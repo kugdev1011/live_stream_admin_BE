@@ -109,7 +109,7 @@ func (h *authHandler) login(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not generate access token"})
 	}
-	fmt.Println("token", token)
+
 	//
 	adminLog := &model.AdminLog{
 
@@ -123,7 +123,13 @@ func (h *authHandler) login(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"accessToken": token})
+	response := map[string]interface{}{
+		"username": user.Username,
+		"email":    user.Email,
+		"role":     user.Role.Type,
+		"token":    token,
+	}
+	return c.JSON(http.StatusOK, response)
 }
 
 func (h *authHandler) forgetPassword(c echo.Context) error {
