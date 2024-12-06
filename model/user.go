@@ -46,3 +46,11 @@ type AdminLog struct {
 	PerformedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	User        User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
+
+type BlockedList struct {
+	UserID        uint      `gorm:"primaryKey"`
+	BlockedUserID uint      `gorm:"primaryKey"`
+	User          User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	BlockedUser   User      `gorm:"foreignKey:BlockedUserID;constraint:OnDelete:CASCADE"`
+	BlockedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+}

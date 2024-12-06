@@ -27,6 +27,14 @@ func LoadDB() (*gorm.DB, error) {
 		&model.Role{},
 		&model.User{},
 		&model.AdminLog{},
+		&model.BlockedList{},
+		&model.Like{},
+		&model.Comment{},
+		&model.Share{},
+		&model.StreamAnalytics{},
+		&model.Subscription{},
+		&model.Notification{},
+		&model.Stream{},
 	)
 
 	return db, nil
