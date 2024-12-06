@@ -9,6 +9,12 @@ const (
 	Logout AdminAction = "banned_user"
 )
 
+const (
+	LoginAction  AdminAction = "login"
+	LogoutAction AdminAction = "logout"
+	// Adjusted the constants to match their names
+)
+
 type RoleType string
 
 const (

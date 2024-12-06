@@ -8,12 +8,14 @@ import (
 
 type Service struct {
 	User  *UserService
-	admin *AdminService
+	Admin *AdminLogService
+	Role  *RoleService
 }
 
 func NewService(repo *repository.Repository, redis *redis.Client) *Service {
 	return &Service{
 		User:  newUserService(repo, redis),
-		admin: newAdminService(repo, redis),
+		Admin: newAdminService(repo, redis),
+		Role:  NewRoleService(repo, redis),
 	}
 }

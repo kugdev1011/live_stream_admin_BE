@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"gitlab/live/be-live-api/cmd/admin/handler"
+	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/datasource"
+	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
 	"gitlab/live/be-live-api/service"
 	"log"
@@ -39,9 +41,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	repo := repository.NewRepository(ds.DB)
+	if err := ds.DB.AutoMigrate(&model.Role{}, &model.User{}, &model.AdminLog{}); err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
+	}
 
+	repo := repository.NewRepository(ds.DB)
+	roleService := service.NewRoleService(repo, ds.RClient)
 	srv := service.NewService(repo, ds.RClient)
+	conf.SeedRoles(roleService)
 
 	e := echo.New()
 	e.Server.MaxHeaderBytes = 10 << 20 //10MB

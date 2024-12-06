@@ -1,10 +1,18 @@
 package conf
 
 import (
+	"crypto/rsa"
+	"gitlab/live/be-live-api/model"
+	"gitlab/live/be-live-api/service"
 	"log"
 	"os"
 
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	PrivateKey *rsa.PrivateKey
+	PublicKey  *rsa.PublicKey
 )
 
 var cfg *Config
@@ -43,6 +51,26 @@ func LoadYaml(path string) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func SeedRoles(roleService *service.RoleService) {
+	roles := []model.Role{
+		{Type: string(model.ADMINROLE), Description: "Administrator role"},
+		{Type: string(model.USERROLE), Description: "Default user role"},
+		{Type: string(model.GUESTROLE), Description: "Guest user role"},
+	}
+
+	for _, role := range roles {
+		existingRole, _ := roleService.GetRoleByType(role.Type)
+		if existingRole != nil {
+			continue // Role already exists
+		}
+		if err := roleService.CreateRole(&role); err != nil {
+			log.Fatalf("Failed to seed role: %v", err)
+		}
+	}
+
+	log.Println("Roles seeded successfully")
 }
 
 func init() {
