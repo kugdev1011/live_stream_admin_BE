@@ -20,8 +20,11 @@ func (s *UserRepository) Page(filter *apimodel.UserQuery, page, limit int) (*uti
 	}
 
 	query = query.Preload("Role").Preload("AdminLogs")
-
-	return utils.CreatePage[model.User](query, page, limit)
+	pagination, err := utils.CreatePage[model.User](query, page, limit)
+	if err != nil {
+		return nil, err
+	}
+	return utils.Create[model.User](pagination, page, limit)
 }
 
 func newUserRepository(db *gorm.DB) *UserRepository {
