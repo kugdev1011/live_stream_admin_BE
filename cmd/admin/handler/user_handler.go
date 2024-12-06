@@ -2,8 +2,10 @@ package handler
 
 import (
 	"errors"
+	model "gitlab/live/be-live-api/model/api-model"
 	"gitlab/live/be-live-api/pkg/utils"
 	"gitlab/live/be-live-api/service"
+	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -28,7 +30,7 @@ func newUserHandler(r *echo.Group, srv *service.Service) *userHandler {
 func (h *userHandler) register() {
 	group := h.r.Group("api/users")
 
-	group.POST("/:page/:limit", h.page)
+	group.GET("/:page/:limit", h.page)
 
 }
 
@@ -42,20 +44,25 @@ func (h *userHandler) page(c echo.Context) error {
 	if c.Param("page") != "" {
 		page, err = strconv.Atoi(c.Param("page"))
 		if err != nil {
-			return c.JSON(400, errors.New("invalid page parameter").Error())
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid page parameter"), nil)
 		}
 	}
 
 	if c.Param("limit") != "" {
-		page, err = strconv.Atoi(c.Param("limit"))
+		limit, err = strconv.Atoi(c.Param("limit"))
 		if err != nil {
-			return c.JSON(400, errors.New("invalid limit parameter").Error())
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid limit parameter"), nil)
 		}
 	}
 
-	data, err := h.srv.User.GetUserList(page, limit)
-	if err != nil {
-		return c.JSON(500, err.Error())
+	var req model.UserQuery
+	if err := c.Bind(&req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request"), nil)
 	}
-	return c.JSON(200, data)
+
+	data, err := h.srv.User.GetUserList(&req, page, limit)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	return utils.BuildSuccessResponse(c, http.StatusOK, data)
 }

@@ -87,7 +87,6 @@ func CreatePage[T any](query *gorm.DB, page, limit int) (*PaginationModel[T], er
 	if err := query.Count(&pagination.TotalItems).Error; err != nil {
 		return nil, err
 	}
-
 	if err := query.Offset((page - 1) * limit).Limit(limit).Find(&pagination.Page).Error; err != nil {
 		return nil, err
 	}
