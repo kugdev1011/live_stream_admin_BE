@@ -22,16 +22,18 @@ const (
 )
 
 type Stream struct {
-	StreamID     uint         `gorm:"primaryKey"`
-	UserID       uint         `gorm:"not null"`
-	Title        string       `gorm:"type:varchar(100);not null"`
-	Description  string       `gorm:"type:text"`
-	Status       StreamStatus `gorm:"type:varchar(50);not null"`
-	StreamURL    string       `gorm:"type:text;not null"`
-	ThumbnailURL string       `gorm:"type:text;not null"`
-	StartedAt    time.Time    `gorm:"default:CURRENT_TIMESTAMP"`
-	EndedAt      time.Time    `gorm:"default:CURRENT_TIMESTAMP"`
-	User         User         `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	StreamID    uint         `gorm:"primaryKey"`
+	UserID      uint         `gorm:"not null"`
+	Title       string       `gorm:"type:varchar(100);not null"`
+	Description string       `gorm:"type:text"`
+	Status      StreamStatus `gorm:"type:varchar(50);not null"`
+	// StreamURL    string       `gorm:"type:text;not null"`
+	StreamToken  string    `gorm:"type:text;not null"` // generated from streaming server
+	StreamKey    string    `gorm:"type:text;not null"` // generated from web
+	ThumbnailURL string    `gorm:"type:text;not null"`
+	StartedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	EndedAt      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	User         User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 type Notification struct {
