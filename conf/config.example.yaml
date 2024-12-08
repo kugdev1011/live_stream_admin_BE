@@ -1,9 +1,9 @@
 database:
   host: localhost
   port: 5432
-  user: username
-  pass: password
-  name: car_info
+  user: postgres
+  pass: postgres
+  name: dbyoumi
 
 redis:
   host: localhost
@@ -13,3 +13,4 @@ redis:
 
 web:
   port: 8787
+  salt_key: secret_key
