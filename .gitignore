@@ -1,5 +1,4 @@
-config.yaml
 .air.toml
-tmp
-.idea
-project/db-data
+tmp/
+.idea/
+project/db-data/
