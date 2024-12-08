@@ -22,5 +22,6 @@ func (h *Handler) Register() {
 
 	newAuthHandler(h.r, h.srv)
 	newUserHandler(h.r, h.srv)
+	newAdminHandler(h.r, h.srv)
 
 }

@@ -10,8 +10,9 @@ import (
 var cfg *Config
 
 type Config struct {
-	DB    DBConfig `yaml:"database"`
-	Redis DBConfig `yaml:"redis"`
+	DB    DBConfig          `yaml:"database"`
+	Redis DBConfig          `yaml:"redis"`
+	Web   ApplicationConfig `yaml:"web"`
 }
 
 type DBConfig struct {
@@ -27,6 +28,11 @@ type RedisConfig struct {
 	Port int    `yaml:"port"`
 	User string `yaml:"user"`
 	Pass string `yaml:"pass"`
+}
+
+type ApplicationConfig struct {
+	SaltKey string `yaml:"salt_key"`
+	Port    int    `yaml:"port"`
 }
 
 func LoadYaml(path string) (*Config, error) {
@@ -54,4 +60,8 @@ func init() {
 
 func GetDatabaseConfig() *DBConfig {
 	return &cfg.DB
+}
+
+func GetApplicationConfig() *ApplicationConfig {
+	return &cfg.Web
 }

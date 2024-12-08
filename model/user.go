@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type AdminAction string
 
@@ -12,9 +16,10 @@ const (
 type RoleType string
 
 const (
-	ADMINROLE RoleType = "admin"
-	USERROLE  RoleType = "user"
-	GUESTROLE RoleType = "guest"
+	ADMINROLE       RoleType = "admin"
+	USERROLE        RoleType = "user"
+	GUESTROLE       RoleType = "guest"
+	SUPPERADMINROLE RoleType = "supper_admin"
 )
 
 type Role struct {
@@ -27,15 +32,22 @@ type Role struct {
 }
 
 type User struct {
-	ID           uint       `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Username     string     `gorm:"type:varchar(50);not null;unique" json:"user_name,omitempty"`
-	Email        string     `gorm:"type:varchar(100);not null;unique" json:"email,omitempty"`
-	PasswordHash string     `gorm:"type:varchar(255);not null"`
-	RoleID       uint       `gorm:"not null" json:"role_id,omitempty"`
-	Role         Role       `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE" json:"role,omitempty"`
-	CreatedAt    time.Time  `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`
-	UpdatedAt    time.Time  `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime" json:"updated_at,omitempty"`
-	AdminLogs    []AdminLog `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"admin_logs,omitempty"`
+	ID           uint           `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
+	Username     string         `gorm:"type:varchar(50);not null;unique" json:"user_name,omitempty"`
+	DisplayName  string         `gorm:"type:varchar(100)" json:"display_name,omitempty"`
+	Email        string         `gorm:"type:varchar(100);not null;unique" json:"email,omitempty"`
+	PasswordHash string         `gorm:"type:varchar(255);not null"`
+	RoleID       uint           `gorm:"not null" json:"role_id,omitempty"`
+	Role         *Role          `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE" json:"role,omitempty"`
+	CreatedAt    time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`
+	CreatedByID  uint           `gorm:"index" json:"created_by_id,omitempty"`
+	CreatedBy    *User          `gorm:"foreignKey:CreatedByID" json:"created_by,omitempty"`
+	UpdatedAt    time.Time      `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime" json:"updated_at,omitempty"`
+	UpdatedByID  uint           `gorm:"index" json:"updated_by_id,omitempty"`
+	UpdatedBy    *User          `gorm:"foreignKey:UpdatedByID" json:"updated_by,omitempty"`
+	DeletedAt    gorm.DeletedAt `json:"deleted_at,omitempty"`
+	DeletedByID  *uint          `json:"deleted_by_id,omitempty"`
+	AdminLogs    []AdminLog     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"admin_logs,omitempty"`
 }
 
 type AdminLog struct {

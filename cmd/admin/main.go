@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gitlab/live/be-live-api/cmd/admin/handler"
+	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/datasource"
 	"gitlab/live/be-live-api/repository"
 	"gitlab/live/be-live-api/service"
@@ -41,7 +42,9 @@ func main() {
 
 	repo := repository.NewRepository(ds.DB)
 
-	srv := service.NewService(repo, ds.RClient)
+	appConfig := conf.GetApplicationConfig()
+
+	srv := service.NewService(repo, ds.RClient, appConfig)
 
 	e := echo.New()
 	e.Server.MaxHeaderBytes = 10 << 20 //10MB
