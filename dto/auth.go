@@ -17,3 +17,9 @@ type RegisterDTO struct {
 type ForgetPasswordDTO struct {
 	Email string `json:"email" validate:"required,email,max=100"`
 }
+
+type ResetPasswordDTO struct {
+	OTP             string `json:"otp" validate:"required,len=6"`
+	NewPassword     string `json:"password" validate:"required,min=8"`
+	ConfirmPassword string `json:"confirmPassword" validate:"required,min=8"`
+}

@@ -8,6 +8,7 @@ import (
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
 	"net/http"
+	"time"
 )
 
 type authHandler struct {
@@ -32,6 +33,9 @@ func (h *authHandler) register() {
 	group.POST("/login", h.login)
 	group.POST("/register", h.signUp)
 	group.POST("/forgetPassword", h.forgetPassword)
+
+	group.Use(h.JWTMiddleware())
+	group.POST("/resetPassword", h.resetPassword)
 
 }
 
@@ -148,11 +152,27 @@ func (h *authHandler) forgetPassword(c echo.Context) error {
 	}
 
 	// Generate a password reset token (you could also send an email here)
-	resetToken, err := utils.GenerateAccessToken(user.Email, model.RoleType(user.Role.Type))
+	//resetToken, err := utils.GenerateAccessToken(user.Email, model.RoleType(user.Role.Type))
+	//if err != nil {
+	//	return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not generate reset token"})
+	//}
+
+	otp, err := utils.GenerateOTP(6)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not generate reset token"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate OTP"})
 	}
 
+	//hashedOTP, err := utils.HashOTP(otp)
+	//if err != nil {
+	//	return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to hash OTP"})
+	//}
+	user.OTP = otp
+	user.OTPExpiresAt = time.Now().Add(15 * time.Minute)
+
+	err = h.srv.User.Update(user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user"})
+	}
 	adminLog := &model.AdminLog{
 
 		UserID:  user.ID,
@@ -165,5 +185,55 @@ func (h *authHandler) forgetPassword(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"resetToken": resetToken})
+	return c.JSON(http.StatusOK, map[string]string{"otp": otp})
+}
+
+func (h *authHandler) resetPassword(c echo.Context) error {
+
+	var resetPasswordDTO dto.ResetPasswordDTO
+
+	if err := c.Bind(&resetPasswordDTO); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+	}
+
+	if err := c.Validate(&resetPasswordDTO); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	if resetPasswordDTO.NewPassword != resetPasswordDTO.ConfirmPassword {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Passwords do not match"})
+	}
+
+	claims := c.Get("user").(*utils.Claims)
+	email := claims.Email
+
+	user, err := h.srv.User.FindByEmail(email)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "Email not found"})
+	}
+
+	if time.Now().After(user.OTPExpiresAt) {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "OTP expired"})
+	}
+	if user.OTP != resetPasswordDTO.OTP {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid OTP"})
+	}
+
+	hashedPassword, err := utils.HashPassword(resetPasswordDTO.NewPassword)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not hash password"})
+	}
+	err = h.srv.User.UpdatePassword(user.ID, hashedPassword)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update password"})
+	}
+
+	// Clear the OTP and expiration time
+	err = h.srv.User.ClearOTP(user.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to clear OTP"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Password reset successfully"})
 }

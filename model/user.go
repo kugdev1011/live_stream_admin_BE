@@ -37,6 +37,8 @@ type User struct {
 	Username     string     `gorm:"type:varchar(50);not null;unique"`
 	Email        string     `gorm:"type:varchar(100);not null;unique"`
 	PasswordHash string     `gorm:"type:varchar(255);not null"`
+	OTP          string     `gorm:"type:varchar(6);null"`
+	OTPExpiresAt time.Time  `gorm:"type:timestamp;null"`
 	RoleID       uint       `gorm:"not null"`
 	Role         Role       `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE"`
 	CreatedAt    time.Time  `gorm:"default:CURRENT_TIMESTAMP"`
