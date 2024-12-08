@@ -12,6 +12,13 @@ const (
 
 type LikeEmoteType string
 
+type StreamType string
+
+const (
+	CAMERASTREAM   StreamType = "camera"
+	SOFTWARESTREAM StreamType = "software" // like obs
+)
+
 const (
 	LikeEmoteTypeLike    LikeEmoteType = "like"
 	LikeEmoteTypeDislike LikeEmoteType = "dislike"
@@ -28,12 +35,13 @@ type Stream struct {
 	Description string       `gorm:"type:text"`
 	Status      StreamStatus `gorm:"type:varchar(50);not null"`
 	// StreamURL    string       `gorm:"type:text;not null"`
-	StreamToken  string    `gorm:"type:text;not null"` // generated from streaming server
-	StreamKey    string    `gorm:"type:text;not null"` // generated from web
-	ThumbnailURL string    `gorm:"type:text;not null"`
-	StartedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	EndedAt      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	User         User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	StreamToken  string     `gorm:"type:text;not null"` // generated from streaming server
+	StreamKey    string     `gorm:"type:text;not null"` // generated from web
+	StreamType   StreamType `gorm:"type:varchar(50);not null"`
+	ThumbnailURL string     `gorm:"type:text;not null"`
+	StartedAt    time.Time  `gorm:"default:CURRENT_TIMESTAMP"`
+	EndedAt      time.Time  `gorm:"default:CURRENT_TIMESTAMP"`
+	User         User       `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 type Notification struct {
