@@ -47,6 +47,7 @@ func (h *authHandler) signUp(c echo.Context) error {
 
 	if err := utils.BindAndValidate(c, &registerDTO); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+
 	}
 
 	roleType := registerDTO.RoleType
@@ -75,6 +76,7 @@ func (h *authHandler) signUp(c echo.Context) error {
 		Email:        registerDTO.Email,
 		PasswordHash: hashedPassword,
 		RoleID:       role.ID,
+		Role:         *role,
 		CreatedByID:  &claims.CreatedByID,
 		UpdatedByID:  &claims.CreatedByID,
 		OTPExpiresAt: nil,
