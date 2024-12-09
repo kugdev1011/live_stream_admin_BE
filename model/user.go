@@ -44,7 +44,7 @@ type User struct {
 	Email        string         `gorm:"type:varchar(100);not null;unique"`
 	PasswordHash string         `gorm:"type:varchar(255);not null"`
 	OTP          string         `gorm:"type:varchar(6);null"`
-	OTPExpiresAt time.Time      `gorm:"type:timestamp;null" json:"otp_expires_at,omitempty"`
+	OTPExpiresAt *time.Time     `gorm:"type:timestamp;null" json:"otp_expires_at,omitempty"`
 	RoleID       uint           `gorm:"not null"`
 	Role         Role           `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE"`
 	CreatedAt    time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`

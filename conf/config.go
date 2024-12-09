@@ -100,6 +100,7 @@ func SeedSuperAdminUser(userService *service.UserService, roleService *service.R
 		Email:        "superAdmin@gamil.com",
 		PasswordHash: hashedPassword, // Replace with hashed password
 		RoleID:       role.ID,
+		OTPExpiresAt: nil,
 	}
 
 	if err := userService.Create(admin); err != nil {

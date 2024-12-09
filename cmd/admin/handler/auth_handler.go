@@ -3,13 +3,14 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
 	"net/http"
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
 type authHandler struct {
@@ -76,6 +77,7 @@ func (h *authHandler) signUp(c echo.Context) error {
 		RoleID:       role.ID,
 		CreatedByID:  &claims.CreatedByID,
 		UpdatedByID:  &claims.CreatedByID,
+		OTPExpiresAt: nil,
 	}
 
 	if err := h.srv.User.Create(user); err != nil {
@@ -140,7 +142,11 @@ func (h *authHandler) forgetPassword(c echo.Context) error {
 	}
 
 	user.OTP = otp
-	user.OTPExpiresAt = time.Now().Add(15 * time.Minute)
+	//user.OTPExpiresAt = time.Now().Add(15 * time.Minute)
+
+	user.OTPExpiresAt = func(t time.Time) *time.Time {
+		return &t
+	}(time.Now().Add(15 * time.Minute))
 
 	err = h.srv.User.Update(user)
 	if err != nil {
@@ -170,7 +176,7 @@ func (h *authHandler) resetPassword(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("email not found"), nil)
 	}
 
-	if time.Now().After(user.OTPExpiresAt) {
+	if time.Now().After(*user.OTPExpiresAt) {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("OTP expired"), nil)
 
 	}
