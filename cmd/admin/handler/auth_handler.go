@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"gitlab/live/be-live-api/dto"
@@ -43,35 +44,29 @@ func (h *authHandler) signUp(c echo.Context) error {
 
 	var registerDTO dto.RegisterDTO
 
-	if err := c.Bind(&registerDTO); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
-	if err := c.Validate(&registerDTO); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	if err := utils.BindAndValidate(c, &registerDTO); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
 	roleType := registerDTO.RoleType
-	if roleType != model.SUPPERADMINROLE && roleType != model.ADMINROLE && roleType != model.USERROLE && roleType != model.STREAMER {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid role type"})
+	if !model.IsValidRoleType(roleType) {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid role type"), nil)
 	}
 
-	// Find the Role by Type
 	role, err := h.srv.Role.GetRoleByType(string(roleType))
 
-	//
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to validate role"})
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 	if role == nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid role type"})
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid role type"), nil)
 	}
 
 	hashedPassword, err := utils.HashPassword(registerDTO.Password)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not hash password"})
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-
 	claims := c.Get("user").(*utils.Claims)
 
 	user := &model.User{
@@ -79,53 +74,38 @@ func (h *authHandler) signUp(c echo.Context) error {
 		Email:        registerDTO.Email,
 		PasswordHash: hashedPassword,
 		RoleID:       role.ID,
-
-		CreatedByID: &claims.CreatedByID,
-		UpdatedByID: &claims.CreatedByID,
+		CreatedByID:  &claims.CreatedByID,
+		UpdatedByID:  &claims.CreatedByID,
 	}
-	//
+
 	if err := h.srv.User.Create(user); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not create user"})
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{
-		"message": fmt.Sprintf("%s created successfully", role.Type),
-	})
+	return utils.BuildSuccessResponse(c, http.StatusCreated, fmt.Sprintf("%s created successfully", role.Type), user)
 
 }
 
 func (h *authHandler) login(c echo.Context) error {
 	var loginDTO dto.LoginDTO
-	if err := c.Bind(&loginDTO); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
-	if err := c.Validate(&loginDTO); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+
+	if err := utils.BindAndValidate(c, &loginDTO); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
 	user, err := h.srv.User.FindByEmail(loginDTO.Email)
 
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid username or password"})
-	}
-
-	if !utils.CheckPasswordHash(loginDTO.Password, user.PasswordHash) {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid username or password"})
+	if err != nil || !utils.CheckPasswordHash(loginDTO.Password, user.PasswordHash) {
+		return utils.BuildErrorResponse(c, http.StatusUnauthorized, errors.New("invalid username or password"), nil)
 	}
 
 	roleType := model.RoleType(user.Role.Type)
 	token, err := utils.GenerateAccessToken(user.Email, roleType, user.ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not generate access token"})
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := &model.AdminLog{
-
-		UserID:  user.ID,
-		Action:  string(model.LoginAction),
-		Details: fmt.Sprintf("User %s logged in", user.Email),
-	}
-
+	adminLog := service.CreateAdminLog(user.ID, model.LoginAction, fmt.Sprintf("User %s logged in", user.Email))
 	err = h.srv.Admin.CreateLog(adminLog)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
@@ -137,28 +117,26 @@ func (h *authHandler) login(c echo.Context) error {
 		"role":     user.Role.Type,
 		"token":    token,
 	}
-	return c.JSON(http.StatusOK, response)
-
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Login successful", response)
 }
 
 func (h *authHandler) forgetPassword(c echo.Context) error {
 	var forgetPasswordDTO dto.ForgetPasswordDTO
-	if err := c.Bind(&forgetPasswordDTO); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
-	if err := c.Validate(&forgetPasswordDTO); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+
+	if err := utils.BindAndValidate(c, &forgetPasswordDTO); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
 	// Check if the user exists
 	user, err := h.srv.User.FindByEmail(forgetPasswordDTO.Email)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Email not found"})
+		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("email not found"), nil)
+
 	}
 
 	otp, err := utils.GenerateOTP(6)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate OTP"})
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
 	user.OTP = otp
@@ -166,68 +144,54 @@ func (h *authHandler) forgetPassword(c echo.Context) error {
 
 	err = h.srv.User.Update(user)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user"})
-	}
-	adminLog := &model.AdminLog{
-		UserID:  user.ID,
-		Action:  string(model.LoginAction),
-		Details: fmt.Sprintf("User %s logged in", user.Email),
-	}
 
-	err = h.srv.Admin.CreateLog(adminLog)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
-	}
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 
-	return c.JSON(http.StatusOK, map[string]string{"otp": otp})
+	}
+	return utils.BuildSuccessResponse(c, http.StatusOK, "OTP generated successfully", map[string]string{"otp": otp})
+
 }
 
 func (h *authHandler) resetPassword(c echo.Context) error {
 
 	var resetPasswordDTO dto.ResetPasswordDTO
-
-	if err := c.Bind(&resetPasswordDTO); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
-
-	if err := c.Validate(&resetPasswordDTO); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	if err := utils.BindAndValidate(c, &resetPasswordDTO); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
 	if resetPasswordDTO.NewPassword != resetPasswordDTO.ConfirmPassword {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Passwords do not match"})
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("passwords do not match"), nil)
 	}
 
 	claims := c.Get("user").(*utils.Claims)
-	email := claims.Email
 
-	user, err := h.srv.User.FindByEmail(email)
+	user, err := h.srv.User.FindByEmail(claims.Email)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "Email not found"})
+		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("email not found"), nil)
 	}
 
 	if time.Now().After(user.OTPExpiresAt) {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "OTP expired"})
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("OTP expired"), nil)
+
 	}
 	if user.OTP != resetPasswordDTO.OTP {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid OTP"})
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid OTP"), nil)
+
 	}
 
 	hashedPassword, err := utils.HashPassword(resetPasswordDTO.NewPassword)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not hash password"})
-	}
-	err = h.srv.User.UpdatePassword(user.ID, hashedPassword)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update password"})
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	// Clear the OTP and expiration time
-	err = h.srv.User.ClearOTP(user.ID)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to clear OTP"})
+	if err := h.srv.User.UpdatePassword(user.ID, hashedPassword); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	if err := h.srv.User.ClearOTP(user.ID); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Password reset successfully"})
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Password reset successfully", nil)
+
 }

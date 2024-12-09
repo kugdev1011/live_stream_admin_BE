@@ -64,8 +64,8 @@ func SeedRoles(roleService *service.RoleService) {
 	roles := []model.Role{
 		{Type: string(model.SUPPERADMINROLE), Description: "supper_admin role"},
 		{Type: string(model.ADMINROLE), Description: "Administrator role"},
-		{Type: string(model.USERROLE), Description: "Default user role"},
 		{Type: string(model.STREAMER), Description: "Streamer role"},
+		{Type: string(model.USERROLE), Description: "Default user role"},
 	}
 
 	for _, role := range roles {
