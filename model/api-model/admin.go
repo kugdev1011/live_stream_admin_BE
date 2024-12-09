@@ -5,5 +5,5 @@ type CreateAdminRequest struct {
 	Email       string `json:"email"`
 	DisplayName string `json:"display_name"`
 	Password    string `json:"password"`
-	CreatedByID uint   `json:"created_by_id"`
+	CreatedByID *uint  `json:"created_by_id"`
 }

@@ -38,6 +38,12 @@ func (s *AdminRepository) ById(id uint) (*model.User, error) {
 	return &user, nil
 }
 
+func (r *AdminRepository) Create(adminLog *model.AdminLog) error {
+	if err := r.db.Create(adminLog).Error; err != nil {
+		return err
+	}
+	return nil
+}
 func newAdminRepository(db *gorm.DB) *AdminRepository {
 	return &AdminRepository{
 		db: db,

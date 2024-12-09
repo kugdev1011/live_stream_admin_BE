@@ -1,10 +1,19 @@
 package conf
 
 import (
+	"crypto/rsa"
+	"gitlab/live/be-live-api/model"
+	"gitlab/live/be-live-api/service"
+	"gitlab/live/be-live-api/utils"
 	"log"
 	"os"
 
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	PrivateKey *rsa.PrivateKey
+	PublicKey  *rsa.PublicKey
 )
 
 var cfg *Config
@@ -49,6 +58,56 @@ func LoadYaml(path string) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func SeedRoles(roleService *service.RoleService) {
+	roles := []model.Role{
+		{Type: string(model.SUPPERADMINROLE), Description: "supper_admin role"},
+		{Type: string(model.ADMINROLE), Description: "Administrator role"},
+		{Type: string(model.STREAMER), Description: "Streamer role"},
+		{Type: string(model.USERROLE), Description: "Default user role"},
+	}
+
+	for _, role := range roles {
+		existingRole, _ := roleService.GetRoleByType(role.Type)
+		if existingRole != nil {
+			continue // Role already exists
+		}
+		if err := roleService.CreateRole(&role); err != nil {
+			log.Fatalf("Failed to seed role: %v", err)
+		}
+	}
+
+	log.Println("Roles seeded successfully")
+}
+
+func SeedSuperAdminUser(userService *service.UserService, roleService *service.RoleService) {
+	role, err := roleService.GetRoleByType(string(model.SUPPERADMINROLE))
+	if err != nil || role == nil {
+		log.Fatalf("super_admin role must be created before seeding admin user")
+	}
+
+	existingUser, err := userService.FindByEmail("superAdmin@gamil.com")
+	if err == nil && existingUser != nil {
+		log.Println("Super admin user already exists, skipping creation")
+		return
+	}
+
+	hashedPassword, err := utils.HashPassword("superAdmin123")
+
+	admin := &model.User{
+		Username:     "superAdmin",
+		Email:        "superAdmin@gamil.com",
+		PasswordHash: hashedPassword, // Replace with hashed password
+		RoleID:       role.ID,
+		OTPExpiresAt: nil,
+	}
+
+	if err := userService.Create(admin); err != nil {
+		log.Fatalf("Failed to seed admin user: %v", err)
+	}
+
+	log.Println("Admin user seeded successfully")
 }
 
 func init() {

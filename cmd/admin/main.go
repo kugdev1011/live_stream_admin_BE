@@ -6,6 +6,7 @@ import (
 	"gitlab/live/be-live-api/cmd/admin/handler"
 	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/datasource"
+	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
 	"gitlab/live/be-live-api/service"
 	"log"
@@ -40,11 +41,22 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := ds.DB.AutoMigrate(&model.Role{}, &model.User{}, &model.AdminLog{}); err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
+	}
+
 	repo := repository.NewRepository(ds.DB)
+	//roleService := service.NewRoleService(repo, ds.RClient)
+	srv := service.NewService(repo, ds.RClient)
+	conf.SeedRoles(srv.Role)
+	conf.SeedSuperAdminUser(srv.User, srv.Role)
 
-	appConfig := conf.GetApplicationConfig()
+	log.Println("Seeding completed successfully")
 
-	srv := service.NewService(repo, ds.RClient, appConfig)
+	// conf.SeedRoles(srv.Role)
+	// appConfig := conf.GetApplicationConfig()
+
+	// srv := service.NewService(repo, ds.RClient)
 
 	e := echo.New()
 	e.Server.MaxHeaderBytes = 10 << 20 //10MB
@@ -71,7 +83,6 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-quit
-	fmt.Println("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -79,7 +90,5 @@ func main() {
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}
-
-	fmt.Println("Server gracefully stopped")
 
 }

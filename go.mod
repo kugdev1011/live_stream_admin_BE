@@ -4,8 +4,10 @@ go 1.22.2
 
 require (
 	github.com/go-playground/validator/v10 v10.23.0
+	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/labstack/echo/v4 v4.13.0
 	github.com/redis/go-redis/v9 v9.7.0
+	golang.org/x/crypto v0.22.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
@@ -31,7 +33,6 @@ require (
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect

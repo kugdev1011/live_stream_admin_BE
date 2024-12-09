@@ -1,7 +1,6 @@
 package service
 
 import (
-	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/repository"
 
 	"github.com/redis/go-redis/v9"
@@ -10,11 +9,13 @@ import (
 type Service struct {
 	User  *UserService
 	Admin *AdminService
+	Role  *RoleService
 }
 
-func NewService(repo *repository.Repository, redis *redis.Client, appConfig *conf.ApplicationConfig) *Service {
+func NewService(repo *repository.Repository, redis *redis.Client) *Service {
 	return &Service{
 		User:  newUserService(repo, redis),
-		Admin: newAdminService(repo, redis, appConfig),
+		Admin: newAdminService(repo, redis),
+		Role:  NewRoleService(repo, redis),
 	}
 }
