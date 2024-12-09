@@ -1,8 +1,8 @@
 package service
 
 import (
+	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
-	apimodel "gitlab/live/be-live-api/model/api-model"
 	"gitlab/live/be-live-api/repository"
 	"gitlab/live/be-live-api/utils"
 	"time"
@@ -15,7 +15,7 @@ type UserService struct {
 	redis *redis.Client
 }
 
-func (s *UserService) GetUserList(filter *apimodel.UserQuery, page, limit int) (*utils.PaginationModel[model.User], error) {
+func (s *UserService) GetUserList(filter *dto.UserQuery, page, limit int) (*utils.PaginationModel[model.User], error) {
 	return s.repo.User.Page(filter, page, limit)
 }
 

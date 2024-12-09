@@ -3,8 +3,8 @@ package repository
 import (
 	"errors"
 	"fmt"
+	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
-	apimodel "gitlab/live/be-live-api/model/api-model"
 	"gitlab/live/be-live-api/utils"
 	"time"
 
@@ -15,7 +15,7 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-func (s *UserRepository) Page(filter *apimodel.UserQuery, page, limit int) (*utils.PaginationModel[model.User], error) {
+func (s *UserRepository) Page(filter *dto.UserQuery, page, limit int) (*utils.PaginationModel[model.User], error) {
 	var query = s.db.Model(model.User{})
 	if filter != nil && filter.Role != "" {
 		query = query.Joins("LEFT JOIN roles ON roles.id = users.role_id").
