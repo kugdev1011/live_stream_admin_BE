@@ -2,6 +2,8 @@ package service
 
 import (
 	"gitlab/live/be-live-api/model"
+	apimodel "gitlab/live/be-live-api/model/api-model"
+	"gitlab/live/be-live-api/pkg/utils"
 	"gitlab/live/be-live-api/repository"
 	"time"
 
@@ -11,6 +13,10 @@ import (
 type UserService struct {
 	repo  *repository.Repository
 	redis *redis.Client
+}
+
+func (s *UserService) GetUserList(filter *apimodel.UserQuery, page, limit int) (*utils.PaginationModel[model.User], error) {
+	return s.repo.User.Page(filter, page, limit)
 }
 
 func newUserService(repo *repository.Repository, redis *redis.Client) *UserService {
@@ -43,6 +49,7 @@ func (s *UserService) UpdateOTP(userID uint, otp string, expiresAt time.Time) er
 func (s *UserService) ClearOTP(userID uint) error {
 	return s.repo.User.ClearOTP(userID)
 }
+
 func (s *UserService) UpdatePassword(userID uint, hashedPassword string) error {
 	return s.repo.User.UpdatePassword(userID, hashedPassword)
 }

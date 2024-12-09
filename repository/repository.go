@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Repository struct {
 	User  *UserRepository
-	Admin *AdminLogRepository
+	Admin *AdminRepository
 	Role  *RoleRepository
 }
 

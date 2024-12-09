@@ -31,11 +31,11 @@ func (h *authHandler) register() {
 	group := h.r.Group("api/auth")
 
 	group.POST("/login", h.login)
-	group.POST("/register", h.signUp)
-	group.POST("/forgetPassword", h.forgetPassword)
 
 	group.Use(h.JWTMiddleware())
+	group.POST("/register", h.signUp)
 	group.POST("/resetPassword", h.resetPassword)
+	group.POST("/forgetPassword", h.forgetPassword)
 
 }
 
@@ -51,13 +51,14 @@ func (h *authHandler) signUp(c echo.Context) error {
 	}
 
 	roleType := registerDTO.RoleType
-	if roleType != model.ADMINROLE && roleType != model.USERROLE && roleType != model.GUESTROLE {
+	if roleType != model.SUPPERADMINROLE && roleType != model.ADMINROLE && roleType != model.USERROLE && roleType != model.STREAMER {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid role type"})
 	}
 
 	// Find the Role by Type
 	role, err := h.srv.Role.GetRoleByType(string(roleType))
 
+	//
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to validate role"})
 	}
@@ -71,18 +72,25 @@ func (h *authHandler) signUp(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not hash password"})
 	}
 
+	claims := c.Get("user").(*utils.Claims)
+
 	user := &model.User{
 		Username:     registerDTO.Username,
 		Email:        registerDTO.Email,
 		PasswordHash: hashedPassword,
 		RoleID:       role.ID,
-	}
 
+		CreatedByID: &claims.CreatedByID,
+		UpdatedByID: &claims.CreatedByID,
+	}
+	//
 	if err := h.srv.User.Create(user); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not create user"})
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"message": "User created successfully"})
+	return c.JSON(http.StatusCreated, map[string]string{
+		"message": fmt.Sprintf("%s created successfully", role.Type),
+	})
 
 }
 
@@ -95,26 +103,22 @@ func (h *authHandler) login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	// Find user by username
 	user, err := h.srv.User.FindByEmail(loginDTO.Email)
+
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid username or password"})
 	}
 
-	// Check password
 	if !utils.CheckPasswordHash(loginDTO.Password, user.PasswordHash) {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid username or password"})
 	}
 
-	// Generate access token
-
 	roleType := model.RoleType(user.Role.Type)
-	token, err := utils.GenerateAccessToken(user.Email, roleType)
+	token, err := utils.GenerateAccessToken(user.Email, roleType, user.ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not generate access token"})
 	}
 
-	//
 	adminLog := &model.AdminLog{
 
 		UserID:  user.ID,
@@ -122,7 +126,7 @@ func (h *authHandler) login(c echo.Context) error {
 		Details: fmt.Sprintf("User %s logged in", user.Email),
 	}
 
-	err = h.srv.Admin.Create(adminLog)
+	err = h.srv.Admin.CreateLog(adminLog)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -134,6 +138,7 @@ func (h *authHandler) login(c echo.Context) error {
 		"token":    token,
 	}
 	return c.JSON(http.StatusOK, response)
+
 }
 
 func (h *authHandler) forgetPassword(c echo.Context) error {
@@ -151,21 +156,11 @@ func (h *authHandler) forgetPassword(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, map[string]string{"error": "Email not found"})
 	}
 
-	// Generate a password reset token (you could also send an email here)
-	//resetToken, err := utils.GenerateAccessToken(user.Email, model.RoleType(user.Role.Type))
-	//if err != nil {
-	//	return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not generate reset token"})
-	//}
-
 	otp, err := utils.GenerateOTP(6)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate OTP"})
 	}
 
-	//hashedOTP, err := utils.HashOTP(otp)
-	//if err != nil {
-	//	return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to hash OTP"})
-	//}
 	user.OTP = otp
 	user.OTPExpiresAt = time.Now().Add(15 * time.Minute)
 
@@ -174,13 +169,12 @@ func (h *authHandler) forgetPassword(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update user"})
 	}
 	adminLog := &model.AdminLog{
-
 		UserID:  user.ID,
 		Action:  string(model.LoginAction),
 		Details: fmt.Sprintf("User %s logged in", user.Email),
 	}
 
-	err = h.srv.Admin.Create(adminLog)
+	err = h.srv.Admin.CreateLog(adminLog)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}

@@ -1,9 +1,10 @@
 package service
 
 import (
-	"github.com/redis/go-redis/v9"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type RoleService struct {

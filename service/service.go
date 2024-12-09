@@ -8,7 +8,7 @@ import (
 
 type Service struct {
 	User  *UserService
-	Admin *AdminLogService
+	Admin *AdminService
 	Role  *RoleService
 }
 

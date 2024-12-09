@@ -4,9 +4,9 @@ services:
     networks:
       - bank-network
     environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=live
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=dbyoumi
     ports:
       - "5432:5432"
     volumes:

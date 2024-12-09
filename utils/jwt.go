@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"gitlab/live/be-live-api/model"
@@ -12,8 +11,9 @@ import (
 // Create a struct that will be encoded to a JWT.
 // We add jwt.RegisteredClaims as an embedded type, to provide fields like expiry time
 type Claims struct {
-	Email    string `json:"email"`
-	RoleType string `json:"role_type"`
+	Email       string `json:"email"`
+	CreatedByID uint   `json:"created_by_id"`
+	RoleType    string `json:"role_type"`
 	jwt.RegisteredClaims
 }
 
@@ -21,13 +21,14 @@ type Claims struct {
 var jwtSecret = []byte("your-very-secure-secret-key")
 
 // generate admin access token
-func GenerateAccessToken(email string, roleType model.RoleType) (string, error) {
+func GenerateAccessToken(email string, roleType model.RoleType, createdByID uint) (string, error) {
 	// Declare the expiration time of the token
 	// here, we have kept it as 5 minutes
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
-		Email:    email,
-		RoleType: string(roleType),
+		Email:       email,
+		RoleType:    string(roleType),
+		CreatedByID: createdByID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
@@ -70,22 +71,22 @@ func ValidateAccessToken(tokenString string) (*Claims, error) {
 
 }
 
-func GenerateRefreshToken(token string) (string, error) {
-	claim, err := ValidateAccessToken(token)
-	if err != nil {
-		return "", err
-	}
-
-	// We ensure that a new token is not issued until enough time has elapsed
-	// In this case, a new token will only be issued if the old token is within
-	// 30 seconds of expiry. Otherwise, return a bad request status
-	if time.Until(claim.ExpiresAt.Time) > 30*time.Second {
-		return "", errors.New("token is not expired, yet")
-	}
-
-	refreshToken, err := GenerateAccessToken(claim.Email, model.RoleType(claim.RoleType))
-	if err != nil {
-		return "", err
-	}
-	return refreshToken, nil
-}
+//func GenerateRefreshToken(token string) (string, error) {
+//	claim, err := ValidateAccessToken(token)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	// We ensure that a new token is not issued until enough time has elapsed
+//	// In this case, a new token will only be issued if the old token is within
+//	// 30 seconds of expiry. Otherwise, return a bad request status
+//	if time.Until(claim.ExpiresAt.Time) > 30*time.Second {
+//		return "", errors.New("token is not expired, yet")
+//	}
+//
+//	refreshToken, err := GenerateAccessToken(claim.Email, model.RoleType(claim.RoleType))
+//	if err != nil {
+//		return "", err
+//	}
+//	return refreshToken, nil
+//}

@@ -46,9 +46,17 @@ func main() {
 	}
 
 	repo := repository.NewRepository(ds.DB)
-	roleService := service.NewRoleService(repo, ds.RClient)
+	//roleService := service.NewRoleService(repo, ds.RClient)
 	srv := service.NewService(repo, ds.RClient)
-	conf.SeedRoles(roleService)
+	conf.SeedRoles(srv.Role)
+	conf.SeedSuperAdminUser(srv.User, srv.Role)
+
+	log.Println("Seeding completed successfully")
+
+	// conf.SeedRoles(srv.Role)
+	// appConfig := conf.GetApplicationConfig()
+
+	// srv := service.NewService(repo, ds.RClient)
 
 	e := echo.New()
 	e.Server.MaxHeaderBytes = 10 << 20 //10MB
@@ -75,7 +83,6 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-quit
-	fmt.Println("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -83,7 +90,5 @@ func main() {
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}
-
-	fmt.Println("Server gracefully stopped")
 
 }

@@ -2,13 +2,32 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"gitlab/live/be-live-api/model"
-	"gorm.io/gorm"
+	apimodel "gitlab/live/be-live-api/model/api-model"
+	"gitlab/live/be-live-api/pkg/utils"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type UserRepository struct {
 	db *gorm.DB
+}
+
+func (s *UserRepository) Page(filter *apimodel.UserQuery, page, limit int) (*utils.PaginationModel[model.User], error) {
+	var query = s.db.Model(model.User{})
+	if filter != nil && filter.Role != "" {
+		query = query.Joins("LEFT JOIN roles ON roles.id = users.role_id").
+			Where("roles.type = ?", filter.Role)
+	}
+
+	query = query.Preload("Role").Preload("AdminLogs").Preload("CreatedBy").Preload("UpdatedBy")
+	pagination, err := utils.CreatePage[model.User](query, page, limit)
+	if err != nil {
+		return nil, err
+	}
+	return utils.Create(pagination, page, limit)
 }
 
 func newUserRepository(db *gorm.DB) *UserRepository {
@@ -18,11 +37,15 @@ func newUserRepository(db *gorm.DB) *UserRepository {
 }
 
 func (r *UserRepository) Create(user *model.User) error {
+	// Perform the database insertion
 	if err := r.db.Create(user).Error; err != nil {
-		return err
+		// Provide more context about the error
+		return fmt.Errorf("failed to create user: %w", err)
 	}
+
 	return nil
 }
+
 func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 	var user model.User
 	if err := r.db.Preload("Role").Where("email = ?", email).First(&user).Error; err != nil {
@@ -46,6 +69,7 @@ func (r *UserRepository) FindByUsername(username string) (*model.User, error) {
 }
 
 func (r *UserRepository) Update(user *model.User) error {
+	
 	if err := r.db.Save(user).Error; err != nil {
 		return err
 	}
@@ -53,6 +77,7 @@ func (r *UserRepository) Update(user *model.User) error {
 }
 
 func (r *UserRepository) UpdateOTP(userID uint, otp string, expiresAt time.Time) error {
+
 	if err := r.db.Model(&model.User{}).
 		Where("id = ?", userID).
 		Updates(map[string]interface{}{

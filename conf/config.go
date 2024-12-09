@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/service"
+	"gitlab/live/be-live-api/utils"
 	"log"
 	"os"
 
@@ -18,8 +19,9 @@ var (
 var cfg *Config
 
 type Config struct {
-	DB    DBConfig `yaml:"database"`
-	Redis DBConfig `yaml:"redis"`
+	DB    DBConfig          `yaml:"database"`
+	Redis DBConfig          `yaml:"redis"`
+	Web   ApplicationConfig `yaml:"web"`
 }
 
 type DBConfig struct {
@@ -35,6 +37,11 @@ type RedisConfig struct {
 	Port int    `yaml:"port"`
 	User string `yaml:"user"`
 	Pass string `yaml:"pass"`
+}
+
+type ApplicationConfig struct {
+	SaltKey string `yaml:"salt_key"`
+	Port    int    `yaml:"port"`
 }
 
 func LoadYaml(path string) (*Config, error) {
@@ -55,9 +62,10 @@ func LoadYaml(path string) (*Config, error) {
 
 func SeedRoles(roleService *service.RoleService) {
 	roles := []model.Role{
+		{Type: string(model.SUPPERADMINROLE), Description: "supper_admin role"},
 		{Type: string(model.ADMINROLE), Description: "Administrator role"},
 		{Type: string(model.USERROLE), Description: "Default user role"},
-		{Type: string(model.GUESTROLE), Description: "Guest user role"},
+		{Type: string(model.STREAMER), Description: "Streamer role"},
 	}
 
 	for _, role := range roles {
@@ -73,6 +81,34 @@ func SeedRoles(roleService *service.RoleService) {
 	log.Println("Roles seeded successfully")
 }
 
+func SeedSuperAdminUser(userService *service.UserService, roleService *service.RoleService) {
+	role, err := roleService.GetRoleByType(string(model.SUPPERADMINROLE))
+	if err != nil || role == nil {
+		log.Fatalf("super_admin role must be created before seeding admin user")
+	}
+
+	existingUser, err := userService.FindByEmail("superAdmin@gamil.com")
+	if err == nil && existingUser != nil {
+		log.Println("Super admin user already exists, skipping creation")
+		return
+	}
+
+	hashedPassword, err := utils.HashPassword("superAdmin123")
+
+	admin := &model.User{
+		Username:     "superAdmin",
+		Email:        "superAdmin@gamil.com",
+		PasswordHash: hashedPassword, // Replace with hashed password
+		RoleID:       role.ID,
+	}
+
+	if err := userService.Create(admin); err != nil {
+		log.Fatalf("Failed to seed admin user: %v", err)
+	}
+
+	log.Println("Admin user seeded successfully")
+}
+
 func init() {
 	var err error
 	if cfg, err = LoadYaml("conf/config.yaml"); err != nil {
@@ -82,4 +118,8 @@ func init() {
 
 func GetDatabaseConfig() *DBConfig {
 	return &cfg.DB
+}
+
+func GetApplicationConfig() *ApplicationConfig {
+	return &cfg.Web
 }

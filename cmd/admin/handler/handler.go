@@ -24,6 +24,8 @@ func NewHandler(r *echo.Group, srv *service.Service) *Handler {
 func (h *Handler) Register() {
 
 	newAuthHandler(h.r, h.srv)
+	newUserHandler(h.r, h.srv)
+	newAdminHandler(h.r, h.srv)
 
 }
 
