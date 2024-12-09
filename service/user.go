@@ -3,8 +3,8 @@ package service
 import (
 	"gitlab/live/be-live-api/model"
 	apimodel "gitlab/live/be-live-api/model/api-model"
-	"gitlab/live/be-live-api/pkg/utils"
 	"gitlab/live/be-live-api/repository"
+	"gitlab/live/be-live-api/utils"
 	"time"
 
 	"github.com/redis/go-redis/v9"

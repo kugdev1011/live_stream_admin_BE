@@ -3,8 +3,8 @@ package handler
 import (
 	"errors"
 	model "gitlab/live/be-live-api/model/api-model"
-	"gitlab/live/be-live-api/pkg/utils"
 	"gitlab/live/be-live-api/service"
+	"gitlab/live/be-live-api/utils"
 	"net/http"
 	"strconv"
 

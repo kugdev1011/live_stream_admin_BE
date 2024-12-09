@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"gitlab/live/be-live-api/model"
 	apimodel "gitlab/live/be-live-api/model/api-model"
-	"gitlab/live/be-live-api/pkg/utils"
+	"gitlab/live/be-live-api/utils"
 	"time"
 
 	"gorm.io/gorm"
