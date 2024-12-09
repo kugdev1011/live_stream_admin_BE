@@ -45,7 +45,7 @@ func (h *adminHandler) byId(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	return utils.BuildSuccessResponse(c, http.StatusAccepted, data)
+	return utils.BuildSuccessResponseWithData(c, http.StatusAccepted, data)
 
 }
 
@@ -60,5 +60,5 @@ func (h *adminHandler) createAdmin(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	return utils.BuildSuccessResponse(c, http.StatusAccepted, data)
+	return utils.BuildSuccessResponseWithData(c, http.StatusAccepted, data)
 }

@@ -19,20 +19,20 @@ func VerifyPassword(storedHash, content, salt_key string) bool {
 	return HashingPassword(content, salt_key) == storedHash
 }
 
-type Response struct {
-	Data    interface{} `json:"data,omitempty"`
-	Message interface{} `json:"message,omitempty"`
-	Code    interface{} `json:"code,omitempty"`
-}
+// type Response struct {
+// 	Data    interface{} `json:"data,omitempty"`
+// 	Message interface{} `json:"message,omitempty"`
+// 	Code    interface{} `json:"code,omitempty"`
+// }
 
-func BuildErrorResponse(ctx echo.Context, status int, err error, body interface{}) error {
-	return BuildStandardResponse(ctx, status, Response{Message: err.Error(), Code: status, Data: body})
-}
+// func BuildErrorResponse(ctx echo.Context, status int, err error, body interface{}) error {
+// 	return BuildStandardResponse(ctx, status, Response{Message: err.Error(), Code: status, Data: body})
+// }
 
-func BuildSuccessResponse(ctx echo.Context, status int, body interface{}) error {
+func BuildSuccessResponseWithData(ctx echo.Context, status int, body interface{}) error {
 	return BuildStandardResponse(ctx, status, Response{Message: "Successfully", Code: status, Data: body})
 }
 
-func BuildStandardResponse(ctx echo.Context, status int, resp Response) error {
-	return ctx.JSON(status, Response{Data: resp.Data, Code: resp.Code, Message: resp.Message})
-}
+// func BuildStandardResponse(ctx echo.Context, status int, resp Response) error {
+// 	return ctx.JSON(status, Response{Data: resp.Data, Code: resp.Code, Message: resp.Message})
+// }

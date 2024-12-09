@@ -64,5 +64,5 @@ func (h *userHandler) page(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	return utils.BuildSuccessResponse(c, http.StatusOK, data)
+	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 }
