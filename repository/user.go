@@ -69,7 +69,7 @@ func (r *UserRepository) FindByUsername(username string) (*model.User, error) {
 }
 
 func (r *UserRepository) Update(user *model.User) error {
-	
+
 	if err := r.db.Save(user).Error; err != nil {
 		return err
 	}
