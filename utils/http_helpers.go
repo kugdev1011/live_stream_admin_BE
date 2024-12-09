@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"net/http"
+	"errors"
 
 	"github.com/labstack/echo/v4"
 )
@@ -14,10 +14,10 @@ type Response struct {
 
 func BindAndValidate(c echo.Context, dto interface{}) error {
 	if err := c.Bind(dto); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+		return errors.New("invalid request")
 	}
 	if err := c.Validate(dto); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		return errors.New("validation error: " + err.Error())
 	}
 	return nil
 }
