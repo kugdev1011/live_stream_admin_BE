@@ -1,10 +1,14 @@
 package model
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type StreamStatus string
 
 const (
+	PENDING  StreamStatus = "pending"
 	STARTED  StreamStatus = "started"
 	ENDED    StreamStatus = "ended"
 	UPCOMING StreamStatus = "upcoming"
@@ -35,13 +39,13 @@ type Stream struct {
 	Description string       `gorm:"type:text"`
 	Status      StreamStatus `gorm:"type:varchar(50);not null"`
 	// StreamURL    string       `gorm:"type:text;not null"`
-	StreamToken  string     `gorm:"type:text;not null"` // generated from streaming server
-	StreamKey    string     `gorm:"type:text;not null"` // generated from web
-	StreamType   StreamType `gorm:"type:varchar(50);not null"`
-	ThumbnailURL string     `gorm:"type:text;not null"`
-	StartedAt    time.Time  `gorm:"default:CURRENT_TIMESTAMP"`
-	EndedAt      time.Time  `gorm:"default:CURRENT_TIMESTAMP"`
-	User         User       `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	StreamToken  string         `gorm:"type:text;not null"` // generated from streaming server
+	StreamKey    string         `gorm:"type:text;not null"` // generated from web
+	StreamType   StreamType     `gorm:"type:varchar(50);not null"`
+	ThumbnailURL string         `gorm:"type:text;not null"`
+	StartedAt    sql.NullString `gorm:"column:staerted_at"`
+	EndedAt      sql.NullString `gorm:"column:ended_at"`
+	User         User           `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 type Notification struct {
@@ -82,6 +86,7 @@ type StreamAnalytics struct {
 	Views       uint      `gorm:"not null"`
 	Likes       uint      `gorm:"not null"`
 	Comments    uint      `gorm:"not null"`
+	VideoSize   uint      `gorm:"not null"`
 	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	Stream      Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 }
