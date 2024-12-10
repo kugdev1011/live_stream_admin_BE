@@ -26,10 +26,11 @@ func (h *Handler) Register() {
 	newAuthHandler(h.r, h.srv)
 	newUserHandler(h.r, h.srv)
 	newAdminHandler(h.r, h.srv)
+	newStreamHandler(h.r, h.srv)
 
 }
 
-func (h *authHandler) JWTMiddleware() echo.MiddlewareFunc {
+func (h *Handler) JWTMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// Extract token from Authorization header

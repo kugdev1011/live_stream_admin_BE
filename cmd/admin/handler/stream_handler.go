@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
 	"net/http"
@@ -11,32 +10,33 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type userHandler struct {
+type streamHandler struct {
 	Handler
 	r   *echo.Group
 	srv *service.Service
 }
 
-func newUserHandler(r *echo.Group, srv *service.Service) *userHandler {
-	user := &userHandler{
+func newStreamHandler(r *echo.Group, srv *service.Service) *streamHandler {
+	statistics := &streamHandler{
 		r:   r,
 		srv: srv,
 	}
 
-	user.register()
+	statistics.register()
 
-	return user
+	return statistics
 }
 
-func (h *userHandler) register() {
-	group := h.r.Group("api/users")
+func (h *streamHandler) register() {
+	group := h.r.Group("api/streams")
 
 	group.Use(h.JWTMiddleware())
-	group.GET("/:page/:limit", h.page)
+	group.GET("/statistics/:page/:limit", h.getLiveStreamStatisticsData)
 
 }
 
-func (h *userHandler) page(c echo.Context) error {
+func (h *streamHandler) getLiveStreamStatisticsData(c echo.Context) error {
+
 	var page, limit int
 	var err error
 
@@ -57,14 +57,11 @@ func (h *userHandler) page(c echo.Context) error {
 		}
 	}
 
-	var req dto.UserQuery
-	if err := utils.BindAndValidate(c, &req); err != nil {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-	}
-
-	data, err := h.srv.User.GetUserList(&req, page, limit)
+	data, err := h.srv.Stream.GetStreamAnalyticsData(page, limit)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
+
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", data)
+
 }

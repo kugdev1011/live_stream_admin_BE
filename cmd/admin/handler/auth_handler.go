@@ -14,6 +14,7 @@ import (
 )
 
 type authHandler struct {
+	Handler
 	r   *echo.Group
 	srv *service.Service
 }

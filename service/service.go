@@ -7,15 +7,17 @@ import (
 )
 
 type Service struct {
-	User  *UserService
-	Admin *AdminService
-	Role  *RoleService
+	User   *UserService
+	Admin  *AdminService
+	Role   *RoleService
+	Stream *StreamService
 }
 
 func NewService(repo *repository.Repository, redis *redis.Client) *Service {
 	return &Service{
-		User:  newUserService(repo, redis),
-		Admin: newAdminService(repo, redis),
-		Role:  NewRoleService(repo, redis),
+		User:   newUserService(repo, redis),
+		Admin:  newAdminService(repo, redis),
+		Role:   NewRoleService(repo, redis),
+		Stream: newStreamService(repo, redis),
 	}
 }

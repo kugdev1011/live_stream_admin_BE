@@ -1,38 +1,53 @@
 package utils
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
+	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
-
-func HashingPassword(content, salt_key string) string {
-	data := salt_key + content
-	hash := sha256.New()
-	hash.Write([]byte(data))
-	hashBytes := hash.Sum(nil)
-	return hex.EncodeToString(hashBytes)
-}
-
-func VerifyPassword(storedHash, content, salt_key string) bool {
-	return HashingPassword(content, salt_key) == storedHash
-}
-
-// type Response struct {
-// 	Data    interface{} `json:"data,omitempty"`
-// 	Message interface{} `json:"message,omitempty"`
-// 	Code    interface{} `json:"code,omitempty"`
-// }
-
-// func BuildErrorResponse(ctx echo.Context, status int, err error, body interface{}) error {
-// 	return BuildStandardResponse(ctx, status, Response{Message: err.Error(), Code: status, Data: body})
-// }
 
 func BuildSuccessResponseWithData(ctx echo.Context, status int, body interface{}) error {
 	return BuildStandardResponse(ctx, status, Response{Message: "Successfully", Code: status, Data: body})
 }
 
-// func BuildStandardResponse(ctx echo.Context, status int, resp Response) error {
-// 	return ctx.JSON(status, Response{Data: resp.Data, Code: resp.Code, Message: resp.Message})
-// }
+func ConvertBytes(bytes int64) string {
+	if bytes < 1024 {
+		return strconv.FormatInt(bytes, 10) + "B" // bytes
+	}
+
+	// Define units for bytes, KB, MB, GB, etc.
+	units := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB"}
+
+	// Convert the bytes to the appropriate unit
+	var unitIndex int
+	size := float64(bytes)
+
+	// Iterate to find the appropriate size and unit
+	for size >= 1024 && unitIndex < len(units)-1 {
+		size /= 1024
+		unitIndex++
+	}
+
+	// Format the size to two decimal places
+	return fmt.Sprintf("%.1f%s", size, units[unitIndex])
+}
+
+func ConvertTimestampToDuration(timestamp int64) string {
+	timestampTime := time.Unix(timestamp, 0)
+	duration := time.Since(timestampTime)
+	hours := int(duration.Hours())          // Total hours
+	minutes := int(duration.Minutes()) % 60 // Remainder minutes
+	return fmt.Sprintf("%d hours %d minutes", hours, minutes)
+}
+
+const DATETIME_LAYOUT = "2024-12-09 20:56:08.408 +0700"
+
+func ConvertDatetimeToTimestamp(datetimeStr, layout string) (int64, error) {
+	timestampTime, err := time.Parse(layout, datetimeStr)
+	if err != nil {
+		return 0, err
+	}
+	return timestampTime.Unix(), nil
+}

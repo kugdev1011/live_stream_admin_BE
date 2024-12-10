@@ -1,8 +1,8 @@
 package service
 
 import (
+	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
-	apimodel "gitlab/live/be-live-api/model/api-model"
 	"gitlab/live/be-live-api/repository"
 	"gitlab/live/be-live-api/utils"
 
@@ -14,7 +14,7 @@ type AdminService struct {
 	redis *redis.Client
 }
 
-func (s *AdminService) CreateAdmin(request *apimodel.CreateAdminRequest) (*model.User, error) {
+func (s *AdminService) CreateAdmin(request *dto.CreateAdminRequest) (*model.User, error) {
 	var newUser = new(model.User)
 	newUser.Username = request.UserName
 	//newUser.PasswordHash = utils.HashingPassword(request.Password, s.appConfig.SaltKey)

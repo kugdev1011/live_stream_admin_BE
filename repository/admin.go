@@ -14,7 +14,7 @@ func (s *AdminRepository) CreateAdmin(newUser *model.User) (*model.User, error) 
 
 	// find role admin
 	var role model.Role
-	if err := s.db.Model(model.Role{}).Where("type=?", "admin").First(&role).Error; err != nil {
+	if err := s.db.Model(model.Role{}).Where("type=?", model.ADMINROLE).First(&role).Error; err != nil {
 		return nil, err
 	}
 

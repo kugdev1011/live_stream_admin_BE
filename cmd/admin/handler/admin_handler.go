@@ -2,7 +2,7 @@ package handler
 
 import (
 	"errors"
-	model "gitlab/live/be-live-api/model/api-model"
+	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
 	"net/http"
@@ -12,6 +12,7 @@ import (
 )
 
 type adminHandler struct {
+	Handler
 	r   *echo.Group
 	srv *service.Service
 }
@@ -29,6 +30,8 @@ func newAdminHandler(r *echo.Group, srv *service.Service) *adminHandler {
 
 func (h *adminHandler) register() {
 	group := h.r.Group("api/admins")
+
+	group.Use(h.JWTMiddleware())
 
 	group.POST("", h.createAdmin)
 	group.GET("/:id", h.byId)
@@ -51,9 +54,9 @@ func (h *adminHandler) byId(c echo.Context) error {
 
 func (h *adminHandler) createAdmin(c echo.Context) error {
 	var err error
-	var req model.CreateAdminRequest
-	if err := c.Bind(&req); err != nil {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request"), nil)
+	var req dto.CreateAdminRequest
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
 	data, err := h.srv.Admin.CreateAdmin(&req)

@@ -23,7 +23,7 @@ type BasePaginationModel struct {
 
 type PaginationModel[T any] struct {
 	BasePaginationModel
-	Page []T                    `json:"page,omitempty"`
+	Page []T                    `json:"page"`
 	Obj  map[string]interface{} `json:"obj,omitempty"`
 }
 
