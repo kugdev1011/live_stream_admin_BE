@@ -39,10 +39,11 @@ func (s *StreamService) GetStreamAnalyticsData(page, limit int) (*utils.Paginati
 		live_stream_dto.VideoSize = utils.ConvertBytes(int64(v.VideoSize))
 		live_stream_dto.Viewers = v.Views
 
-		if !v.Stream.EndedAt.Valid && !v.Stream.StartedAt.Valid {
+		if v.Stream.EndedAt.Valid && v.Stream.StartedAt.Valid {
 			endAt, _ := utils.ConvertDatetimeToTimestamp(v.Stream.EndedAt.String, utils.DATETIME_LAYOUT)
 			startAt, _ := utils.ConvertDatetimeToTimestamp(v.Stream.StartedAt.String, utils.DATETIME_LAYOUT)
-			live_stream_dto.Duration = utils.ConvertTimestampToDuration(endAt - startAt)
+
+			live_stream_dto.Duration = utils.ConvertTimestampToDuration(*endAt, *startAt)
 		}
 		result.Page = append(result.Page, *live_stream_dto)
 	}
