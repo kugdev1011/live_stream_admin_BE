@@ -34,20 +34,17 @@ func ConvertBytes(bytes int64) string {
 	return fmt.Sprintf("%.1f%s", size, units[unitIndex])
 }
 
-func ConvertTimestampToDuration(timestamp int64) string {
-	timestampTime := time.Unix(timestamp, 0)
-	duration := time.Since(timestampTime)
-	hours := int(duration.Hours())          // Total hours
-	minutes := int(duration.Minutes()) % 60 // Remainder minutes
-	return fmt.Sprintf("%d hours %d minutes", hours, minutes)
+func ConvertTimestampToDuration(endedAt, startedAt time.Time) string {
+	duration := endedAt.Sub(startedAt)
+	return fmt.Sprintf("%.2f hours", duration.Hours())
 }
 
-const DATETIME_LAYOUT = "2024-12-09 20:56:08.408 +0700"
+const DATETIME_LAYOUT = "2006-01-02 15:04:05.999 -0700"
 
-func ConvertDatetimeToTimestamp(datetimeStr, layout string) (int64, error) {
+func ConvertDatetimeToTimestamp(datetimeStr, layout string) (*time.Time, error) {
 	timestampTime, err := time.Parse(layout, datetimeStr)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return timestampTime.Unix(), nil
+	return &timestampTime, nil
 }

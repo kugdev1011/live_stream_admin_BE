@@ -29,42 +29,42 @@ const (
 )
 
 type Role struct {
-	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	Type        string    `gorm:"type:varchar(50);not null;unique" json:"type,omitempty"`
-	Description string    `gorm:"type:text" json:"desription,omitempty"`
-	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`
-	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime" json:"updated_at,omitempty"`
-	Users       []User    `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE" json:"users,omitempty"`
+	ID          uint      `gorm:"primaryKey;autoIncrement"`
+	Type        string    `gorm:"type:varchar(50);not null;unique"`
+	Description string    `gorm:"type:text"`
+	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
+	Users       []User    `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE"`
 }
 
 type User struct {
-	ID           uint           `gorm:"primaryKey;autoIncrement"`
-	Username     string         `gorm:"type:varchar(50);not null;unique"`
-	DisplayName  string         `gorm:"type:varchar(100)" json:"display_name,omitempty"`
-	Email        string         `gorm:"type:varchar(100);not null;unique"`
-	PasswordHash string         `gorm:"type:varchar(255);not null"`
-	OTP          string         `gorm:"type:varchar(6);null"`
-	OTPExpiresAt *time.Time     `gorm:"type:timestamp;null" json:"otp_expires_at,omitempty"`
-	RoleID       uint           `gorm:"not null"`
-	Role         Role           `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE"`
-	CreatedAt    time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`
-	CreatedByID  *uint          `gorm:"index;null" json:"created_by_id,omitempty"`
-	CreatedBy    *User          `gorm:"foreignKey:CreatedByID" json:"created_by,omitempty"`
-	UpdatedAt    time.Time      `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime" json:"updated_at,omitempty"`
-	UpdatedByID  *uint          `gorm:"index;null" json:"updated_by_id,omitempty"`
-	UpdatedBy    *User          `gorm:"foreignKey:UpdatedByID" json:"updated_by,omitempty"`
-	DeletedAt    gorm.DeletedAt `json:"deleted_at,omitempty"`
-	DeletedByID  *uint          `json:"deleted_by_id,omitempty"`
-	AdminLogs    []AdminLog     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	ID           uint       `gorm:"primaryKey;autoIncrement"`
+	Username     string     `gorm:"type:varchar(50);not null;unique"`
+	DisplayName  string     `gorm:"type:varchar(100)"`
+	Email        string     `gorm:"type:varchar(100);not null;unique"`
+	PasswordHash string     `gorm:"type:varchar(255);not null"`
+	OTP          string     `gorm:"type:varchar(6);null"`
+	OTPExpiresAt *time.Time `gorm:"type:timestamp;null"`
+	RoleID       uint       `gorm:"not null"`
+	Role         Role       `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE"`
+	CreatedAt    time.Time  `gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedByID  *uint      `gorm:"index;null"`
+	CreatedBy    *User      `gorm:"foreignKey:CreatedByID"`
+	UpdatedAt    time.Time  `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
+	UpdatedByID  *uint      `gorm:"index;null"`
+	UpdatedBy    *User      `gorm:"foreignKey:UpdatedByID"`
+	DeletedAt    gorm.DeletedAt
+	DeletedByID  *uint
+	AdminLogs    []AdminLog `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 type AdminLog struct {
-	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
-	UserID      uint      `gorm:"not null" json:"user_id,omitempty"`
-	Action      string    `gorm:"type:varchar(100);not null" json:"action,omitempty"`
-	Details     string    `gorm:"type:text" json:"details,omitempty"`
-	PerformedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"performed_at,omitempty"`
-	User        User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user,omitempty"`
+	ID          uint      `gorm:"primaryKey;autoIncrement"`
+	UserID      uint      `gorm:"not null"`
+	Action      string    `gorm:"type:varchar(100);not null"`
+	Details     string    `gorm:"type:text"`
+	PerformedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	User        User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 type BlockedList struct {
