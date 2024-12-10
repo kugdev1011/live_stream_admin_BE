@@ -99,7 +99,7 @@ func (h *authHandler) login(c echo.Context) error {
 
 	user, err := h.srv.User.FindByEmail(loginDTO.Email)
 
-	if err != nil || !utils.CheckPasswordHash(loginDTO.Password, user.PasswordHash) {
+	if err != nil || user == nil || !utils.CheckPasswordHash(loginDTO.Password, user.PasswordHash) {
 		return utils.BuildErrorResponse(c, http.StatusUnauthorized, errors.New("invalid username or password"), nil)
 	}
 
