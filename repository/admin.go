@@ -28,11 +28,17 @@ func (s *AdminRepository) CreateAdmin(newUser *model.User) (*model.User, error) 
 
 func (s *AdminRepository) ById(id uint) (*model.User, error) {
 	var user model.User
-	if err := s.db.Model(model.User{}).Where("id=? AND deleted_at IS NULL", id).
+	var query = s.db.Model(model.User{})
+	query = query.Joins("LEFT JOIN roles ON roles.id = users.role_id").
+		Where("roles.type = ?", model.ADMINROLE)
+	if err := query.Where("users.id=? AND users.deleted_at IS NULL", id).
 		Preload("Role").
 		Preload("CreatedBy").
 		Preload("UpdatedBy").
 		Preload("AdminLogs").First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &user, nil

@@ -8,23 +8,23 @@ import (
 )
 
 type BasePaginationModel struct {
-	Index       int     `json:"Index,omitempty"`
-	CurrentPage int     `json:"CurrentPage,omitempty"`
-	Length      int     `json:"Length,omitempty"`
-	TotalItems  int64   `json:"TotalItems,omitempty"`
-	PageSize    int     `json:"PageSize,omitempty"`
-	Next        int     `json:"Next,omitempty"`
-	Previous    int     `json:"Previous,omitempty"`
-	Query       string  `json:"Query,omitempty"`
-	IsNewFilter bool    `json:"IsNewFilter,omitempty"`
-	Route       string  `json:"Route,omitempty"`
-	ExecTime    float64 `json:"ExecTime,omitempty"`
+	Index       int     `json:"index,omitempty"`
+	CurrentPage int     `json:"current_page,omitempty"`
+	Length      int     `json:"length,omitempty"`
+	TotalItems  int64   `json:"total_items,omitempty"`
+	PageSize    int     `json:"page_size,omitempty"`
+	Next        int     `json:"next,omitempty"`
+	Previous    int     `json:"previous,omitempty"`
+	Query       string  `json:"query,omitempty"`
+	IsNewFilter bool    `json:"is_new_filter,omitempty"`
+	Route       string  `json:"route,omitempty"`
+	ExecTime    float64 `json:"exec_time,omitempty"`
 }
 
 type PaginationModel[T any] struct {
 	BasePaginationModel
 	Page []T                    `json:"page"`
-	Obj  map[string]interface{} `json:"Obj,omitempty"`
+	Obj  map[string]interface{} `json:"obj,omitempty"`
 }
 
 const (
