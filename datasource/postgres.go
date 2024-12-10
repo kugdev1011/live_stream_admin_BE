@@ -23,19 +23,26 @@ func LoadDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(
+	if err := db.AutoMigrate(
 		&model.Role{},
 		&model.User{},
 		&model.AdminLog{},
 		&model.BlockedList{},
+		&model.Stream{},
+	); err != nil {
+		return nil, err
+	}
+
+	if err := db.AutoMigrate(
 		&model.Like{},
 		&model.Comment{},
 		&model.Share{},
 		&model.StreamAnalytics{},
 		&model.Subscription{},
 		&model.Notification{},
-		&model.Stream{},
-	)
+	); err != nil {
+		return nil, err
+	}
 
 	return db, nil
 

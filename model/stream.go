@@ -33,7 +33,7 @@ const (
 )
 
 type Stream struct {
-	StreamID    uint         `gorm:"primaryKey"`
+	ID          uint         `gorm:"primaryKey"`
 	UserID      uint         `gorm:"not null"`
 	Title       string       `gorm:"type:varchar(100);not null"`
 	Description string       `gorm:"type:text"`
@@ -49,13 +49,13 @@ type Stream struct {
 }
 
 type Notification struct {
-	NotificationID uint      `gorm:"primaryKey;autoIncrement"`
-	UserID         uint      `gorm:"not null"`
-	StreamID       uint      `gorm:"not null"`
-	Content        string    `gorm:"type:text;not null"`
-	CreatedAt      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	Stream         Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
-	User           User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	ID        uint      `gorm:"primaryKey"`
+	UserID    uint      `gorm:"not null"`
+	StreamID  uint      `gorm:"not null"`
+	Content   string    `gorm:"type:text;not null"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
+	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 // type Chat struct {
@@ -69,10 +69,10 @@ type Notification struct {
 // }
 
 type Subscription struct {
-	SubscriptionID uint      `gorm:"primaryKey;autoIncrement"`
-	SubscriberID   uint      `gorm:"not null"`
-	StreamerID     uint      `gorm:"not null"`
-	CreatedAt      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	ID           uint      `gorm:"primaryKey"`
+	SubscriberID uint      `gorm:"not null"`
+	StreamerID   uint      `gorm:"not null"`
+	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	// StartDate      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	// EndDate        time.Time `gorm:"not null"`
 	// AutoRenew      bool      `gorm:"not null"`
@@ -81,18 +81,18 @@ type Subscription struct {
 }
 
 type StreamAnalytics struct {
-	AnalyticsID uint      `gorm:"primaryKey;autoIncrement"`
-	StreamID    uint      `gorm:"not null"`
-	Views       uint      `gorm:"not null"`
-	Likes       uint      `gorm:"not null"`
-	Comments    uint      `gorm:"not null"`
-	VideoSize   uint      `gorm:"not null"`
-	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	Stream      Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
+	ID        uint      `gorm:"primaryKey"`
+	StreamID  uint      `gorm:"not null"`
+	Views     uint      `gorm:"not null"`
+	Likes     uint      `gorm:"not null"`
+	Comments  uint      `gorm:"not null"`
+	VideoSize uint      `gorm:"not null"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 }
 
 type Like struct {
-	LikesID   uint          `gorm:"primaryKey;autoIncrement"`
+	ID        uint          `gorm:"primaryKey"`
 	UserID    uint          `gorm:"not null"`
 	StreamID  uint          `gorm:"not null"`
 	LikeEmote LikeEmoteType `gorm:"type:varchar(50);not null"`
@@ -102,16 +102,16 @@ type Like struct {
 }
 
 type Comment struct {
-	CommentsID uint      `gorm:"primaryKey;autoIncrement"`
-	UserID     uint      `gorm:"not null"`
-	StreamID   uint      `gorm:"not null"`
-	Comment    string    `gorm:"type:text;not null"`
-	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	Stream     Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
-	User       User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	ID        uint      `gorm:"primaryKey"`
+	UserID    uint      `gorm:"not null"`
+	StreamID  uint      `gorm:"not null"`
+	Comment   string    `gorm:"type:text;not null"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
+	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 type Share struct {
-	ShareID   uint      `gorm:"primaryKey;autoIncrement"`
+	ID        uint      `gorm:"primaryKey"`
 	UserID    uint      `gorm:"not null"`
 	StreamID  uint      `gorm:"not null"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
