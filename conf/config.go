@@ -62,7 +62,7 @@ func LoadYaml(path string) (*Config, error) {
 
 func SeedRoles(roleService *service.RoleService) {
 	roles := []model.Role{
-		{Type: string(model.SUPPERADMINROLE), Description: "supper_admin role"},
+		{Type: string(model.SUPPERADMINROLE), Description: "super_admin role"},
 		{Type: string(model.ADMINROLE), Description: "Administrator role"},
 		{Type: string(model.STREAMER), Description: "Streamer role"},
 		{Type: string(model.USERROLE), Description: "Default user role"},
@@ -87,17 +87,20 @@ func SeedSuperAdminUser(userService *service.UserService, roleService *service.R
 		log.Fatalf("super_admin role must be created before seeding admin user")
 	}
 
-	existingUser, err := userService.FindByEmail("superAdmin@gamil.com")
+	existingUser, err := userService.FindByEmail("superAdmin@gmail.com")
 	if err == nil && existingUser != nil {
 		log.Println("Super admin user already exists, skipping creation")
 		return
 	}
 
 	hashedPassword, err := utils.HashPassword("superAdmin123")
+	if err != nil {
+		log.Printf("Failed to hash password: %v\n", err)
+	}
 
 	admin := &model.User{
 		Username:     "superAdmin",
-		Email:        "superAdmin@gamil.com",
+		Email:        "superAdmin@gmail.com",
 		PasswordHash: hashedPassword, // Replace with hashed password
 		RoleID:       role.ID,
 		OTPExpiresAt: nil,

@@ -8,10 +8,11 @@ type LoginDTO struct {
 }
 
 type RegisterDTO struct {
-	Username string         `json:"username" validate:"required,min=3,max=50"`
-	Email    string         `json:"email" validate:"required,email,max=100"`
-	Password string         `json:"password" validate:"required,min=6,max=255"`
-	RoleType model.RoleType `json:"roleType" validate:"required,oneof=supper_admin admin streamer user"`
+	Username    string         `json:"username" validate:"required,min=3,max=50"`
+	DisplayName string         `json:"display_name" validate:"required,min=5,max=100"`
+	Email       string         `json:"email" validate:"required,email,max=100"`
+	Password    string         `json:"password" validate:"required,min=6,max=255"`
+	RoleType    model.RoleType `json:"role_type" validate:"required,oneof=super_admin admin streamer user"`
 }
 
 type ForgetPasswordDTO struct {

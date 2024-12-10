@@ -74,6 +74,7 @@ func (h *authHandler) signUp(c echo.Context) error {
 
 	user := &model.User{
 		Username:     registerDTO.Username,
+		DisplayName:  registerDTO.DisplayName,
 		Email:        registerDTO.Email,
 		PasswordHash: hashedPassword,
 		RoleID:       role.ID,

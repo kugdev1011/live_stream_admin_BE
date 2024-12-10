@@ -22,7 +22,7 @@ const (
 type RoleType string
 
 const (
-	SUPPERADMINROLE RoleType = "supper_admin"
+	SUPPERADMINROLE RoleType = "super_admin"
 	ADMINROLE       RoleType = "admin"
 	STREAMER        RoleType = "streamer"
 	USERROLE        RoleType = "user"
