@@ -36,59 +36,8 @@ func (h *authHandler) register() {
 	group.POST("/login", h.login)
 
 	group.Use(h.JWTMiddleware())
-	group.POST("/register", h.signUp)
 	group.POST("/resetPassword", h.resetPassword)
 	group.POST("/forgetPassword", h.forgetPassword)
-
-}
-
-func (h *authHandler) signUp(c echo.Context) error {
-
-	var registerDTO dto.RegisterDTO
-
-	if err := utils.BindAndValidate(c, &registerDTO); err != nil {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-
-	}
-
-	roleType := registerDTO.RoleType
-	if !model.IsValidRoleType(roleType) {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid role type"), nil)
-	}
-
-	role, err := h.srv.Role.GetRoleByType(string(roleType))
-
-	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
-	}
-	if role == nil {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid role type"), nil)
-	}
-
-	hashedPassword, err := utils.HashPassword(registerDTO.Password)
-
-	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
-	}
-	claims := c.Get("user").(*utils.Claims)
-
-	user := &model.User{
-		Username:     registerDTO.Username,
-		DisplayName:  registerDTO.DisplayName,
-		Email:        registerDTO.Email,
-		PasswordHash: hashedPassword,
-		RoleID:       role.ID,
-		Role:         *role,
-		CreatedByID:  &claims.CreatedByID,
-		UpdatedByID:  &claims.CreatedByID,
-		OTPExpiresAt: nil,
-	}
-
-	if err := h.srv.User.Create(user); err != nil {
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
-	}
-
-	return utils.BuildSuccessResponse(c, http.StatusCreated, fmt.Sprintf("%s created successfully", role.Type), user)
 
 }
 
