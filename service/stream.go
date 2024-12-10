@@ -21,6 +21,14 @@ func newStreamService(repo *repository.Repository, redis *redis.Client) *StreamS
 
 }
 
+func (s *StreamService) GetStatisticsTotalLiveStreamData() (*dto.StatisticsTotalLiveStreamDTO, error) {
+	total, active, err := s.repo.Stream.GetStatisticsTotalStream()
+	if err != nil {
+		return nil, err
+	}
+	return &dto.StatisticsTotalLiveStreamDTO{ActiveLiveStreams: uint(active), TotalLiveStreams: uint(total)}, err
+}
+
 func (s *StreamService) GetStreamAnalyticsData(page, limit int) (*utils.PaginationModel[dto.LiveStreamRespDTO], error) {
 	pagination, err := s.repo.Stream.PaginateStreamStatisticsData(page, limit)
 	if err != nil {

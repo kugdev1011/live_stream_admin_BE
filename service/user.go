@@ -15,8 +15,72 @@ type UserService struct {
 	redis *redis.Client
 }
 
-func (s *UserService) GetUserList(filter *dto.UserQuery, page, limit int) (*utils.PaginationModel[model.User], error) {
-	return s.repo.User.Page(filter, page, limit)
+func (s *UserService) toUserResponseDTO(user *model.User) dto.UserResponseDTO {
+
+	var userResp = new(dto.UserResponseDTO)
+	userResp.ID = user.ID
+	userResp.Username = user.Username
+	userResp.DisplayName = user.DisplayName
+	userResp.Email = user.Email
+
+	if user.CreatedBy != nil {
+		userResp.CreatedByID = user.CreatedByID
+
+		userResp.CreatedBy = new(dto.UserResponseDTO)
+		userResp.CreatedBy.ID = user.CreatedBy.ID
+		userResp.CreatedBy.Username = user.CreatedBy.Username
+		userResp.CreatedBy.DisplayName = user.CreatedBy.DisplayName
+		userResp.CreatedBy.Email = user.CreatedBy.Email
+		userResp.CreatedBy.CreatedAt = user.CreatedBy.CreatedAt
+		userResp.CreatedBy.UpdatedAt = user.CreatedBy.UpdatedAt
+	}
+
+	if user.UpdatedBy != nil {
+		userResp.UpdatedByID = user.UpdatedByID
+
+		userResp.UpdatedBy = new(dto.UserResponseDTO)
+		userResp.UpdatedBy.ID = user.UpdatedBy.ID
+		userResp.UpdatedBy.Username = user.UpdatedBy.Username
+		userResp.UpdatedBy.DisplayName = user.UpdatedBy.DisplayName
+		userResp.UpdatedBy.Email = user.UpdatedBy.Email
+		userResp.UpdatedBy.CreatedAt = user.UpdatedBy.CreatedAt
+		userResp.UpdatedBy.UpdatedAt = user.UpdatedBy.UpdatedAt
+	}
+
+	userResp.DeletedByID = user.DeletedByID
+	userResp.DeletedAt = user.DeletedAt
+	userResp.CreatedAt = user.CreatedAt
+	userResp.UpdatedAt = user.UpdatedAt
+
+	userResp.RoleID = user.RoleID
+	userResp.Role = new(dto.RoleDTO)
+	userResp.Role.ID = user.Role.ID
+	userResp.Role.Type = user.Role.Type
+	userResp.Role.Description = user.Role.Description
+	userResp.Role.CreatedAt = user.Role.CreatedAt
+	userResp.Role.UpdatedAt = user.UpdatedAt
+
+	if len(user.AdminLogs) > 0 {
+		var adminLogs []dto.AdminLogDTO
+		for _, v := range user.AdminLogs {
+			adminLogs = append(adminLogs, dto.AdminLogDTO{ID: v.ID, UserID: v.UserID, Action: v.Action, PerformedAt: v.PerformedAt})
+		}
+		userResp.AdminLogs = append(userResp.AdminLogs, adminLogs...)
+	}
+
+	return *userResp
+}
+
+func (s *UserService) GetUserList(filter *dto.UserQuery, page, limit int) (*utils.PaginationModel[dto.UserResponseDTO], error) {
+	pagination, err := s.repo.User.Page(filter, page, limit)
+	if err != nil {
+		return nil, err
+	}
+	var newPage = new(utils.PaginationModel[dto.UserResponseDTO])
+	newPage.Page = utils.Map(pagination.Page, func(e model.User) dto.UserResponseDTO { return s.toUserResponseDTO(&e) })
+	newPage.BasePaginationModel = pagination.BasePaginationModel
+	return newPage, err
+
 }
 
 func newUserService(repo *repository.Repository, redis *redis.Client) *UserService {
