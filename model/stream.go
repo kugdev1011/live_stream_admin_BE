@@ -43,7 +43,7 @@ type Stream struct {
 	StreamKey    string         `gorm:"type:text;not null"` // generated from web
 	StreamType   StreamType     `gorm:"type:varchar(50);not null"`
 	ThumbnailURL string         `gorm:"type:text;not null"`
-	StartedAt    sql.NullString `gorm:"column:staerted_at"`
+	StartedAt    sql.NullString `gorm:"column:started_at"`
 	EndedAt      sql.NullString `gorm:"column:ended_at"`
 	User         User           `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
