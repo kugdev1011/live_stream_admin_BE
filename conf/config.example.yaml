@@ -15,7 +15,8 @@ web:
   port: 8787
 
 file_storage:
-  thumbnail_folder: ./tmp
+  thumbnail_folder: ./tmp/thumbnail/
+  avatar_folder: ./tmp/avatar/
 
 stream_server:
   http_url: http://localhost:8090

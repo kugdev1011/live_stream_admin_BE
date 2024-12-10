@@ -19,9 +19,10 @@ var (
 var cfg *Config
 
 type Config struct {
-	DB    DBConfig          `yaml:"database"`
-	Redis DBConfig          `yaml:"redis"`
-	Web   ApplicationConfig `yaml:"web"`
+	DB          DBConfig          `yaml:"database"`
+	Redis       DBConfig          `yaml:"redis"`
+	Web         ApplicationConfig `yaml:"web"`
+	FileStorage FileStorageConfig `yaml:"file_storage"`
 }
 
 type DBConfig struct {
@@ -42,6 +43,11 @@ type RedisConfig struct {
 type ApplicationConfig struct {
 	SaltKey string `yaml:"salt_key"`
 	Port    int    `yaml:"port"`
+}
+
+type FileStorageConfig struct {
+	ThumbnailFolder string `yaml:"thumbnail_folder"`
+	AvatarFolder    string `yaml:"avatar_folder"`
 }
 
 func LoadYaml(path string) (*Config, error) {
