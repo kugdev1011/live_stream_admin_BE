@@ -9,3 +9,8 @@ type LiveStreamRespDTO struct {
 	Comments    uint   `json:"comments,omitempty"`
 	Duration    string `json:"duration,omitempty"`
 }
+
+type StatisticsTotalLiveStreamDTO struct {
+	ActiveLiveStreams uint `json:"active_live_streams"`
+	TotalLiveStreams  uint `json:"total_live_streams"`
+}

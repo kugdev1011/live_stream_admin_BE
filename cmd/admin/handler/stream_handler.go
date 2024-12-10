@@ -32,7 +32,17 @@ func (h *streamHandler) register() {
 
 	group.Use(h.JWTMiddleware())
 	group.GET("/statistics/:page/:limit", h.getLiveStreamStatisticsData)
+	group.GET("/statistics/total", h.getTotalLiveStream)
 
+}
+
+func (h *streamHandler) getTotalLiveStream(c echo.Context) error {
+
+	data, err := h.srv.Stream.GetStatisticsTotalLiveStreamData()
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", data)
 }
 
 func (h *streamHandler) getLiveStreamStatisticsData(c echo.Context) error {

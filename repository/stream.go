@@ -26,3 +26,15 @@ func (s *StreamRepository) PaginateStreamStatisticsData(page, limit int) (*utils
 	}
 	return utils.Create(pagination, page, limit)
 }
+
+func (s *StreamRepository) GetStatisticsTotalStream() (int64, int64, error) {
+	var activeStream, totalStream int64
+
+	if err := s.db.Model(model.Stream{}).Where("status=?", model.STARTED).Count(&activeStream).Error; err != nil {
+		return 0, 0, err
+	}
+	if err := s.db.Model(model.Stream{}).Count(&totalStream).Error; err != nil {
+		return 0, 0, err
+	}
+	return totalStream, activeStream, nil
+}
