@@ -53,7 +53,7 @@ type User struct {
 	UpdatedBy      *User          `gorm:"foreignKey:UpdatedByID" json:"updated_by,omitempty"`
 	DeletedAt      gorm.DeletedAt `json:"deleted_at,omitempty"`
 	DeletedByID    *uint          `json:"deleted_by_id,omitempty"`
-	AvatarFileName sql.NullString `gorm:"type:varchar(255);" json:"avatar_file_name,omitempty"`
+	AvatarFileName sql.NullString `gorm:"type:varchar(255)" json:"avatar_file_name,omitempty"`
 	AdminLogs      []AdminLog     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
