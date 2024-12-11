@@ -44,6 +44,12 @@ func LoadDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
+	if err := db.AutoMigrate(
+		&model.TwoFA{},
+	); err != nil {
+		return nil, err
+	}
+
 	return db, nil
 
 }

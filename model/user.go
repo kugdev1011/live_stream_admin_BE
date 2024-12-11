@@ -73,3 +73,13 @@ type BlockedList struct {
 	BlockedUser   User      `gorm:"foreignKey:BlockedUserID;constraint:OnDelete:CASCADE"`
 	BlockedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 }
+
+type TwoFA struct {
+	ID           uint      `gorm:"primaryKey;autoIncrement"`
+	UserID       uint      `gorm:"not null"`
+	Secret       string    `gorm:"type:text;not null"`
+	Is2faEnabled bool      `gorm:"not null;default:false"`
+	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	UpdatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	User         User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+}
