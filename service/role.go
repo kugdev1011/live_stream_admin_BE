@@ -27,6 +27,6 @@ func (s *RoleService) GetRoleByID(roleID uint) (*model.Role, error) {
 	return s.repo.Role.FindByID(roleID)
 }
 
-func (s *RoleService) GetRoleByType(roleType string) (*model.Role, error) {
+func (s *RoleService) GetRoleByType(roleType model.RoleType) (*model.Role, error) {
 	return s.repo.Role.FindByType(roleType)
 }

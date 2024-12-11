@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"gitlab/live/be-live-api/model"
+
 	"gorm.io/gorm"
 )
 
@@ -37,7 +38,7 @@ func (r *RoleRepository) FindByID(roleID uint) (*model.Role, error) {
 }
 
 // Find a role by type
-func (r *RoleRepository) FindByType(roleType string) (*model.Role, error) {
+func (r *RoleRepository) FindByType(roleType model.RoleType) (*model.Role, error) {
 	var role model.Role
 	if err := r.db.Where("type = ?", roleType).First(&role).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

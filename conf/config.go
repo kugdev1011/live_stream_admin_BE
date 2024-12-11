@@ -68,10 +68,10 @@ func LoadYaml(path string) (*Config, error) {
 
 func SeedRoles(roleService *service.RoleService) {
 	roles := []model.Role{
-		{Type: string(model.SUPPERADMINROLE), Description: "super_admin role"},
-		{Type: string(model.ADMINROLE), Description: "Administrator role"},
-		{Type: string(model.STREAMER), Description: "Streamer role"},
-		{Type: string(model.USERROLE), Description: "Default user role"},
+		{Type: model.SUPPERADMINROLE, Description: "super_admin role"},
+		{Type: model.ADMINROLE, Description: "Administrator role"},
+		{Type: model.STREAMER, Description: "Streamer role"},
+		{Type: model.USERROLE, Description: "Default user role"},
 	}
 
 	for _, role := range roles {
@@ -88,7 +88,7 @@ func SeedRoles(roleService *service.RoleService) {
 }
 
 func SeedSuperAdminUser(userService *service.UserService, roleService *service.RoleService) {
-	role, err := roleService.GetRoleByType(string(model.SUPPERADMINROLE))
+	role, err := roleService.GetRoleByType(model.SUPPERADMINROLE)
 	if err != nil || role == nil {
 		log.Fatalf("super_admin role must be created before seeding admin user")
 	}

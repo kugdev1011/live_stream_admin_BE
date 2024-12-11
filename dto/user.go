@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"gitlab/live/be-live-api/model"
 	"time"
 
 	"gorm.io/gorm"
@@ -30,7 +31,7 @@ type UserResponseDTO struct {
 
 type RoleDTO struct {
 	ID          uint              `json:"id,omitempty"`
-	Type        string            `json:"type,omitempty"`
+	Type        model.RoleType    `json:"type,omitempty"`
 	Description string            `json:"description,omitempty"`
 	CreatedAt   time.Time         `json:"created_at,omitempty"`
 	UpdatedAt   time.Time         `json:"updated_at,omitempty"`
