@@ -15,8 +15,10 @@ web:
   port: 8787
 
 file_storage:
+  root_folder: ./tmp
   thumbnail_folder: ./tmp/thumbnail/
   avatar_folder: ./tmp/avatar/
+  live_folder: ./tmp/recordings/live/
 
 stream_server:
   http_url: http://localhost:8090
