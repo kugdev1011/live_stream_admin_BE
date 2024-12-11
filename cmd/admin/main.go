@@ -65,6 +65,14 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	// Use CORS middleware, for local run
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"*"},                                                                                    // Allow all origins (use specific origins for production)
+		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions}, // Allowed HTTP methods
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},                                    // Allowed headers
+		AllowCredentials: true,                                                                                             // Allow credentials like cookies
+	}))
+
 	v := validator.New()
 	// Register custom validator with Echo
 	e.Validator = &CustomValidator{validator: v}
