@@ -22,6 +22,33 @@ func (s *UserRepository) Page(filter *dto.UserQuery, page, limit int) (*utils.Pa
 			Where("roles.type = ?", filter.Role)
 	}
 
+	if filter != nil && filter.UserName != "" {
+		query = query.Where("users.username LIKE ?", "%"+filter.UserName+"%")
+	}
+
+	if filter != nil && filter.DisplayName != "" {
+		query = query.Where("users.display_name LIKE ?", "%"+filter.DisplayName+"%")
+	}
+
+	if filter != nil && filter.Email != "" {
+		query = query.Where("users.email LIKE ?", "%"+filter.Email+"%")
+	}
+
+	if filter != nil && filter.CreatedBy != "" {
+		query = query.Joins("LEFT JOIN users cr ON cr.id = users.created_by_id").
+			Where("cr.username LIKE ? OR cr.display_name LIKE ?", "%"+filter.CreatedBy+"%", "%"+filter.CreatedBy+"%")
+	}
+
+	if filter != nil && filter.UpdatedBy != "" {
+		query = query.Joins("LEFT JOIN users ur ON ur.id = users.updated_by_id").
+			Where("ur.username = ? OR ur.display_name = ?", "%"+filter.UpdatedBy+"%", "%"+filter.UpdatedBy+"%")
+	}
+	if filter != nil && filter.SortBy != "" && filter.Sort != "" {
+		query = query.Order(fmt.Sprintf("users.%s %s", filter.SortBy, filter.Sort))
+	} else {
+		query = query.Order(fmt.Sprintf("users.%s %s", "created_at", "DESC"))
+	}
+
 	query = query.Preload("Role").Preload("AdminLogs").Preload("CreatedBy").Preload("UpdatedBy")
 	pagination, err := utils.CreatePage[model.User](query, page, limit)
 	if err != nil {
