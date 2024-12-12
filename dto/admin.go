@@ -10,7 +10,7 @@ type CreateAdminRequest struct {
 	Email       string `json:"email" validate:"required,email,max=100"`
 	DisplayName string `json:"display_name" validate:"required,min=3,max=100"`
 	Password    string `json:"password" validate:"required,min=6,max=255"`
-	CreatedByID *uint  `json:"created_by_id" validate:"required"`
+	CreatedByID *uint  `json:"created_by_id"`
 }
 
 type CreateAdminResp struct {
