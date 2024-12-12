@@ -14,10 +14,11 @@ func (s *AdminRepository) CreateAdmin(newUser *model.User) (*model.User, error) 
 
 	// find role admin
 	var role model.Role
-	if err := s.db.Model(model.Role{}).Where("type=?", model.ADMINROLE).First(&role).Error; err != nil {
+	if err := s.db.Model(model.Role{}).Where("type=?", newUser.Role.Type).First(&role).Error; err != nil {
 		return nil, err
 	}
 
+	newUser.Role = model.Role{}
 	newUser.RoleID = role.ID
 	if err := s.db.Model(model.User{}).Create(newUser).Error; err != nil {
 		return nil, err
@@ -29,8 +30,6 @@ func (s *AdminRepository) CreateAdmin(newUser *model.User) (*model.User, error) 
 func (s *AdminRepository) ById(id uint) (*model.User, error) {
 	var user model.User
 	var query = s.db.Model(model.User{})
-	query = query.Joins("LEFT JOIN roles ON roles.id = users.role_id").
-		Where("roles.type = ?", model.ADMINROLE)
 	if err := query.Where("users.id=? AND users.deleted_at IS NULL", id).
 		Preload("Role").
 		Preload("CreatedBy").
