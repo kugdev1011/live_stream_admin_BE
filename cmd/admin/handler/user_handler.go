@@ -32,6 +32,7 @@ func (h *userHandler) register() {
 	group := h.r.Group("api/users")
 
 	group.Use(h.JWTMiddleware())
+	group.Use(h.RoleGuardMiddleware())
 	group.GET("/:page/:limit", h.page)
 
 }
