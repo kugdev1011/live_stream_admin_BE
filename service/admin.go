@@ -20,7 +20,7 @@ func (s *AdminService) toCreateAdminDto(user *model.User) *dto.CreateAdminResp {
 		Email:       user.Email,
 		DisplayName: user.DisplayName,
 		CreatedAt:   user.CreatedAt,
-		Role:        model.ADMINROLE,
+		Role:        user.Role.Type,
 	}
 }
 
@@ -88,12 +88,13 @@ func (s *AdminService) CreateAdmin(request *dto.CreateAdminRequest) (*dto.Create
 	newUser.Email = request.Email
 	newUser.CreatedByID = request.CreatedByID
 	newUser.UpdatedByID = request.CreatedByID
+	newUser.Role.Type = request.RoleType
 
 	createdUser, err := s.repo.Admin.CreateAdmin(newUser)
 	if err != nil {
 		return nil, err
 	}
-
+	createdUser.Role.Type = request.RoleType
 	return s.toCreateAdminDto(createdUser), err
 }
 
