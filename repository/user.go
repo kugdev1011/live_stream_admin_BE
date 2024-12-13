@@ -57,6 +57,28 @@ func (s *UserRepository) Page(filter *dto.UserQuery, page, limit int) (*utils.Pa
 	return utils.Create(pagination, page, limit)
 }
 
+func (r *UserRepository) Update(updatedUser *model.User) error {
+	if err := r.db.Updates(updatedUser).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *UserRepository) Delete(id, deletedByID uint) error {
+	var userToDelete model.User
+	if err := r.db.First(&userToDelete, "id = ?", id).Error; err != nil {
+		return err
+	}
+	userToDelete.DeletedByID = &deletedByID
+	if err := r.db.Updates(&userToDelete).Error; err != nil {
+		return err
+	}
+	if err := r.db.Delete(&userToDelete).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func newUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{
 		db: db,
@@ -93,14 +115,6 @@ func (r *UserRepository) FindByUsername(username string) (*model.User, error) {
 		return nil, err
 	}
 	return &user, nil
-}
-
-func (r *UserRepository) Update(user *model.User) error {
-
-	if err := r.db.Save(user).Error; err != nil {
-		return err
-	}
-	return nil
 }
 
 func (r *UserRepository) UpdateOTP(userID uint, otp string, expiresAt time.Time) error {

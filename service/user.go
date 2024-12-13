@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
@@ -80,6 +81,55 @@ func (s *UserService) GetUserList(filter *dto.UserQuery, page, limit int) (*util
 	newPage.Page = utils.Map(pagination.Page, func(e model.User) dto.UserResponseDTO { return s.toUserResponseDTO(&e) })
 	newPage.BasePaginationModel = pagination.BasePaginationModel
 	return newPage, err
+
+}
+
+func (s *UserService) DeleteByID(id uint, deletedByID uint) error {
+	if err := s.repo.User.Delete(id, deletedByID); err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (s *UserService) toUpdatedUserDTO(user *model.User, role model.RoleType) *dto.UpdateUserResponse {
+	return &dto.UpdateUserResponse{
+		UserName:    user.Username,
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+		UpdatedAt:   user.UpdatedAt,
+		Role:        role,
+	}
+}
+
+func (s *UserService) UpdateUser(updatedUser *dto.UpdateUserRequest, id uint) (*dto.UpdateUserResponse, error) {
+
+	user, err := s.repo.Admin.ById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	role, err := s.repo.Role.FindByType(updatedUser.RoleType)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Username = updatedUser.UserName
+	user.DisplayName = updatedUser.DisplayName
+	user.Email = updatedUser.Email
+	user.Role = *role
+	if updatedUser.AvatarFileName != "" {
+		user.AvatarFileName = sql.NullString{String: updatedUser.AvatarFileName, Valid: true}
+	}
+	user.UpdatedBy = nil
+	user.UpdatedByID = updatedUser.UpdatedByID
+	user.UpdatedAt = time.Now()
+
+	if err := s.repo.User.Update(user); err != nil {
+		return nil, err
+	}
+
+	return s.toUpdatedUserDTO(user, updatedUser.RoleType), err
 
 }
 

@@ -55,7 +55,7 @@ func (h *authHandler) login(c echo.Context) error {
 	}
 
 	roleType := model.RoleType(user.Role.Type)
-	token, err := utils.GenerateAccessToken(user.Email, roleType, user.ID)
+	token, err := utils.GenerateAccessToken(user.Email, roleType, user.ID) // createdByID is current user id login
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
