@@ -53,3 +53,20 @@ type AdminLogDTO struct {
 	PerformedAt time.Time       `json:"performed_at,omitempty"`
 	User        UserResponseDTO `json:"user,omitempty"`
 }
+
+type UpdateUserRequest struct {
+	UserName       string         `json:"username" validate:"required,min=3,max=50"`
+	Email          string         `json:"email" validate:"required,email,max=100"`
+	DisplayName    string         `json:"display_name" validate:"required,min=3,max=100"`
+	RoleType       model.RoleType `json:"role_type" validate:"required,oneof=admin streamer user"`
+	AvatarFileName string         `json:"avatar_file_name" validate:"omitempty,min=3,max=200"`
+	UpdatedByID    *uint          `json:"updated_by_id"`
+}
+
+type UpdateUserResponse struct {
+	UserName    string         `json:"username,omitempty"`
+	DisplayName string         `json:"display_name,omitempty"`
+	Email       string         `json:"email,omitempty"`
+	Role        model.RoleType `json:"role,omitempty"`
+	UpdatedAt   time.Time      `json:"created_at,omitempty"`
+}

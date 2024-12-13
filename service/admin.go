@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
@@ -16,11 +17,12 @@ type AdminService struct {
 
 func (s *AdminService) toCreateAdminDto(user *model.User) *dto.CreateAdminResp {
 	return &dto.CreateAdminResp{
-		UserName:    user.Username,
-		Email:       user.Email,
-		DisplayName: user.DisplayName,
-		CreatedAt:   user.CreatedAt,
-		Role:        user.Role.Type,
+		UserName:       user.Username,
+		Email:          user.Email,
+		DisplayName:    user.DisplayName,
+		CreatedAt:      user.CreatedAt,
+		AvatarFileName: user.AvatarFileName.String,
+		Role:           user.Role.Type,
 	}
 }
 
@@ -89,6 +91,9 @@ func (s *AdminService) CreateAdmin(request *dto.CreateAdminRequest) (*dto.Create
 	newUser.CreatedByID = request.CreatedByID
 	newUser.UpdatedByID = request.CreatedByID
 	newUser.Role.Type = request.RoleType
+	if request.AvatarFileName != "" {
+		newUser.AvatarFileName = sql.NullString{String: request.AvatarFileName, Valid: true}
+	}
 
 	createdUser, err := s.repo.Admin.CreateAdmin(newUser)
 	if err != nil {
