@@ -93,8 +93,8 @@ type StreamAnalytics struct {
 
 type Like struct {
 	ID        uint          `gorm:"primaryKey"`
-	UserID    uint          `gorm:"not null"`
-	StreamID  uint          `gorm:"not null"`
+	UserID    uint          `gorm:"not null;uniqueIndex:idx_user_stream"`
+	StreamID  uint          `gorm:"not null;uniqueIndex:idx_user_stream"`
 	LikeEmote LikeEmoteType `gorm:"type:varchar(50);not null"`
 	CreatedAt time.Time     `gorm:"default:CURRENT_TIMESTAMP"`
 	Stream    Stream        `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
