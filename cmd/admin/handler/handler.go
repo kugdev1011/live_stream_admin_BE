@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -53,6 +55,21 @@ func (h *Handler) JWTMiddleware() echo.MiddlewareFunc {
 
 			// Attach claims to the context
 			c.Set("user", claims)
+
+			// Call the next handler
+			return next(c)
+		}
+	}
+}
+
+func (h *Handler) RoleGuardMiddleware() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			// Extract token from Authorization header
+			user := c.Get("user").(*utils.Claims)
+			if !slices.Contains([]model.RoleType{model.ADMINROLE, model.SUPPERADMINROLE}, model.RoleType(user.RoleType)) {
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Permission denied"})
+			}
 
 			// Call the next handler
 			return next(c)

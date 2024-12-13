@@ -31,6 +31,7 @@ func (h *streamHandler) register() {
 	group := h.r.Group("api/streams")
 
 	group.Use(h.JWTMiddleware())
+	group.Use(h.RoleGuardMiddleware())
 	group.GET("/statistics/:page/:limit", h.getLiveStreamStatisticsData)
 	group.GET("/statistics/total", h.getTotalLiveStream)
 
