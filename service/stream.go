@@ -30,7 +30,7 @@ func (s *StreamService) GetStatisticsTotalLiveStreamData() (*dto.StatisticsTotal
 	return &dto.StatisticsTotalLiveStreamDTO{ActiveLiveStreams: uint(active), TotalLiveStreams: uint(total)}, err
 }
 
-func (s *StreamService) sortByDuration(a []dto.LiveStreamRespDTO) []dto.LiveStreamRespDTO {
+func (s *StreamService) sortByDuration(a []dto.LiveStreamRespDTO, sort string) []dto.LiveStreamRespDTO {
 	if len(a) < 2 {
 		return a
 	}
@@ -45,7 +45,12 @@ func (s *StreamService) sortByDuration(a []dto.LiveStreamRespDTO) []dto.LiveStre
 
 	// Pile elements smaller than the pivot on the left
 	for i := range a {
-		if a[i].Duration < a[right].Duration {
+		if a[i].Duration < a[right].Duration && sort == "ASC" {
+			a[i], a[left] = a[left], a[i]
+			left++
+		}
+
+		if a[i].Duration > a[right].Duration && sort == "DESC" {
 			a[i], a[left] = a[left], a[i]
 			left++
 		}
@@ -55,8 +60,8 @@ func (s *StreamService) sortByDuration(a []dto.LiveStreamRespDTO) []dto.LiveStre
 	a[left], a[right] = a[right], a[left]
 
 	// Go down the rabbit hole
-	s.sortByDuration(a[:left])
-	s.sortByDuration(a[left+1:])
+	s.sortByDuration(a[:left], sort)
+	s.sortByDuration(a[left+1:], sort)
 
 	return a
 }
@@ -91,7 +96,7 @@ func (s *StreamService) GetStreamAnalyticsData(page, limit int, req *dto.Statist
 		result.Page = append(result.Page, *live_stream_dto)
 	}
 	if req != nil && req.SortBy == "duration" && req.Sort != "" {
-		result.Page = s.sortByDuration(result.Page)
+		result.Page = s.sortByDuration(result.Page, req.Sort)
 	}
 	return result, nil
 }
