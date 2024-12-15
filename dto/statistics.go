@@ -19,6 +19,6 @@ type StatisticsTotalLiveStreamDTO struct {
 }
 
 type StatisticsQuery struct {
-	SortBy string `query:"sort_by" validate:"omitempty,oneof=created_at views likes comments video_size duration stream_id id"`
+	SortBy string `query:"sort_by" validate:"omitempty,oneof=title created_at views likes comments video_size duration stream_id id"`
 	Sort   string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
 }
