@@ -19,7 +19,7 @@ func (s *UserRepository) Page(filter *dto.UserQuery, page, limit int) (*utils.Pa
 	var query = s.db.Model(model.User{})
 	if filter != nil && filter.Role != "" {
 		query = query.Joins("LEFT JOIN roles ON roles.id = users.role_id").
-			Where("roles.type = ?", filter.Role)
+			Where("roles.type = ? AND roles.type != ?", filter.Role, model.SUPPERADMINROLE)
 	}
 
 	if filter != nil && filter.UserName != "" {
