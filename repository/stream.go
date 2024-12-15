@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/utils"
 
@@ -17,9 +19,14 @@ func newStreamRepository(db *gorm.DB) *StreamRepository {
 	}
 }
 
-func (s *StreamRepository) PaginateStreamStatisticsData(page, limit int) (*utils.PaginationModel[model.StreamAnalytics], error) {
+func (s *StreamRepository) PaginateStreamStatisticsData(page, limit int, cond *dto.StatisticsQuery) (*utils.PaginationModel[model.StreamAnalytics], error) {
 
 	var query = s.db.Model(model.StreamAnalytics{}).Preload("Stream")
+	if cond != nil && cond.Sort != "" && cond.SortBy != "" {
+		query = query.Order(fmt.Sprintf("%s %s", cond.SortBy, cond.Sort))
+	} else {
+		query = query.Order(fmt.Sprintf("%s %s", "created_at", "DESC"))
+	}
 	pagination, err := utils.CreatePage[model.StreamAnalytics](query, page, limit)
 	if err != nil {
 		return nil, err

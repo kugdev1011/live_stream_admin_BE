@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
 	"net/http"
@@ -68,7 +69,12 @@ func (h *streamHandler) getLiveStreamStatisticsData(c echo.Context) error {
 		}
 	}
 
-	data, err := h.srv.Stream.GetStreamAnalyticsData(page, limit)
+	var req dto.StatisticsQuery
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	data, err := h.srv.Stream.GetStreamAnalyticsData(page, limit, &req)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
