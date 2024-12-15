@@ -69,11 +69,11 @@ func (r *UserRepository) Delete(id, deletedByID uint) error {
 	if err := r.db.First(&userToDelete, "id = ?", id).Error; err != nil {
 		return err
 	}
-	userToDelete.DeletedByID = &deletedByID
-	if err := r.db.Updates(&userToDelete).Error; err != nil {
-		return err
-	}
-	if err := r.db.Delete(&userToDelete).Error; err != nil {
+	// userToDelete.DeletedByID = &deletedByID
+	// if err := r.db.Updates(&userToDelete).Error; err != nil {
+	// 	return err
+	// }
+	if err := r.db.Unscoped().Delete(&userToDelete).Error; err != nil {
 		return err
 	}
 	return nil
