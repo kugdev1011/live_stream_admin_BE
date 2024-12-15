@@ -4,6 +4,7 @@ import (
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/repository"
 	"gitlab/live/be-live-api/utils"
+	"math/rand"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -27,6 +28,37 @@ func (s *StreamService) GetStatisticsTotalLiveStreamData() (*dto.StatisticsTotal
 		return nil, err
 	}
 	return &dto.StatisticsTotalLiveStreamDTO{ActiveLiveStreams: uint(active), TotalLiveStreams: uint(total)}, err
+}
+
+func (s *StreamService) sortByDuration(a []dto.LiveStreamRespDTO) []dto.LiveStreamRespDTO {
+	if len(a) < 2 {
+		return a
+	}
+
+	left, right := 0, len(a)-1
+
+	// Pick a pivot
+	pivotIndex := rand.Int() % len(a)
+
+	// Move the pivot to the right
+	a[pivotIndex], a[right] = a[right], a[pivotIndex]
+
+	// Pile elements smaller than the pivot on the left
+	for i := range a {
+		if a[i].Duration < a[right].Duration {
+			a[i], a[left] = a[left], a[i]
+			left++
+		}
+	}
+
+	// Place the pivot after the last smaller element
+	a[left], a[right] = a[right], a[left]
+
+	// Go down the rabbit hole
+	s.sortByDuration(a[:left])
+	s.sortByDuration(a[left+1:])
+
+	return a
 }
 
 func (s *StreamService) GetStreamAnalyticsData(page, limit int, req *dto.StatisticsQuery) (*utils.PaginationModel[dto.LiveStreamRespDTO], error) {
@@ -57,6 +89,9 @@ func (s *StreamService) GetStreamAnalyticsData(page, limit int, req *dto.Statist
 			live_stream_dto.Duration = int64(endAt.Sub(*startAt))
 		}
 		result.Page = append(result.Page, *live_stream_dto)
+	}
+	if req != nil && req.SortBy == "duration" && req.Sort != "" {
+		result.Page = s.sortByDuration(result.Page)
 	}
 	return result, nil
 }
