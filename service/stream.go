@@ -2,6 +2,7 @@ package service
 
 import (
 	"gitlab/live/be-live-api/dto"
+	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
 	"gitlab/live/be-live-api/utils"
 	"math/rand"
@@ -94,4 +95,68 @@ func (s *StreamService) GetStreamAnalyticsData(page, limit int, req *dto.Statist
 		result.Page = s.sortByDuration(result.Page, req.Sort)
 	}
 	return result, nil
+}
+
+func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream) *dto.LiveStreamBroadCastDTO {
+	var liveStreamDto = new(dto.LiveStreamBroadCastDTO)
+	liveStreamDto.Title = v.Title
+	liveStreamDto.Description = v.Description
+	liveStreamDto.Status = v.Status
+	liveStreamDto.StreamKey = v.StreamKey
+	liveStreamDto.StreamToken = v.StreamToken
+	liveStreamDto.StreamType = v.StreamType
+	liveStreamDto.ThumbnailFileName = v.ThumbnailFileName
+	if v.StartedAt.Valid {
+		liveStreamDto.StartedAt = &v.StartedAt.Time
+	}
+	if v.EndedAt.Valid {
+		liveStreamDto.EndedAt = &v.EndedAt.Time
+	}
+	liveStreamDto.ID = int(v.ID)
+
+	//user if exist
+	liveStreamDto.User = new(dto.UserResponseDTO)
+	liveStreamDto.User.Username = v.User.Username
+	liveStreamDto.User.DisplayName = v.User.DisplayName
+	liveStreamDto.User.Email = v.User.Email
+	liveStreamDto.User.ID = v.UserID
+	liveStreamDto.User.CreatedAt = v.User.CreatedAt
+	liveStreamDto.User.UpdatedAt = v.User.UpdatedAt
+
+	//user if exist
+	if v.StreamAnalytic != nil {
+		liveStreamDto.LiveStreamAnalytic = new(dto.LiveStreamRespDTO)
+		if v.EndedAt.Valid && v.StartedAt.Valid {
+			liveStreamDto.LiveStreamAnalytic.Duration = int64(v.EndedAt.Time.Sub(v.StartedAt.Time))
+		}
+		liveStreamDto.LiveStreamAnalytic.Likes = v.StreamAnalytic.Likes
+		liveStreamDto.LiveStreamAnalytic.VideoSize = int64(v.StreamAnalytic.VideoSize)
+		liveStreamDto.LiveStreamAnalytic.Viewers = v.StreamAnalytic.Views
+		liveStreamDto.LiveStreamAnalytic.Comments = v.StreamAnalytic.Comments
+	}
+	return liveStreamDto
+}
+
+func (s *StreamService) GetLiveStreamBroadCastWithPagination(page, limit int, req *dto.LiveStreamBroadCastQueryDTO) (*utils.PaginationModel[dto.LiveStreamBroadCastDTO], error) {
+	pagination, err := s.repo.Stream.PaginateLiveStreamBroadCastData(page, limit, req)
+	if err != nil {
+		return nil, err
+	}
+
+	result := new(utils.PaginationModel[dto.LiveStreamBroadCastDTO])
+	result.BasePaginationModel = pagination.BasePaginationModel
+
+	for _, v := range pagination.Page {
+		liveStreamDto := s.toLiveStreamBroadCastDto(&v)
+		result.Page = append(result.Page, *liveStreamDto)
+	}
+	return result, nil
+}
+
+func (s *StreamService) GetLiveStreamBroadCastByID(id int) (*dto.LiveStreamBroadCastDTO, error) {
+	v, err := s.repo.Stream.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return s.toLiveStreamBroadCastDto(v), nil
 }

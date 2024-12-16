@@ -5,6 +5,7 @@ import (
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/utils"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -40,6 +41,53 @@ func (s *StreamRepository) PaginateStreamStatisticsData(page, limit int, cond *d
 		return nil, err
 	}
 	return utils.Create(pagination, page, limit)
+}
+
+func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit int, cond *dto.LiveStreamBroadCastQueryDTO) (*utils.PaginationModel[model.Stream], error) {
+
+	var query = s.db.Model(model.Stream{}).Preload("StreamAnalytic").Preload("User")
+
+	// filter
+	if cond != nil {
+		if cond.Keyword != "" {
+			query = query.Where("title LIKE ? OR description LIKE ?", "%"+cond.Keyword+"%", "%"+cond.Keyword+"%")
+		}
+		if len(cond.Status) > 0 {
+			query = query.Where("status IN ?", cond.Status)
+		}
+		if cond.Type != "" {
+			query = query.Where("type = ?", cond.Type)
+		}
+		if cond.FromStartedTime != 0 && cond.EndStartedTime != 0 {
+			from := time.Unix(cond.FromStartedTime, 0).Format(utils.DATETIME_LAYOUT)
+			end := time.Unix(cond.EndStartedTime, 0).Format(utils.DATETIME_LAYOUT)
+			query = query.Where("started_at BETWEEN ? AND ?", from, end)
+		}
+		if cond.FromEndedTime != 0 && cond.EndEndedTime != 0 {
+			from := time.Unix(cond.FromEndedTime, 0).Format(utils.DATETIME_LAYOUT)
+			end := time.Unix(cond.EndEndedTime, 0).Format(utils.DATETIME_LAYOUT)
+			query = query.Where("ended_at BETWEEN ? AND ?", from, end)
+		}
+
+		if cond != nil && cond.Sort != "" && cond.SortBy != "" {
+			query = query.Order(fmt.Sprintf("%s %s", cond.SortBy, cond.Sort))
+		}
+	}
+
+	pagination, err := utils.CreatePage[model.Stream](query, page, limit)
+	if err != nil {
+		return nil, err
+	}
+	return utils.Create(pagination, page, limit)
+}
+
+func (s *StreamRepository) GetByID(id int) (*model.Stream, error) {
+	var result model.Stream
+
+	if err := s.db.Model(model.Stream{}).Where("id=?", id).Preload("User").Preload("StreamAnalytic").First(&result).Error; err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
 func (s *StreamRepository) GetStatisticsTotalStream() (int64, int64, error) {
