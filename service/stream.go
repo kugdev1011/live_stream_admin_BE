@@ -86,12 +86,7 @@ func (s *StreamService) GetStreamAnalyticsData(page, limit int, req *dto.Statist
 		live_stream_dto.CreatedAt = &v.CreatedAt
 
 		if v.Stream.EndedAt.Valid && v.Stream.StartedAt.Valid {
-			endAt, errEndAt := utils.ConvertDatetimeToTimestamp(v.Stream.EndedAt.String, utils.DATETIME_LAYOUT)
-			startAt, errStartAt := utils.ConvertDatetimeToTimestamp(v.Stream.StartedAt.String, utils.DATETIME_LAYOUT)
-			if errEndAt != nil || errStartAt != nil {
-				live_stream_dto.Duration = 0
-			}
-			live_stream_dto.Duration = int64(endAt.Sub(*startAt))
+			live_stream_dto.Duration = int64(v.Stream.EndedAt.Time.Sub(v.Stream.StartedAt.Time))
 		}
 		result.Page = append(result.Page, *live_stream_dto)
 	}
