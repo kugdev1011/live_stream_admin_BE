@@ -21,7 +21,7 @@ type UserQuery struct {
 type UserResponseDTO struct {
 	ID          uint             `json:"id,omitempty"`
 	Username    string           `json:"username,omitempty"`
-	DisplayName string           `json:"display_name,omitempty"`
+	DisplayName string           `json:"display_name"`
 	Email       string           `json:"email,omitempty"`
 	RoleID      uint             `json:"role_id,omitempty"`
 	Role        *RoleDTO         `json:"role,omitempty"`

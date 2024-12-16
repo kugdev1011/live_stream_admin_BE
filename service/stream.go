@@ -4,6 +4,7 @@ import (
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/repository"
 	"gitlab/live/be-live-api/utils"
+	"math/rand"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -29,8 +30,44 @@ func (s *StreamService) GetStatisticsTotalLiveStreamData() (*dto.StatisticsTotal
 	return &dto.StatisticsTotalLiveStreamDTO{ActiveLiveStreams: uint(active), TotalLiveStreams: uint(total)}, err
 }
 
-func (s *StreamService) GetStreamAnalyticsData(page, limit int) (*utils.PaginationModel[dto.LiveStreamRespDTO], error) {
-	pagination, err := s.repo.Stream.PaginateStreamStatisticsData(page, limit)
+func (s *StreamService) sortByDuration(a []dto.LiveStreamRespDTO, sort string) []dto.LiveStreamRespDTO {
+	if len(a) < 2 {
+		return a
+	}
+
+	left, right := 0, len(a)-1
+
+	// Pick a pivot
+	pivotIndex := rand.Int() % len(a)
+
+	// Move the pivot to the right
+	a[pivotIndex], a[right] = a[right], a[pivotIndex]
+
+	// Pile elements smaller than the pivot on the left
+	for i := range a {
+		if a[i].Duration < a[right].Duration && sort == "ASC" {
+			a[i], a[left] = a[left], a[i]
+			left++
+		}
+
+		if a[i].Duration > a[right].Duration && sort == "DESC" {
+			a[i], a[left] = a[left], a[i]
+			left++
+		}
+	}
+
+	// Place the pivot after the last smaller element
+	a[left], a[right] = a[right], a[left]
+
+	// Go down the rabbit hole
+	s.sortByDuration(a[:left], sort)
+	s.sortByDuration(a[left+1:], sort)
+
+	return a
+}
+
+func (s *StreamService) GetStreamAnalyticsData(page, limit int, req *dto.StatisticsQuery) (*utils.PaginationModel[dto.LiveStreamRespDTO], error) {
+	pagination, err := s.repo.Stream.PaginateStreamStatisticsData(page, limit, req)
 	if err != nil {
 		return nil, err
 	}
@@ -46,14 +83,20 @@ func (s *StreamService) GetStreamAnalyticsData(page, limit int) (*utils.Paginati
 		live_stream_dto.Likes = v.Likes
 		live_stream_dto.VideoSize = int64(v.VideoSize)
 		live_stream_dto.Viewers = v.Views
+		live_stream_dto.CreatedAt = &v.CreatedAt
 
 		if v.Stream.EndedAt.Valid && v.Stream.StartedAt.Valid {
-			endAt, _ := utils.ConvertDatetimeToTimestamp(v.Stream.EndedAt.String, utils.DATETIME_LAYOUT)
-			startAt, _ := utils.ConvertDatetimeToTimestamp(v.Stream.StartedAt.String, utils.DATETIME_LAYOUT)
-
+			endAt, errEndAt := utils.ConvertDatetimeToTimestamp(v.Stream.EndedAt.String, utils.DATETIME_LAYOUT)
+			startAt, errStartAt := utils.ConvertDatetimeToTimestamp(v.Stream.StartedAt.String, utils.DATETIME_LAYOUT)
+			if errEndAt != nil || errStartAt != nil {
+				live_stream_dto.Duration = 0
+			}
 			live_stream_dto.Duration = int64(endAt.Sub(*startAt))
 		}
 		result.Page = append(result.Page, *live_stream_dto)
+	}
+	if req != nil && req.SortBy == "duration" && req.Sort != "" {
+		result.Page = s.sortByDuration(result.Page, req.Sort)
 	}
 	return result, nil
 }
