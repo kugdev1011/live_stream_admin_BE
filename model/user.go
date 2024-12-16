@@ -76,7 +76,7 @@ type BlockedList struct {
 
 type TwoFA struct {
 	ID           uint      `gorm:"primaryKey;autoIncrement"`
-	UserID       uint      `gorm:"not null"`
+	UserID       uint      `gorm:"not null;unique"`
 	Secret       string    `gorm:"type:text;not null"`
 	Is2faEnabled bool      `gorm:"not null;default:false"`
 	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
