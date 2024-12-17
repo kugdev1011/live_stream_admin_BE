@@ -46,8 +46,10 @@ func main() {
 	}
 
 	repo := repository.NewRepository(ds.DB)
+	streamServerConfig := conf.GetStreamServerConfig()
+	streamServer := service.NewStreamServerService(streamServerConfig.HTTPURL, streamServerConfig.RTMPURL)
 	//roleService := service.NewRoleService(repo, ds.RClient)
-	srv := service.NewService(repo, ds.RClient)
+	srv := service.NewService(repo, ds.RClient, streamServer)
 	conf.SeedRoles(srv.Role)
 	conf.SeedSuperAdminUser(srv.User, srv.Role)
 

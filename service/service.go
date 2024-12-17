@@ -7,17 +7,18 @@ import (
 )
 
 type Service struct {
-	User   *UserService
-	Admin  *AdminService
-	Role   *RoleService
-	Stream *StreamService
+	User         *UserService
+	Admin        *AdminService
+	Role         *RoleService
+	Stream       *StreamService
+	StreamServer *streamServerService
 }
 
-func NewService(repo *repository.Repository, redis *redis.Client) *Service {
+func NewService(repo *repository.Repository, redis *redis.Client, streamServer *streamServerService) *Service {
 	return &Service{
 		User:   newUserService(repo, redis),
 		Admin:  newAdminService(repo, redis),
 		Role:   NewRoleService(repo, redis),
-		Stream: newStreamService(repo, redis),
+		Stream: newStreamService(repo, redis, streamServer),
 	}
 }

@@ -19,10 +19,22 @@ var (
 var cfg *Config
 
 type Config struct {
-	DB          DBConfig          `yaml:"database"`
-	Redis       DBConfig          `yaml:"redis"`
-	Web         ApplicationConfig `yaml:"web"`
-	FileStorage FileStorageConfig `yaml:"file_storage"`
+	DB           DBConfig           `yaml:"database"`
+	Redis        DBConfig           `yaml:"redis"`
+	Web          ApplicationConfig  `yaml:"web"`
+	FileStorage  FileStorageConfig  `yaml:"file_storage"`
+	StreamServer StreamServerConfig `yaml:"stream_server"`
+	ApiFile      ApiFileConfig      `yaml:"api_file"`
+}
+
+type ApiFileConfig struct {
+	Url string `yaml:"url"`
+}
+
+type StreamServerConfig struct {
+	HTTPURL string `yaml:"http_url"`
+	RTMPURL string `yaml:"rtmp_url"`
+	HLSURL  string `yaml:"hls_url"`
 }
 
 type DBConfig struct {
@@ -136,3 +148,13 @@ func GetDatabaseConfig() *DBConfig {
 func GetApplicationConfig() *ApplicationConfig {
 	return &cfg.Web
 }
+
+func GetFileStorageConfig() *FileStorageConfig {
+	return &cfg.FileStorage
+}
+
+func GetStreamServerConfig() *StreamServerConfig {
+	return &cfg.StreamServer
+}
+
+func GetApiFileConfig() *ApiFileConfig { return &cfg.ApiFile }
