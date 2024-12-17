@@ -39,13 +39,14 @@ type Stream struct {
 	Description string       `gorm:"type:text"`
 	Status      StreamStatus `gorm:"type:varchar(50);not null"`
 	// StreamURL    string       `gorm:"type:text;not null"`
-	StreamToken       string       `gorm:"type:text;not null"` // generated from streaming server
-	StreamKey         string       `gorm:"type:text;not null"` // generated from web
-	StreamType        StreamType   `gorm:"type:varchar(50);not null"`
-	ThumbnailFileName string       `gorm:"type:text;not null"`
-	StartedAt         sql.NullTime `gorm:"column:started_at"`
-	EndedAt           sql.NullTime `gorm:"column:ended_at"`
-	User              User         `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	StreamToken       string           `gorm:"type:text;not null"` // generated from streaming server
+	StreamKey         string           `gorm:"type:text;not null"` // generated from web
+	StreamType        StreamType       `gorm:"type:varchar(50);not null"`
+	ThumbnailFileName string           `gorm:"type:text;not null"`
+	StartedAt         sql.NullTime     `gorm:"column:started_at"`
+	EndedAt           sql.NullTime     `gorm:"column:ended_at"`
+	User              User             `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	StreamAnalytic    *StreamAnalytics `gorm:"foreignKey:StreamID"`
 }
 
 type Notification struct {

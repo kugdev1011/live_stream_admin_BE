@@ -123,6 +123,7 @@ func SeedSuperAdminUser(userService *service.UserService, roleService *service.R
 
 func init() {
 	var err error
+
 	if cfg, err = LoadYaml("conf/config.yaml"); err != nil {
 		log.Fatal(err)
 	}
