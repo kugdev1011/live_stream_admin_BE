@@ -31,6 +31,7 @@ func (s *StreamRepository) PaginateStreamStatisticsData(page, limit int, cond *d
 			} else {
 
 				query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
+
 			}
 		}
 	} else {
@@ -111,4 +112,8 @@ func (s *StreamRepository) GetStatisticsTotalStream() (int64, int64, error) {
 		return 0, 0, err
 	}
 	return totalStream, activeStream, nil
+}
+
+func (r *StreamRepository) Create(stream *model.Stream) error {
+	return r.db.Create(stream).Error
 }
