@@ -5,6 +5,7 @@ import (
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
 	"gitlab/live/be-live-api/utils"
+	"log"
 	"math/rand"
 
 	"github.com/redis/go-redis/v9"
@@ -124,15 +125,21 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream) *dto.LiveStrea
 	liveStreamDto.User.UpdatedAt = v.User.UpdatedAt
 
 	//user if exist
-	if v.StreamAnalytic != nil {
+	streamAnalytic, err := s.repo.Stream.GetStreamAnalyticByStream(int(v.ID))
+	if err != nil {
+		log.Println(err.Error())
+		return nil
+	}
+
+	if streamAnalytic != nil {
 		liveStreamDto.LiveStreamAnalytic = new(dto.LiveStreamRespDTO)
 		if v.EndedAt.Valid && v.StartedAt.Valid {
 			liveStreamDto.LiveStreamAnalytic.Duration = int64(v.EndedAt.Time.Sub(v.StartedAt.Time))
 		}
-		liveStreamDto.LiveStreamAnalytic.Likes = v.StreamAnalytic.Likes
-		liveStreamDto.LiveStreamAnalytic.VideoSize = int64(v.StreamAnalytic.VideoSize)
-		liveStreamDto.LiveStreamAnalytic.Viewers = v.StreamAnalytic.Views
-		liveStreamDto.LiveStreamAnalytic.Comments = v.StreamAnalytic.Comments
+		liveStreamDto.LiveStreamAnalytic.Likes = streamAnalytic.Likes
+		liveStreamDto.LiveStreamAnalytic.VideoSize = int64(streamAnalytic.VideoSize)
+		liveStreamDto.LiveStreamAnalytic.Viewers = streamAnalytic.Views
+		liveStreamDto.LiveStreamAnalytic.Comments = streamAnalytic.Comments
 	}
 	return liveStreamDto
 }

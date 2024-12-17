@@ -43,9 +43,20 @@ func (s *StreamRepository) PaginateStreamStatisticsData(page, limit int, cond *d
 	return utils.Create(pagination, page, limit)
 }
 
+func (s *StreamRepository) GetStreamAnalyticByStream(streamId int) (*model.StreamAnalytics, error) {
+	var result model.StreamAnalytics
+	if err := s.db.Model(model.StreamAnalytics{}).Where("stream_id = ?", streamId).First(&result).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &result, nil
+}
+
 func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit int, cond *dto.LiveStreamBroadCastQueryDTO) (*utils.PaginationModel[model.Stream], error) {
 
-	var query = s.db.Model(model.Stream{}).Preload("StreamAnalytic").Preload("User")
+	var query = s.db.Model(model.Stream{}).Preload("User")
 
 	// filter
 	if cond != nil {
@@ -84,7 +95,7 @@ func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit int, cond
 func (s *StreamRepository) GetByID(id int) (*model.Stream, error) {
 	var result model.Stream
 
-	if err := s.db.Model(model.Stream{}).Where("id=?", id).Preload("User").Preload("StreamAnalytic").First(&result).Error; err != nil {
+	if err := s.db.Model(model.Stream{}).Where("id=?", id).Preload("User").First(&result).Error; err != nil {
 		return nil, err
 	}
 	return &result, nil
