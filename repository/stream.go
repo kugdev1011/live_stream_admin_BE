@@ -81,7 +81,7 @@ func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit int, cond
 			query = query.Where("ended_at BETWEEN ? AND ?", from, end)
 		}
 
-		if cond != nil && cond.Sort != "" && cond.SortBy != "" {
+		if cond.Sort != "" && cond.SortBy != "" {
 			query = query.Order(fmt.Sprintf("%s %s", cond.SortBy, cond.Sort))
 		}
 	}
