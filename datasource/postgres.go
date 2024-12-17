@@ -34,6 +34,12 @@ func LoadDB() (*gorm.DB, error) {
 	}
 
 	if err := db.AutoMigrate(
+		&model.Category{},
+	); err != nil {
+		return nil, err
+	}
+
+	if err := db.AutoMigrate(
 		&model.Like{},
 		&model.Comment{},
 		&model.Share{},
@@ -46,6 +52,7 @@ func LoadDB() (*gorm.DB, error) {
 
 	if err := db.AutoMigrate(
 		&model.TwoFA{},
+		&model.StreamCategory{},
 	); err != nil {
 		return nil, err
 	}

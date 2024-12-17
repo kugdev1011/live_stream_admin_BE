@@ -118,3 +118,22 @@ type Share struct {
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
+
+type Category struct {
+	ID            uint      `gorm:"primaryKey"`
+	Name          string    `gorm:"type:varchar(50);not null;unique"`
+	CreatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	UpdatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
+	CreatedByID   uint      `gorm:"column:created_by_id;not null"`
+	UpdatedByID   uint      `gorm:"column:updated_by_id;not null"`
+	CreatedByUser User      `gorm:"foreignKey:CreatedByID;constraint:OnDelete:CASCADE"`
+	UpdatedByUser User      `gorm:"foreignKey:UpdatedByID;constraint:OnDelete:CASCADE"`
+}
+
+type StreamCategory struct {
+	CategoryID uint      `gorm:"primaryKey"`
+	StreamID   uint      `gorm:"primaryKey"`
+	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	Stream     Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
+	Category   Category  `gorm:"foreignKey:CategoryID;constraint:OnDelete:CASCADE"`
+}
