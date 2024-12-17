@@ -173,7 +173,7 @@ func (s *StreamService) GetLiveStreamBroadCastByID(id int, apiUrl string) (*dto.
 }
 
 func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stream, error) {
-	channelKey := utils.MakeUniqueID()
+	channelKey := req.Record
 	token, err := s.streamServer.GetChannelKey(channelKey)
 	if err != nil {
 		return nil, err

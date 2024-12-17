@@ -63,6 +63,27 @@ func IsImage(fileHeader *multipart.FileHeader) (bool, error) {
 	return mimeType == "image/jpeg" || mimeType == "image/png" || mimeType == "image/gif", nil
 }
 
+func IsFlvFile(fileHeader *multipart.FileHeader) (bool, error) {
+	// Open the uploaded file
+	file, err := fileHeader.Open()
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+
+	// Read the first 512 bytes of the file
+	buffer := make([]byte, 512)
+	_, err = file.Read(buffer)
+	if err != nil {
+		return false, err
+	}
+
+	// Detect MIME type
+	mimeType := http.DetectContentType(buffer)
+	fmt.Println("format: ", mimeType)
+	return mimeType == "video/x-flv", nil
+}
+
 func GetFileExtension(fileHeader *multipart.FileHeader) string {
 	return filepath.Ext(fileHeader.Filename)
 }

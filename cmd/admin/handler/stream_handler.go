@@ -123,7 +123,7 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 	//save recording
 	record, err := c.FormFile("record")
 	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, fmt.Sprintf("recording field is required: %s", err.Error()))
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, fmt.Sprintf("record field is required: %s", err.Error()))
 	}
 
 	fileRecordExt := utils.GetFileExtension(record)
