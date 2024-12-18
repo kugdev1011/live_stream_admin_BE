@@ -149,8 +149,8 @@ type StreamCategory struct {
 
 type View struct {
 	ID        uint      `gorm:"primaryKey"`
-	UserID    uint      `gorm:"not null"`
-	StreamID  uint      `gorm:"not null"`
+	UserID    uint      `gorm:"not null;uniqueIndex:idx_view_user_stream"`
+	StreamID  uint      `gorm:"not null;uniqueIndex:idx_view_user_stream"`
 	ViewType  ViewType  `gorm:"type:varchar(50);not null"`
 	IsViewing bool      `gorm:"not null;default:false"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
