@@ -36,25 +36,27 @@ type Role struct {
 }
 
 type User struct {
-	ID             uint           `gorm:"primaryKey;autoIncrement"`
-	Username       string         `gorm:"type:varchar(50);not null;unique"`
-	DisplayName    string         `gorm:"type:varchar(100)" json:"display_name,omitempty"`
-	Email          string         `gorm:"type:varchar(100);not null;unique"`
-	PasswordHash   string         `gorm:"type:varchar(255);not null"`
-	OTP            string         `gorm:"type:varchar(6);null"`
-	OTPExpiresAt   *time.Time     `gorm:"type:timestamp;null" json:"otp_expires_at,omitempty"`
-	RoleID         uint           `gorm:"not null"`
-	Role           Role           `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE"`
-	CreatedAt      time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`
-	CreatedByID    *uint          `gorm:"index;null" json:"created_by_id,omitempty"`
-	CreatedBy      *User          `gorm:"foreignKey:CreatedByID" json:"created_by,omitempty"`
-	UpdatedAt      time.Time      `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime" json:"updated_at,omitempty"`
-	UpdatedByID    *uint          `gorm:"index;null" json:"updated_by_id,omitempty"`
-	UpdatedBy      *User          `gorm:"foreignKey:UpdatedByID" json:"updated_by,omitempty"`
-	DeletedAt      gorm.DeletedAt `json:"deleted_at,omitempty"`
-	DeletedByID    *uint          `json:"deleted_by_id,omitempty"`
-	AvatarFileName sql.NullString `gorm:"type:varchar(255)" json:"avatar_file_name,omitempty"`
-	AdminLogs      []AdminLog     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	ID                  uint           `gorm:"primaryKey;autoIncrement"`
+	Username            string         `gorm:"type:varchar(50);not null;unique"`
+	DisplayName         string         `gorm:"type:varchar(100)" json:"display_name,omitempty"`
+	Email               string         `gorm:"type:varchar(100);not null;unique"`
+	PasswordHash        string         `gorm:"type:varchar(255);not null"`
+	OTP                 string         `gorm:"type:varchar(6);null"`
+	OTPExpiresAt        *time.Time     `gorm:"type:timestamp;null" json:"otp_expires_at,omitempty"`
+	RoleID              uint           `gorm:"not null"`
+	Role                Role           `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE"`
+	CreatedAt           time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`
+	CreatedByID         *uint          `gorm:"index;null" json:"created_by_id,omitempty"`
+	CreatedBy           *User          `gorm:"foreignKey:CreatedByID" json:"created_by,omitempty"`
+	UpdatedAt           time.Time      `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime" json:"updated_at,omitempty"`
+	UpdatedByID         *uint          `gorm:"index;null" json:"updated_by_id,omitempty"`
+	UpdatedBy           *User          `gorm:"foreignKey:UpdatedByID" json:"updated_by,omitempty"`
+	DeletedAt           gorm.DeletedAt `json:"deleted_at,omitempty"`
+	DeletedByID         *uint          `json:"deleted_by_id,omitempty"`
+	AvatarFileName      sql.NullString `gorm:"type:varchar(255)" json:"avatar_file_name,omitempty"`
+	AdminLogs           []AdminLog     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	CreatedByCategories []Category     `gorm:"foreignKey:CreatedByID"`
+	UpdatedByCategories []Category     `gorm:"foreignKey:UpdatedByID"`
 }
 
 type AdminLog struct {

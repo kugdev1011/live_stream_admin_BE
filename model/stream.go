@@ -120,14 +120,12 @@ type Share struct {
 }
 
 type Category struct {
-	ID            uint      `gorm:"primaryKey"`
-	Name          string    `gorm:"type:varchar(50);not null;unique"`
-	CreatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	UpdatedAt     time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
-	CreatedByID   uint      `gorm:"column:created_by_id;not null"`
-	UpdatedByID   uint      `gorm:"column:updated_by_id;not null"`
-	CreatedByUser User      `gorm:"foreignKey:CreatedByID;constraint:OnDelete:CASCADE"`
-	UpdatedByUser User      `gorm:"foreignKey:UpdatedByID;constraint:OnDelete:CASCADE"`
+	ID          uint      `gorm:"primaryKey"`
+	Name        string    `gorm:"type:varchar(50);not null;unique"`
+	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
+	CreatedByID uint      `gorm:"column:created_by_id;not null"`
+	UpdatedByID uint      `gorm:"column:updated_by_id;not null"`
 }
 
 type StreamCategory struct {
