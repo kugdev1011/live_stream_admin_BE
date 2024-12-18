@@ -29,6 +29,7 @@ func (h *Handler) Register() {
 	newUserHandler(h.r, h.srv)
 	newAdminHandler(h.r, h.srv)
 	newStreamHandler(h.r, h.srv)
+	newCategoryHandler(h.r, h.srv)
 
 }
 

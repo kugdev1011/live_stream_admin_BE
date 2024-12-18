@@ -20,6 +20,9 @@ file_storage:
   avatar_folder: ./tmp/avatar/
   live_folder: ./tmp/recordings/live/
 
+api_file:
+  url: http://localhost:8787
+
 stream_server:
   http_url: http://localhost:8090
   rtmp_url: rtmp://localhost:1935/live
@@ -33,3 +36,6 @@ mail:
   password: alkdjklanbvudjehje
   host: smtp.gmail.com
   port: 587
+
+2fa_auth:
+  issuer: live-stream.org
