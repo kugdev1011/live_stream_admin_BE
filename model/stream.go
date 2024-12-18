@@ -52,6 +52,8 @@ type Stream struct {
 	ThumbnailFileName string       `gorm:"type:text;not null"`
 	StartedAt         sql.NullTime `gorm:"column:started_at"`
 	EndedAt           sql.NullTime `gorm:"column:ended_at"`
+	CreatedAt         time.Time    `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt         time.Time    `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	User              User         `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
@@ -60,7 +62,7 @@ type Notification struct {
 	UserID    uint      `gorm:"not null"`
 	StreamID  uint      `gorm:"not null"`
 	Content   string    `gorm:"type:text;not null"`
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
@@ -79,7 +81,7 @@ type Subscription struct {
 	ID           uint      `gorm:"primaryKey"`
 	SubscriberID uint      `gorm:"not null"`
 	StreamerID   uint      `gorm:"not null"`
-	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
 	// StartDate      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	// EndDate        time.Time `gorm:"not null"`
 	// AutoRenew      bool      `gorm:"not null"`
@@ -94,7 +96,8 @@ type StreamAnalytics struct {
 	Likes     uint      `gorm:"not null"`
 	Comments  uint      `gorm:"not null"`
 	VideoSize uint      `gorm:"not null"`
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 }
 
@@ -103,7 +106,8 @@ type Like struct {
 	UserID    uint          `gorm:"not null;uniqueIndex:idx_user_stream"`
 	StreamID  uint          `gorm:"not null;uniqueIndex:idx_user_stream"`
 	LikeEmote LikeEmoteType `gorm:"type:varchar(50);not null"`
-	CreatedAt time.Time     `gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedAt time.Time     `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt time.Time     `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	Stream    Stream        `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User          `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
@@ -113,7 +117,7 @@ type Comment struct {
 	UserID    uint      `gorm:"not null"`
 	StreamID  uint      `gorm:"not null"`
 	Comment   string    `gorm:"type:text;not null"`
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
@@ -121,7 +125,7 @@ type Share struct {
 	ID        uint      `gorm:"primaryKey"`
 	UserID    uint      `gorm:"not null"`
 	StreamID  uint      `gorm:"not null"`
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
@@ -129,8 +133,8 @@ type Share struct {
 type Category struct {
 	ID          uint      `gorm:"primaryKey"`
 	Name        string    `gorm:"type:varchar(50);not null;unique"`
-	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
+	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	CreatedByID uint      `gorm:"column:created_by_id;not null"`
 	UpdatedByID uint      `gorm:"column:updated_by_id;not null"`
 }
@@ -138,7 +142,7 @@ type Category struct {
 type StreamCategory struct {
 	CategoryID uint      `gorm:"primaryKey"`
 	StreamID   uint      `gorm:"primaryKey"`
-	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
 	Stream     Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	Category   Category  `gorm:"foreignKey:CategoryID;constraint:OnDelete:CASCADE"`
 }
@@ -149,8 +153,8 @@ type View struct {
 	StreamID  uint      `gorm:"not null"`
 	ViewType  ViewType  `gorm:"type:varchar(50);not null"`
 	IsViewing bool      `gorm:"not null;default:false"`
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }

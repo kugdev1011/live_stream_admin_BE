@@ -30,8 +30,8 @@ type Role struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Type        RoleType  `gorm:"type:varchar(50);not null;unique" json:"type,omitempty"`
 	Description string    `gorm:"type:text" json:"desription,omitempty"`
-	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`
-	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime" json:"updated_at,omitempty"`
+	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;not null" json:"created_at,omitempty"`
+	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null" json:"updated_at,omitempty"`
 	Users       []User    `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE" json:"users,omitempty"`
 }
 
@@ -45,10 +45,10 @@ type User struct {
 	OTPExpiresAt        *time.Time     `gorm:"type:timestamp;null" json:"otp_expires_at,omitempty"`
 	RoleID              uint           `gorm:"not null"`
 	Role                Role           `gorm:"foreignKey:RoleID;constraint:OnDelete:CASCADE"`
-	CreatedAt           time.Time      `gorm:"default:CURRENT_TIMESTAMP" json:"created_at,omitempty"`
+	CreatedAt           time.Time      `gorm:"default:CURRENT_TIMESTAMP;not null" json:"created_at,omitempty"`
 	CreatedByID         *uint          `gorm:"index;null" json:"created_by_id,omitempty"`
 	CreatedBy           *User          `gorm:"foreignKey:CreatedByID" json:"created_by,omitempty"`
-	UpdatedAt           time.Time      `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime" json:"updated_at,omitempty"`
+	UpdatedAt           time.Time      `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null" json:"updated_at,omitempty"`
 	UpdatedByID         *uint          `gorm:"index;null" json:"updated_by_id,omitempty"`
 	UpdatedBy           *User          `gorm:"foreignKey:UpdatedByID" json:"updated_by,omitempty"`
 	DeletedAt           gorm.DeletedAt `json:"deleted_at,omitempty"`
@@ -81,7 +81,7 @@ type TwoFA struct {
 	UserID       uint      `gorm:"not null;unique"`
 	Secret       string    `gorm:"type:text;not null"`
 	Is2faEnabled bool      `gorm:"not null;default:false"`
-	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
-	UpdatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	User         User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
