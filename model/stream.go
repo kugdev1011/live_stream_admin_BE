@@ -91,7 +91,7 @@ type Subscription struct {
 
 type StreamAnalytics struct {
 	ID        uint      `gorm:"primaryKey"`
-	StreamID  uint      `gorm:"not null"`
+	StreamID  uint      `gorm:"not null;unique"`
 	Views     uint      `gorm:"not null"`
 	Likes     uint      `gorm:"not null"`
 	Comments  uint      `gorm:"not null"`
