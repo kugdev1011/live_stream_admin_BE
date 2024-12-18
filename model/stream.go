@@ -14,14 +14,14 @@ const (
 	UPCOMING StreamStatus = "upcoming"
 )
 
-type LikeEmoteType string
-
 type StreamType string
 
 const (
 	CAMERASTREAM   StreamType = "camera"
 	SOFTWARESTREAM StreamType = "software" // like obs
 )
+
+type LikeEmoteType string
 
 const (
 	LikeEmoteTypeLike    LikeEmoteType = "like"
@@ -30,6 +30,13 @@ const (
 	LikeEmoteTypeSad     LikeEmoteType = "sad"
 	LikeEmoteTypeWow     LikeEmoteType = "wow"
 	LikeEmoteTypeHeart   LikeEmoteType = "heart"
+)
+
+type ViewType string
+
+const (
+	ViewTypeLiveView   ViewType = "live_view"
+	ViewTypeRecordView ViewType = "record_view"
 )
 
 type Stream struct {
@@ -134,4 +141,16 @@ type StreamCategory struct {
 	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	Stream     Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	Category   Category  `gorm:"foreignKey:CategoryID;constraint:OnDelete:CASCADE"`
+}
+
+type View struct {
+	ID        uint      `gorm:"primaryKey"`
+	UserID    uint      `gorm:"not null"`
+	StreamID  uint      `gorm:"not null"`
+	ViewType  ViewType  `gorm:"type:varchar(50);not null"`
+	IsViewing bool      `gorm:"not null;default:false"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP"`
+	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime"`
+	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
+	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
