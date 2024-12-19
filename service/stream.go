@@ -100,14 +100,14 @@ func (s *StreamService) GetStreamAnalyticsData(page, limit int, req *dto.Statist
 	return result, nil
 }
 
-func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl string) *dto.LiveStreamBroadCastDTO {
+func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpURL, hlsURL string) *dto.LiveStreamBroadCastDTO {
 
 	var liveStreamDto = new(dto.LiveStreamBroadCastDTO)
 	liveStreamDto.Title = v.Title
 	liveStreamDto.Description = v.Description
 	liveStreamDto.Status = v.Status
-	liveStreamDto.StreamKey = v.StreamKey
-	liveStreamDto.StreamToken = v.StreamToken
+	liveStreamDto.BroadcastURL = utils.MakeBroadcastURL(hlsURL, v.StreamKey)
+	liveStreamDto.PushURL = utils.MakePushURL(rtmpURL, v.StreamToken)
 	liveStreamDto.StreamType = v.StreamType
 	liveStreamDto.ThumbnailFileName = utils.MakeThumbnailURL(apiUrl, v.ThumbnailFileName)
 	if v.StartedAt.Valid {
@@ -148,7 +148,7 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl string)
 	return liveStreamDto
 }
 
-func (s *StreamService) GetLiveStreamBroadCastWithPagination(page, limit int, req *dto.LiveStreamBroadCastQueryDTO, apiUrl string) (*utils.PaginationModel[dto.LiveStreamBroadCastDTO], error) {
+func (s *StreamService) GetLiveStreamBroadCastWithPagination(page, limit int, req *dto.LiveStreamBroadCastQueryDTO, apiUrl, rtmpURL, hlsURL string) (*utils.PaginationModel[dto.LiveStreamBroadCastDTO], error) {
 	pagination, err := s.repo.Stream.PaginateLiveStreamBroadCastData(page, limit, req)
 	if err != nil {
 		return nil, err
@@ -158,18 +158,18 @@ func (s *StreamService) GetLiveStreamBroadCastWithPagination(page, limit int, re
 	result.BasePaginationModel = pagination.BasePaginationModel
 
 	for _, v := range pagination.Page {
-		liveStreamDto := s.toLiveStreamBroadCastDto(&v, apiUrl)
+		liveStreamDto := s.toLiveStreamBroadCastDto(&v, apiUrl, rtmpURL, hlsURL)
 		result.Page = append(result.Page, *liveStreamDto)
 	}
 	return result, nil
 }
 
-func (s *StreamService) GetLiveStreamBroadCastByID(id int, apiUrl string) (*dto.LiveStreamBroadCastDTO, error) {
+func (s *StreamService) GetLiveStreamBroadCastByID(id int, apiUrl, rtmpURL, hlsURL string) (*dto.LiveStreamBroadCastDTO, error) {
 	v, err := s.repo.Stream.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
-	return s.toLiveStreamBroadCastDto(v, apiUrl), nil
+	return s.toLiveStreamBroadCastDto(v, apiUrl, rtmpURL, hlsURL), nil
 }
 
 func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stream, error) {

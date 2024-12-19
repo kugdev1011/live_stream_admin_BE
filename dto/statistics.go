@@ -43,8 +43,8 @@ type LiveStreamBroadCastDTO struct {
 	Title              string             `json:"title,omitempty"`
 	Description        string             `json:"description,omitempty"`
 	Status             model.StreamStatus `json:"status,omitempty"`
-	StreamToken        string             `json:"stream_token,omitempty"` // generated from streaming server
-	StreamKey          string             `json:"stream_key,omitempty"`   // generated from web
+	PushURL            string             `json:"push_url,omitempty"`      // generated from streaming server
+	BroadcastURL       string             `json:"broadcast_url,omitempty"` // generated from web
 	StreamType         model.StreamType   `json:"stream_type,omitempty"`
 	ThumbnailFileName  string             `json:"thumbnail_file_name,omitempty"`
 	StartedAt          *time.Time         `json:"started_at,omitempty"`

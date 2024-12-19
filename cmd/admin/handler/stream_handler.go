@@ -78,7 +78,7 @@ func (h *streamHandler) getLiveStreamBroadCastByID(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
 
-	data, err := h.srv.Stream.GetLiveStreamBroadCastByID(id, h.ApiURL)
+	data, err := h.srv.Stream.GetLiveStreamBroadCastByID(id, h.ApiURL, h.rtmpURL, h.hlsURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
@@ -252,7 +252,7 @@ func (h *streamHandler) getLiveStreamWithPagination(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	data, err := h.srv.Stream.GetLiveStreamBroadCastWithPagination(page, limit, &req, h.ApiURL)
+	data, err := h.srv.Stream.GetLiveStreamBroadCastWithPagination(page, limit, &req, h.ApiURL, h.rtmpURL, h.hlsURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
