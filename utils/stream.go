@@ -14,3 +14,7 @@ func MakeBroadcastURL(hlsURL, streamKey string) string {
 func MakeThumbnailURL(apiURL, fileName string) string {
 	return fmt.Sprintf("%s/api/file/thumbnail/%s", apiURL, fileName)
 }
+
+func MakeAvatarURL(apiURL, fileName string) string {
+	return fmt.Sprintf("%s/api/file/avatar/%s", apiURL, fileName)
+}
