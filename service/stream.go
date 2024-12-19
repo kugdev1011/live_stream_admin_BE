@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
@@ -183,11 +184,13 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 		UserID:            req.UserID,
 		Title:             req.Title,
 		Description:       req.Description,
-		Status:            model.PENDING,
+		Status:            model.ENDED,
 		StreamToken:       token,
 		StreamKey:         channelKey,
 		StreamType:        req.StreamType,
 		ThumbnailFileName: req.ThumbnailFileName,
+		StartedAt:         sql.NullTime{Time: req.StartedAt, Valid: true},
+		EndedAt:           sql.NullTime{Time: req.EndedAt, Valid: true},
 	}
 
 	if err := s.repo.Stream.Create(stream); err != nil {
