@@ -57,7 +57,19 @@ func (h *streamHandler) register() {
 	group.GET("/:page/:limit", h.getLiveStreamWithPagination)
 	group.GET("/:id", h.getLiveStreamBroadCastByID)
 	group.POST("", h.createLiveStreamByAdmin)
+	group.DELETE("/:id", h.deleteLiveStream)
 
+}
+
+func (h *streamHandler) deleteLiveStream(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
+	}
+	if err := h.srv.Stream.DeleteLiveStream(id); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", nil)
 }
 
 func (h *streamHandler) getLiveStreamBroadCastByID(c echo.Context) error {

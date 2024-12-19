@@ -5,6 +5,7 @@ import (
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/utils"
+	"log"
 	"time"
 
 	"gorm.io/gorm"
@@ -116,4 +117,55 @@ func (s *StreamRepository) GetStatisticsTotalStream() (int64, int64, error) {
 
 func (r *StreamRepository) Create(stream *model.Stream) error {
 	return r.db.Create(stream).Error
+}
+
+func (r *StreamRepository) DeleteLiveStream(id int) error {
+	tx := r.db.Begin()
+
+	if err := tx.Unscoped().Where("stream_id = ?", id).Delete(&model.StreamAnalytics{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Unscoped().Where("stream_id = ?", id).Delete(&model.View{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Unscoped().Where("stream_id = ?", id).Delete(&model.Like{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Unscoped().Where("stream_id = ?", id).Delete(&model.Comment{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Unscoped().Where("stream_id = ?", id).Delete(&model.StreamCategory{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Unscoped().Where("stream_id = ?", id).Delete(&model.Notification{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Unscoped().Where("stream_id = ?", id).Delete(&model.Share{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Unscoped().Where("id = ?", id).Delete(&model.Stream{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Defer the commit or rollback of the transaction
+	defer func() {
+		if r := recover(); r != nil {
+			// In case of panic, roll back the transaction
+			tx.Rollback()
+			log.Println("Transaction failed, rolling back")
+		}
+	}()
+
+	tx.Commit()
+
+	return nil
+
 }
