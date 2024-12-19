@@ -16,17 +16,18 @@ type UserService struct {
 	redis *redis.Client
 }
 
-func (s *UserService) toUserResponseDTO(user *model.User) dto.UserResponseDTO {
+func (s *UserService) toUserResponseDTO(user *model.User, apiURL string) dto.UserResponseDTO {
 
 	var userResp = new(dto.UserResponseDTO)
 	userResp.ID = user.ID
 	userResp.Username = user.Username
 	userResp.DisplayName = user.DisplayName
 	userResp.Email = user.Email
-
+	if user.AvatarFileName.Valid {
+		userResp.AvatarFileName = utils.MakeAvatarURL(apiURL, user.AvatarFileName.String)
+	}
 	if user.CreatedBy != nil {
 		userResp.CreatedByID = user.CreatedByID
-
 		userResp.CreatedBy = new(dto.UserResponseDTO)
 		userResp.CreatedBy.ID = user.CreatedBy.ID
 		userResp.CreatedBy.Username = user.CreatedBy.Username
@@ -72,13 +73,16 @@ func (s *UserService) toUserResponseDTO(user *model.User) dto.UserResponseDTO {
 	return *userResp
 }
 
-func (s *UserService) GetUserList(filter *dto.UserQuery, page, limit int) (*utils.PaginationModel[dto.UserResponseDTO], error) {
+func (s *UserService) GetUserList(filter *dto.UserQuery, page, limit int, apiURL string) (*utils.PaginationModel[dto.UserResponseDTO], error) {
 	pagination, err := s.repo.User.Page(filter, page, limit)
 	if err != nil {
 		return nil, err
 	}
 	var newPage = new(utils.PaginationModel[dto.UserResponseDTO])
-	newPage.Page = utils.Map(pagination.Page, func(e model.User) dto.UserResponseDTO { return s.toUserResponseDTO(&e) })
+	newPage.Page = utils.Map(pagination.Page,
+		func(e model.User) dto.UserResponseDTO {
+			return s.toUserResponseDTO(&e, apiURL)
+		})
 	newPage.BasePaginationModel = pagination.BasePaginationModel
 	return newPage, err
 

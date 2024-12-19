@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
@@ -13,14 +14,16 @@ import (
 
 type adminHandler struct {
 	Handler
-	r   *echo.Group
-	srv *service.Service
+	r      *echo.Group
+	srv    *service.Service
+	apiURL string
 }
 
 func newAdminHandler(r *echo.Group, srv *service.Service) *adminHandler {
 	admin := &adminHandler{
-		r:   r,
-		srv: srv,
+		r:      r,
+		srv:    srv,
+		apiURL: conf.GetApiFileConfig().Url,
 	}
 
 	admin.register()
@@ -44,7 +47,7 @@ func (h *adminHandler) byId(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
 
-	data, err := h.srv.Admin.ById(uint(id))
+	data, err := h.srv.Admin.ById(uint(id), h.apiURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}

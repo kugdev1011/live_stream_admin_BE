@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
@@ -13,14 +14,20 @@ import (
 
 type userHandler struct {
 	Handler
-	r   *echo.Group
-	srv *service.Service
+	r            *echo.Group
+	srv          *service.Service
+	avatarFolder string
+	apiURL       string
 }
 
 func newUserHandler(r *echo.Group, srv *service.Service) *userHandler {
+	fileStorageConfig := conf.GetFileStorageConfig()
+	apiURL := conf.GetApiFileConfig().Url
 	user := &userHandler{
-		r:   r,
-		srv: srv,
+		r:            r,
+		srv:          srv,
+		avatarFolder: fileStorageConfig.AvatarFolder,
+		apiURL:       apiURL,
 	}
 
 	user.register()
@@ -47,7 +54,7 @@ func (h *userHandler) byId(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
 
-	data, err := h.srv.Admin.ById(uint(id))
+	data, err := h.srv.Admin.ById(uint(id), h.apiURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
@@ -135,7 +142,7 @@ func (h *userHandler) page(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	data, err := h.srv.User.GetUserList(&req, page, limit)
+	data, err := h.srv.User.GetUserList(&req, page, limit, h.apiURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
