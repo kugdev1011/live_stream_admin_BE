@@ -26,14 +26,16 @@ func (s *AdminService) toCreateAdminDto(user *model.User) *dto.CreateAdminResp {
 	}
 }
 
-func (s *AdminService) toAdminResponseDTO(user *model.User) dto.UserResponseDTO {
+func (s *AdminService) toAdminResponseDTO(user *model.User, apiURL string) dto.UserResponseDTO {
 
 	var userResp = new(dto.UserResponseDTO)
 	userResp.ID = user.ID
 	userResp.Username = user.Username
 	userResp.DisplayName = user.DisplayName
 	userResp.Email = user.Email
-
+	if user.AvatarFileName.Valid {
+		userResp.AvatarFileName = utils.MakeAvatarURL(apiURL, user.AvatarFileName.String)
+	}
 	if user.CreatedBy != nil {
 		userResp.CreatedByID = user.CreatedByID
 
@@ -103,7 +105,7 @@ func (s *AdminService) CreateAdmin(request *dto.CreateAdminRequest) (*dto.Create
 	return s.toCreateAdminDto(createdUser), err
 }
 
-func (s *AdminService) ById(id uint) (*dto.UserResponseDTO, error) {
+func (s *AdminService) ById(id uint, apiURL string) (*dto.UserResponseDTO, error) {
 	user, err := s.repo.Admin.ById(id)
 	if err != nil {
 		return nil, err
@@ -111,7 +113,7 @@ func (s *AdminService) ById(id uint) (*dto.UserResponseDTO, error) {
 	if user == nil {
 		return nil, nil
 	}
-	result := s.toAdminResponseDTO(user)
+	result := s.toAdminResponseDTO(user, apiURL)
 	return &result, err
 }
 
