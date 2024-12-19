@@ -78,7 +78,7 @@ func main() {
 	v := validator.New()
 	// Register custom validator with Echo
 	e.Validator = &CustomValidator{validator: v}
-
+	e.Static("/api/file", conf.GetFileStorageConfig().RootFolder)
 	root := e.Group("/")
 
 	handler := handler.NewHandler(root, srv)
