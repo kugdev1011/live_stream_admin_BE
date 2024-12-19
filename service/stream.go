@@ -196,3 +196,10 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 
 	return stream, nil
 }
+
+func (s *StreamService) DeleteLiveStream(id int) error {
+	if err := s.repo.Stream.DeleteLiveStream(id); err != nil {
+		return err
+	}
+	return nil
+}
