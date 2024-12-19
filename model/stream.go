@@ -96,7 +96,7 @@ type StreamAnalytics struct {
 	Likes     uint      `gorm:"not null"`
 	Comments  uint      `gorm:"not null"`
 	VideoSize uint      `gorm:"not null"`
-	Duration  uint      `gorm:"not null"`
+	Duration  uint      `gorm:"not null;default:0"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
