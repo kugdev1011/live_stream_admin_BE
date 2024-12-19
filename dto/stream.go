@@ -1,6 +1,9 @@
 package dto
 
-import "gitlab/live/be-live-api/model"
+import (
+	"gitlab/live/be-live-api/model"
+	"time"
+)
 
 type StreamRequest struct {
 	Title             string           `json:"title" form:"title" validate:"required"`
@@ -9,4 +12,6 @@ type StreamRequest struct {
 	Record            string           `json:"-" form:"-"`
 	ThumbnailFileName string           `json:"-" form:"-"`
 	StreamType        model.StreamType `json:"stream_type" form:"stream_type" validate:"required,oneof=camera software"`
+	StartedAt         time.Time        `json:"started_at" form:"started_at" validate:"required"`
+	EndedAt           time.Time        `json:"ended_at" form:"started_at" validate:"required"`
 }

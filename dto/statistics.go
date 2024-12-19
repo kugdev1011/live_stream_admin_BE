@@ -31,6 +31,7 @@ type LiveStreamBroadCastQueryDTO struct {
 	Sort            string               `query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	Status          []model.StreamStatus `query:"status" validate:"omitempty"`
 	Type            model.StreamType     `query:"type" validate:"omitempty,oneof=camera software"`
+	Category        string               `query:"category" validate:"omitempty"`
 	FromStartedTime int64                `query:"from_started_time" validate:"omitempty"`
 	EndStartedTime  int64                `query:"end_started_time" validate:"omitempty"`
 	FromEndedTime   int64                `query:"from_ended_time" validate:"omitempty"`
@@ -43,12 +44,13 @@ type LiveStreamBroadCastDTO struct {
 	Title              string             `json:"title,omitempty"`
 	Description        string             `json:"description,omitempty"`
 	Status             model.StreamStatus `json:"status,omitempty"`
-	StreamToken        string             `json:"stream_token,omitempty"` // generated from streaming server
-	StreamKey          string             `json:"stream_key,omitempty"`   // generated from web
+	PushURL            string             `json:"push_url,omitempty"`      // generated from streaming server
+	BroadcastURL       string             `json:"broadcast_url,omitempty"` // generated from web
 	StreamType         model.StreamType   `json:"stream_type,omitempty"`
 	ThumbnailFileName  string             `json:"thumbnail_file_name,omitempty"`
 	StartedAt          *time.Time         `json:"started_at,omitempty"`
 	EndedAt            *time.Time         `json:"ended_at,omitempty"`
 	User               *UserResponseDTO   `json:"user,omitempty"`
+	Category           string             `json:"category,omitempty"`
 	LiveStreamAnalytic *LiveStreamRespDTO `json:"live_stream_analytic,omitempty"`
 }

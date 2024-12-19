@@ -58,35 +58,40 @@ func (s *StreamRepository) GetStreamAnalyticByStream(streamId int) (*model.Strea
 
 func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit int, cond *dto.LiveStreamBroadCastQueryDTO) (*utils.PaginationModel[model.Stream], error) {
 
-	var query = s.db.Model(model.Stream{}).Preload("User")
+	var query = s.db.Debug().Model(model.Stream{}).Preload("User")
 
 	// filter
 	if cond != nil {
+
+		if cond.Category != "" {
+			query = query.Joins("LEFT JOIN stream_categories stc ON streams.id = stc.stream_id").Joins("LEFT JOIN categories c ON stc.category_id = c.id").
+				Where("c.name = ?", cond.Category)
+		}
+
 		if cond.Keyword != "" {
-			query = query.Where("title LIKE ? OR description LIKE ?", "%"+cond.Keyword+"%", "%"+cond.Keyword+"%")
+			query = query.Where("streams.title LIKE ? OR streams.description LIKE ?", "%"+cond.Keyword+"%", "%"+cond.Keyword+"%")
 		}
 		if len(cond.Status) > 0 {
-			query = query.Where("status IN ?", cond.Status)
+			query = query.Where("streams.status IN ?", cond.Status)
 		}
 		if cond.Type != "" {
-			query = query.Where("type = ?", cond.Type)
+			query = query.Where("streams.type = ?", cond.Type)
 		}
 		if cond.FromStartedTime != 0 && cond.EndStartedTime != 0 {
 			from := time.Unix(cond.FromStartedTime, 0).Format(utils.DATETIME_LAYOUT)
 			end := time.Unix(cond.EndStartedTime, 0).Format(utils.DATETIME_LAYOUT)
-			query = query.Where("started_at BETWEEN ? AND ?", from, end)
+			query = query.Where("streams.started_at BETWEEN ? AND ?", from, end)
 		}
 		if cond.FromEndedTime != 0 && cond.EndEndedTime != 0 {
 			from := time.Unix(cond.FromEndedTime, 0).Format(utils.DATETIME_LAYOUT)
 			end := time.Unix(cond.EndEndedTime, 0).Format(utils.DATETIME_LAYOUT)
-			query = query.Where("ended_at BETWEEN ? AND ?", from, end)
+			query = query.Where("streams.ended_at BETWEEN ? AND ?", from, end)
 		}
 
 		if cond.Sort != "" && cond.SortBy != "" {
-			query = query.Order(fmt.Sprintf("%s %s", cond.SortBy, cond.Sort))
+			query = query.Order(fmt.Sprintf("streams.%s %s", cond.SortBy, cond.Sort))
 		}
 	}
-
 	pagination, err := utils.CreatePage[model.Stream](query, page, limit)
 	if err != nil {
 		return nil, err
