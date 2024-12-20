@@ -2,12 +2,17 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
+	"io"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -78,18 +83,61 @@ func (h *userHandler) deleteByID(c echo.Context) error {
 }
 
 func (h *userHandler) createUser(c echo.Context) error {
-	var err error
-	var req dto.CreateAdminRequest
+
+	var req dto.CreateUserRequest
 	if err := utils.BindAndValidate(c, &req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 	currentUser := c.Get("user").(*utils.Claims)
 	req.CreatedByID = &currentUser.CreatedByID
-	data, err := h.srv.Admin.CreateAdmin(&req)
-	if err != nil {
+
+	file, err := c.FormFile("avatar")
+	if err != nil && strings.Compare(err.Error(), "http: no such file") != 0 {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+	if file != nil {
+
+		isImage, err := utils.IsImage(file)
+		if err != nil {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+
+		if !isImage {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("file is not an image"), nil)
+		}
+
+		// save avatar
+		fileExt := utils.GetFileExtension(file)
+		req.AvatarFileName = fmt.Sprintf("%s%s", utils.MakeUniqueIDWithTime(), fileExt)
+		avatarPath := fmt.Sprintf("%s/%s", h.avatarFolder, req.AvatarFileName)
+
+		src, err := file.Open()
+
+		if err != nil {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+
+		defer src.Close()
+
+		dst, err := os.Create(avatarPath)
+		if err != nil {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+		defer dst.Close()
+
+		if _, err = io.Copy(dst, src); err != nil {
+			if err := os.Remove(avatarPath); err != nil {
+				log.Println(err)
+			}
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+		//
+	}
+
+	if err := h.srv.User.CreateUser(&req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	return utils.BuildSuccessResponseWithData(c, http.StatusCreated, data)
+	return utils.BuildSuccessResponseWithData(c, http.StatusCreated, nil)
 }
 
 func (h *userHandler) updateUser(c echo.Context) error {

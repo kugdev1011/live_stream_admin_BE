@@ -145,6 +145,30 @@ func newUserService(repo *repository.Repository, redis *redis.Client) *UserServi
 
 }
 
+func (s *UserService) CreateUser(request *dto.CreateUserRequest) error {
+	var newUser = new(model.User)
+	newUser.Username = request.UserName
+	newUser.PasswordHash, _ = utils.HashPassword(request.Password)
+	newUser.DisplayName = request.DisplayName
+	newUser.Email = request.Email
+	newUser.CreatedByID = request.CreatedByID
+	newUser.UpdatedByID = request.CreatedByID
+
+	role, err := s.repo.Role.FindByType(request.RoleType)
+	if err != nil {
+		return err
+	}
+	newUser.Role = *role
+	if request.AvatarFileName != "" {
+		newUser.AvatarFileName = sql.NullString{String: request.AvatarFileName, Valid: true}
+	}
+
+	if err := s.Create(newUser); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *UserService) Create(user *model.User) error {
 	return s.repo.User.Create(user)
 }
