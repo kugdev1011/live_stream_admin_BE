@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/dto"
+	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
 	"io"
@@ -83,7 +84,7 @@ func (h *streamHandler) getLiveStreamBroadCastByID(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := service.CreateAdminLog(data.User.ID, "getLiveStreamBroadCastByID", fmt.Sprintf(" %s live_stream_broad_cast request", data.User.DisplayName), "live_stream_broad_cast")
+	adminLog := service.CreateAdminLog(data.User.ID, model.LiveBroadCastByID, fmt.Sprintf(" %s live_stream_broad_cast request", data.User.DisplayName))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -178,7 +179,7 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := service.CreateAdminLog(req.UserID, "createLiveStreamByAdmin", fmt.Sprintf(" %s create_live_stream_by_admin request", claims.Email), "create_live_stream_by_admin")
+	adminLog := service.CreateAdminLog(req.UserID, model.LiveStreamByAdmin, fmt.Sprintf(" %s create_live_stream_by_admin request", claims.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 

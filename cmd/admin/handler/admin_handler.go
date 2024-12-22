@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/dto"
+	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
 	"net/http"
@@ -52,7 +53,7 @@ func (h *adminHandler) byId(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := service.CreateAdminLog(data.ID, "byId", fmt.Sprintf(" %s by Id request", data.Email), "get_user_by_id")
+	adminLog := service.CreateAdminLog(data.ID, model.GetByIDAction, fmt.Sprintf(" %s by Id request", data.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -77,7 +78,7 @@ func (h *adminHandler) createAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := service.CreateAdminLog(data.ID, "createAdmin", fmt.Sprintf(" %s created admin", data.Email), "register")
+	adminLog := service.CreateAdminLog(data.ID, model.CreateAdmin, fmt.Sprintf(" %s created admin", data.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
