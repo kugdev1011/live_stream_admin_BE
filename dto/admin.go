@@ -16,6 +16,7 @@ type CreateAdminRequest struct {
 }
 
 type CreateAdminResp struct {
+	ID             uint           `json:"id,omitempty"`
 	UserName       string         `json:"username,omitempty"`
 	DisplayName    string         `json:"display_name,omitempty"`
 	Email          string         `json:"email,omitempty"`

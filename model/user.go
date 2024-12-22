@@ -64,6 +64,7 @@ type AdminLog struct {
 	UserID      uint      `gorm:"not null" json:"user_id,omitempty"`
 	Action      string    `gorm:"type:varchar(100);not null" json:"action,omitempty"`
 	Details     string    `gorm:"type:text" json:"details,omitempty"`
+	Type        string    `gorm:"type:text"`
 	PerformedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"performed_at,omitempty"`
 	User        User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user,omitempty"`
 }

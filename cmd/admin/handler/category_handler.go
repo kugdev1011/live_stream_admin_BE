@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
@@ -54,11 +55,21 @@ func (h *categoryHandler) create(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 	currentUser := c.Get("user").(*utils.Claims)
+
 	req.CreatedByID = currentUser.CreatedByID
 
 	if err = h.srv.Category.CreateCategory(&req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+
+	adminLog := service.CreateAdminLog(req.CreatedByID, "create category", fmt.Sprintf(" %s create_category request", currentUser.Email), "create_category")
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusCreated, nil)
 
 }

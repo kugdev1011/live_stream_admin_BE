@@ -63,6 +63,15 @@ func (h *userHandler) byId(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+
+	adminLog := service.CreateAdminLog(data.ID, "byId", fmt.Sprintf(" %s make byID request", data.Email), "get_by_id")
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 
 }
@@ -77,6 +86,18 @@ func (h *userHandler) deleteByID(c echo.Context) error {
 
 	if err := h.srv.User.DeleteByID(uint(id), currentUser.CreatedByID); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	userID, err := strconv.ParseUint(currentUser.ID, 10, 32)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	adminLog := service.CreateAdminLog(uint(userID), "deleteByID", fmt.Sprintf(" %s make deleteByID request", currentUser.Email), "delete_by_id")
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, nil)
 
@@ -137,6 +158,14 @@ func (h *userHandler) createUser(c echo.Context) error {
 	if err := h.srv.User.CreateUser(&req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+	adminLog := service.CreateAdminLog(*req.CreatedByID, "createUser", fmt.Sprintf(" %s make createUser request", currentUser.Email), "create_user")
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusCreated, nil)
 }
 
@@ -161,6 +190,14 @@ func (h *userHandler) updateUser(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+	adminLog := service.CreateAdminLog(uint(id), "UpdateUser", fmt.Sprintf(" %s update_user request", currentUser.Email), "update_user")
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 }
 

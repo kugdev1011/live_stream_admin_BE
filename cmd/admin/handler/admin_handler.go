@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/service"
@@ -51,6 +52,14 @@ func (h *adminHandler) byId(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+	adminLog := service.CreateAdminLog(data.ID, "byId", fmt.Sprintf(" %s by Id request", data.Email), "get_user_by_id")
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 
 }
@@ -67,5 +76,14 @@ func (h *adminHandler) createAdmin(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+
+	adminLog := service.CreateAdminLog(data.ID, "createAdmin", fmt.Sprintf(" %s created admin", data.Email), "register")
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusAccepted, data)
 }

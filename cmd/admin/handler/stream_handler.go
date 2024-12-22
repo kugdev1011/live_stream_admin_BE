@@ -79,8 +79,16 @@ func (h *streamHandler) getLiveStreamBroadCastByID(c echo.Context) error {
 	}
 
 	data, err := h.srv.Stream.GetLiveStreamBroadCastByID(id, h.ApiURL, h.rtmpURL, h.hlsURL)
+
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	adminLog := service.CreateAdminLog(data.User.ID, "getLiveStreamBroadCastByID", fmt.Sprintf(" %s live_stream_broad_cast request", data.User.DisplayName), "live_stream_broad_cast")
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 
@@ -96,7 +104,7 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, fmt.Sprintf("thumbnail field is required: %s", err.Error()))
 	}
-
+	claims := c.Get("user").(*utils.Claims)
 	isImage, err := utils.IsImage(file)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
@@ -170,6 +178,14 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
+	adminLog := service.CreateAdminLog(req.UserID, "createLiveStreamByAdmin", fmt.Sprintf(" %s create_live_stream_by_admin request", claims.Email), "create_live_stream_by_admin")
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponse(c, http.StatusCreated, "Successfully", map[string]any{
 		"id":            stream.ID,
 		"title":         stream.Title,
@@ -183,6 +199,7 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 func (h *streamHandler) getTotalLiveStream(c echo.Context) error {
 
 	data, err := h.srv.Stream.GetStatisticsTotalLiveStreamData()
+
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
