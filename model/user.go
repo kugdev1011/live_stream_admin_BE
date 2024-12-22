@@ -10,11 +10,21 @@ import (
 type AdminAction string
 
 const (
-	Login        AdminAction = "end_stream"
-	Logout       AdminAction = "banned_user"
-	LoginAction  AdminAction = "login"
-	LogoutAction AdminAction = "logout"
-	// Adjusted the constants to match their names
+	Login             AdminAction = "end_stream"
+	Logout            AdminAction = "banned_user"
+	LoginAction       AdminAction = "login"
+	LogoutAction      AdminAction = "logout"
+	GetByIDAction     AdminAction = "get_by_id"
+	UserListAction    AdminAction = "user_list"
+	CreateUserAction  AdminAction = "create_user"
+	UpdateUserAction  AdminAction = "update_user"
+	DeleteUserAction  AdminAction = "delete_user"
+	LiveBroadCastByID AdminAction = "live_broad_cast_by_id"
+	LiveStreamByAdmin AdminAction = "live_stream_by_admin"
+	CreateCategory    AdminAction = "create_category"
+	ForgetPassword    AdminAction = "forget_password"
+	ResetPassword     AdminAction = "reset_password"
+	CreateAdmin       AdminAction = "create_admin"
 )
 
 type RoleType string

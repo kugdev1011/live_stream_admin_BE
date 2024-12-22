@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gitlab/live/be-live-api/conf"
 	"gitlab/live/be-live-api/dto"
+	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/service"
 	"gitlab/live/be-live-api/utils"
 	"io"
@@ -63,6 +64,15 @@ func (h *userHandler) byId(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+
+	adminLog := service.CreateAdminLog(data.ID, model.GetByIDAction, fmt.Sprintf(" %s make byID request", data.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 
 }
@@ -77,6 +87,18 @@ func (h *userHandler) deleteByID(c echo.Context) error {
 
 	if err := h.srv.User.DeleteByID(uint(id), currentUser.CreatedByID); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	userID, err := strconv.ParseUint(currentUser.ID, 10, 32)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	adminLog := service.CreateAdminLog(uint(userID), model.DeleteUserAction, fmt.Sprintf(" %s make deleteUser request", currentUser.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, nil)
 
@@ -137,6 +159,14 @@ func (h *userHandler) createUser(c echo.Context) error {
 	if err := h.srv.User.CreateUser(&req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+	adminLog := service.CreateAdminLog(*req.CreatedByID, model.CreateUserAction, fmt.Sprintf(" %s make createUser request", currentUser.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusCreated, nil)
 }
 
@@ -161,6 +191,14 @@ func (h *userHandler) updateUser(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+	adminLog := service.CreateAdminLog(uint(id), model.UpdateUserAction, fmt.Sprintf(" %s update_user request", currentUser.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 }
 
@@ -191,8 +229,23 @@ func (h *userHandler) page(c echo.Context) error {
 	}
 
 	data, err := h.srv.User.GetUserList(&req, page, limit, h.apiURL)
+
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	currentUser := c.Get("user").(*utils.Claims)
+
+	userID, err := strconv.ParseUint(currentUser.ID, 10, 32)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	adminLog := service.CreateAdminLog(uint(userID), model.UserListAction, fmt.Sprintf(" %s make UserListAction request", currentUser.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 }
