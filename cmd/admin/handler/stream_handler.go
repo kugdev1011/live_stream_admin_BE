@@ -53,9 +53,9 @@ func (h *streamHandler) register() {
 
 	group.Use(h.JWTMiddleware())
 	group.Use(h.RoleGuardMiddleware())
-	group.GET("/statistics/:page/:limit", h.getLiveStreamStatisticsData)
+	group.GET("/statistics", h.getLiveStreamStatisticsData)
 	group.GET("/statistics/total", h.getTotalLiveStream)
-	group.GET("/:page/:limit", h.getLiveStreamWithPagination)
+	group.GET("", h.getLiveStreamWithPagination)
 	group.GET("/:id", h.getLiveStreamBroadCastByID)
 	group.POST("", h.createLiveStreamByAdmin)
 	group.DELETE("/:id", h.deleteLiveStream)
@@ -209,29 +209,20 @@ func (h *streamHandler) getTotalLiveStream(c echo.Context) error {
 
 func (h *streamHandler) getLiveStreamStatisticsData(c echo.Context) error {
 
-	var page, limit int
+	var page, limit uint
 	var err error
-
-	page = utils.DEFAULT_PAGE
-	limit = utils.DEFAULT_LIMIT
-
-	if c.Param("page") != "" {
-		page, err = strconv.Atoi(c.Param("page"))
-		if err != nil {
-			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid page parameter"), nil)
-		}
-	}
-
-	if c.Param("limit") != "" {
-		limit, err = strconv.Atoi(c.Param("limit"))
-		if err != nil || limit > utils.DEFAULT_LIMIT {
-			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid limit parameter"), nil)
-		}
-	}
 
 	var req dto.StatisticsQuery
 	if err := utils.BindAndValidate(c, &req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	if req.Page == 0 || req.Limit == 0 {
+		page = utils.DEFAULT_PAGE
+		limit = utils.DEFAULT_LIMIT
+	} else {
+		page = req.Page
+		limit = req.Limit
 	}
 
 	data, err := h.srv.Stream.GetStreamAnalyticsData(page, limit, &req)
@@ -245,32 +236,12 @@ func (h *streamHandler) getLiveStreamStatisticsData(c echo.Context) error {
 
 func (h *streamHandler) getLiveStreamWithPagination(c echo.Context) error {
 
-	var page, limit int
-	var err error
-
-	page = utils.DEFAULT_PAGE
-	limit = utils.DEFAULT_LIMIT
-
-	if c.Param("page") != "" {
-		page, err = strconv.Atoi(c.Param("page"))
-		if err != nil {
-			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid page parameter"), nil)
-		}
-	}
-
-	if c.Param("limit") != "" {
-		limit, err = strconv.Atoi(c.Param("limit"))
-		if err != nil || limit > utils.DEFAULT_LIMIT {
-			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid limit parameter"), nil)
-		}
-	}
-
 	var req dto.LiveStreamBroadCastQueryDTO
 	if err := utils.BindAndValidate(c, &req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	data, err := h.srv.Stream.GetLiveStreamBroadCastWithPagination(page, limit, &req, h.ApiURL, h.rtmpURL, h.hlsURL)
+	data, err := h.srv.Stream.GetLiveStreamBroadCastWithPagination(req.Page, req.Limit, &req, h.ApiURL, h.rtmpURL, h.hlsURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}

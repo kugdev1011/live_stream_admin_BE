@@ -15,7 +15,7 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-func (s *UserRepository) Page(filter *dto.UserQuery, page, limit int) (*utils.PaginationModel[model.User], error) {
+func (s *UserRepository) Page(filter *dto.UserQuery, page, limit uint) (*utils.PaginationModel[model.User], error) {
 	var query = s.db.Model(model.User{})
 	if filter != nil && filter.Role != "" {
 		query = query.Joins("LEFT JOIN roles ON roles.id = users.role_id").
@@ -50,11 +50,11 @@ func (s *UserRepository) Page(filter *dto.UserQuery, page, limit int) (*utils.Pa
 	}
 
 	query = query.Where("users.username != ?", "superAdmin").Preload("Role").Preload("AdminLogs").Preload("CreatedBy").Preload("UpdatedBy")
-	pagination, err := utils.CreatePage[model.User](query, page, limit)
+	pagination, err := utils.CreatePage[model.User](query, int(page), int(limit))
 	if err != nil {
 		return nil, err
 	}
-	return utils.Create(pagination, page, limit)
+	return utils.Create(pagination, int(page), int(limit))
 }
 
 func (r *UserRepository) Update(updatedUser *model.User) error {

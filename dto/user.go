@@ -16,6 +16,8 @@ type UserQuery struct {
 	Sort        string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	CreatedBy   string `query:"created_by" validate:"omitempty,min=1,max=50"`
 	UpdatedBy   string `query:"updated_by" validate:"omitempty,min=1,max=50"`
+	Page        uint   `query:"page" validate:"omitempty,min=1"`
+	Limit       uint   `query:"limit" validate:"omitempty,min=1,max=20"`
 }
 
 type UserResponseDTO struct {
