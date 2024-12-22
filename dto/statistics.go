@@ -24,6 +24,8 @@ type StatisticsTotalLiveStreamDTO struct {
 type StatisticsQuery struct {
 	SortBy string `query:"sort_by" validate:"omitempty,oneof=title created_at views likes comments video_size duration stream_id id"`
 	Sort   string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	Page   uint   `query:"page" validate:"required,min=1"`
+	Limit  uint   `query:"limit" validate:"required,min=1,max=20"`
 }
 
 type LiveStreamBroadCastQueryDTO struct {
@@ -37,6 +39,8 @@ type LiveStreamBroadCastQueryDTO struct {
 	FromEndedTime   int64                `query:"from_ended_time" validate:"omitempty"`
 	EndEndedTime    int64                `query:"end_ended_time" validate:"omitempty"`
 	Keyword         string               `query:"keyword" validate:"omitempty"`
+	Page            uint                 `query:"page" validate:"required,min=1"`
+	Limit           uint                 `query:"limit" validate:"required,min=1,max=20"`
 }
 
 type LiveStreamBroadCastDTO struct {

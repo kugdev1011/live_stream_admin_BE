@@ -71,7 +71,7 @@ func (s *StreamService) sortByDuration(a []dto.LiveStreamRespDTO, sort string) [
 	return a
 }
 
-func (s *StreamService) GetStreamAnalyticsData(page, limit int, req *dto.StatisticsQuery) (*utils.PaginationModel[dto.LiveStreamRespDTO], error) {
+func (s *StreamService) GetStreamAnalyticsData(page, limit uint, req *dto.StatisticsQuery) (*utils.PaginationModel[dto.LiveStreamRespDTO], error) {
 	pagination, err := s.repo.Stream.PaginateStreamStatisticsData(page, limit, req)
 	if err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 	return liveStreamDto
 }
 
-func (s *StreamService) GetLiveStreamBroadCastWithPagination(page, limit int, req *dto.LiveStreamBroadCastQueryDTO, apiUrl, rtmpURL, hlsURL string) (*utils.PaginationModel[dto.LiveStreamBroadCastDTO], error) {
+func (s *StreamService) GetLiveStreamBroadCastWithPagination(page, limit uint, req *dto.LiveStreamBroadCastQueryDTO, apiUrl, rtmpURL, hlsURL string) (*utils.PaginationModel[dto.LiveStreamBroadCastDTO], error) {
 	pagination, err := s.repo.Stream.PaginateLiveStreamBroadCastData(page, limit, req)
 	if err != nil {
 		return nil, err

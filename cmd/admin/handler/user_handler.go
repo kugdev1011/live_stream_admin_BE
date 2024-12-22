@@ -45,7 +45,7 @@ func (h *userHandler) register() {
 
 	group.Use(h.JWTMiddleware())
 	group.Use(h.RoleGuardMiddleware())
-	group.GET("/:page/:limit", h.page)
+	group.GET("", h.page)
 	group.POST("", h.createUser)
 	group.PUT("/:id", h.updateUser)
 	group.GET("/:id", h.byId)
@@ -165,31 +165,22 @@ func (h *userHandler) updateUser(c echo.Context) error {
 }
 
 func (h *userHandler) page(c echo.Context) error {
-	var page, limit int
+	var page, limit uint
 	var err error
-
-	page = utils.DEFAULT_PAGE
-	limit = utils.DEFAULT_LIMIT
-
-	if c.Param("page") != "" {
-		page, err = strconv.Atoi(c.Param("page"))
-		if err != nil {
-			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid page parameter"), nil)
-		}
-	}
-
-	if c.Param("limit") != "" {
-		limit, err = strconv.Atoi(c.Param("limit"))
-		if err != nil || limit > utils.DEFAULT_LIMIT {
-			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid limit parameter"), nil)
-		}
-	}
 
 	var req dto.UserQuery
 	if err := utils.BindAndValidate(c, &req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
+	if req.Page == 0 || req.Limit == 0 {
+		page = utils.DEFAULT_PAGE
+		limit = utils.DEFAULT_LIMIT
+
+	} else {
+		page = req.Page
+		limit = req.Limit
+	}
 	data, err := h.srv.User.GetUserList(&req, page, limit, h.apiURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)

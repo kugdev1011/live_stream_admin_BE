@@ -73,7 +73,7 @@ func (s *UserService) toUserResponseDTO(user *model.User, apiURL string) dto.Use
 	return *userResp
 }
 
-func (s *UserService) GetUserList(filter *dto.UserQuery, page, limit int, apiURL string) (*utils.PaginationModel[dto.UserResponseDTO], error) {
+func (s *UserService) GetUserList(filter *dto.UserQuery, page, limit uint, apiURL string) (*utils.PaginationModel[dto.UserResponseDTO], error) {
 	pagination, err := s.repo.User.Page(filter, page, limit)
 	if err != nil {
 		return nil, err
