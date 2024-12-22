@@ -180,7 +180,7 @@ func (h *userHandler) page(c echo.Context) error {
 
 	if c.Param("limit") != "" {
 		limit, err = strconv.Atoi(c.Param("limit"))
-		if err != nil {
+		if err != nil || limit > utils.DEFAULT_LIMIT {
 			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid limit parameter"), nil)
 		}
 	}
