@@ -179,7 +179,11 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 	if err != nil {
 		return nil, err
 	}
-
+	startedAt, err := utils.ConvertDatetimeToTimestamp(req.StartedAt, utils.DATETIME_LAYOUT)
+	endedAt, err := utils.ConvertDatetimeToTimestamp(req.EndedAt, utils.DATETIME_LAYOUT)
+	if err != nil {
+		return nil, err
+	}
 	stream := &model.Stream{
 		UserID:            req.UserID,
 		Title:             req.Title,
@@ -189,8 +193,8 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 		StreamKey:         channelKey,
 		StreamType:        req.StreamType,
 		ThumbnailFileName: req.ThumbnailFileName,
-		StartedAt:         sql.NullTime{Time: req.StartedAt, Valid: true},
-		EndedAt:           sql.NullTime{Time: req.EndedAt, Valid: true},
+		StartedAt:         sql.NullTime{Time: *startedAt, Valid: true},
+		EndedAt:           sql.NullTime{Time: *endedAt, Valid: true},
 	}
 
 	if err := s.repo.Stream.Create(stream); err != nil {
