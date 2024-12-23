@@ -24,16 +24,17 @@ func newStreamRepository(db *gorm.DB) *StreamRepository {
 func (s *StreamRepository) PaginateStreamStatisticsData(cond *dto.StatisticsQuery) (*utils.PaginationModel[model.StreamAnalytics], error) {
 
 	var query = s.db.Model(model.StreamAnalytics{}).Preload("Stream")
+	query = query.Joins("LEFT JOIN streams st ON st.id = stream_analytics.stream_id")
 	if cond != nil && cond.Sort != "" && cond.SortBy != "" {
 		if cond.SortBy != "duration" {
 			if cond.SortBy == "title" {
-				query = query.Joins("LEFT JOIN streams st ON st.id = stream_analytics.stream_id")
 				query = query.Order(fmt.Sprintf("st.%s %s", cond.SortBy, cond.Sort))
 			} else {
-
 				query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
-
 			}
+		}
+		if cond.Status != "" {
+			query = query.Where("st.status = ?", cond.Status)
 		}
 	} else {
 		query = query.Order(fmt.Sprintf("stream_analytics.%s %s", "created_at", "DESC"))
