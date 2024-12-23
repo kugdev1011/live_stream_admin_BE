@@ -6,13 +6,13 @@ import (
 )
 
 type LiveStreamRespDTO struct {
-	Title       string     `json:"title,omitempty"`
-	Description string     `json:"description,omitempty"`
-	VideoSize   int64      `json:"video_size,omitempty"`
-	Likes       uint       `json:"likes,omitempty"`
-	Viewers     uint       `json:"viewers,omitempty"`
-	Comments    uint       `json:"comments,omitempty"`
-	Duration    int64      `json:"duration,omitempty"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	VideoSize   int64      `json:"video_size"`
+	Likes       uint       `json:"likes"`
+	Viewers     uint       `json:"viewers"`
+	Comments    uint       `json:"comments"`
+	Duration    int64      `json:"duration"`
 	CreatedAt   *time.Time `json:"created_at,omitempty"`
 }
 
@@ -22,10 +22,11 @@ type StatisticsTotalLiveStreamDTO struct {
 }
 
 type StatisticsQuery struct {
-	SortBy string `query:"sort_by" validate:"omitempty,oneof=title created_at views likes comments video_size duration stream_id id"`
-	Sort   string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
-	Page   uint   `query:"page" validate:"required,min=1"`
-	Limit  uint   `query:"limit" validate:"required,min=1,max=20"`
+	SortBy string             `query:"sort_by" validate:"omitempty,oneof=title created_at views likes comments video_size duration stream_id id"`
+	Sort   string             `query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	Status model.StreamStatus `query:"status" validate:"omitempty,oneof=pending started ended upcoming"`
+	Page   uint               `query:"page" validate:"required,min=1"`
+	Limit  uint               `query:"limit" validate:"required,min=1,max=20"`
 }
 
 type LiveStreamBroadCastQueryDTO struct {
