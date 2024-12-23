@@ -209,23 +209,12 @@ func (h *streamHandler) getTotalLiveStream(c echo.Context) error {
 
 func (h *streamHandler) getLiveStreamStatisticsData(c echo.Context) error {
 
-	var page, limit uint
-	var err error
-
 	var req dto.StatisticsQuery
 	if err := utils.BindAndValidate(c, &req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
-	if req.Page == 0 || req.Limit == 0 {
-		page = utils.DEFAULT_PAGE
-		limit = utils.DEFAULT_LIMIT
-	} else {
-		page = req.Page
-		limit = req.Limit
-	}
-
-	data, err := h.srv.Stream.GetStreamAnalyticsData(page, limit, &req)
+	data, err := h.srv.Stream.GetStreamAnalyticsData(&req)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}

@@ -21,7 +21,7 @@ func newStreamRepository(db *gorm.DB) *StreamRepository {
 	}
 }
 
-func (s *StreamRepository) PaginateStreamStatisticsData(page, limit uint, cond *dto.StatisticsQuery) (*utils.PaginationModel[model.StreamAnalytics], error) {
+func (s *StreamRepository) PaginateStreamStatisticsData(cond *dto.StatisticsQuery) (*utils.PaginationModel[model.StreamAnalytics], error) {
 
 	var query = s.db.Model(model.StreamAnalytics{}).Preload("Stream")
 	if cond != nil && cond.Sort != "" && cond.SortBy != "" {
@@ -38,11 +38,11 @@ func (s *StreamRepository) PaginateStreamStatisticsData(page, limit uint, cond *
 	} else {
 		query = query.Order(fmt.Sprintf("stream_analytics.%s %s", "created_at", "DESC"))
 	}
-	pagination, err := utils.CreatePage[model.StreamAnalytics](query, int(page), int(limit))
+	pagination, err := utils.CreatePage[model.StreamAnalytics](query, int(cond.Page), int(cond.Limit))
 	if err != nil {
 		return nil, err
 	}
-	return utils.Create(pagination, int(page), int(limit))
+	return utils.Create(pagination, int(cond.Page), int(cond.Limit))
 }
 
 func (s *StreamRepository) GetStreamAnalyticByStream(streamId int) (*model.StreamAnalytics, error) {
