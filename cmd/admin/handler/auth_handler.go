@@ -60,7 +60,7 @@ func (h *authHandler) login(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := service.CreateAdminLog(user.ID, model.LoginAction, fmt.Sprintf(" %s logged in", user.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(user.ID, model.LoginAction, fmt.Sprintf(" %s logged in", user.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -110,7 +110,7 @@ func (h *authHandler) forgetPassword(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 
 	}
-	adminLog := service.CreateAdminLog(user.ID, model.ForgetPassword, fmt.Sprintf(" %s forget_password request", user.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(user.ID, model.ForgetPassword, fmt.Sprintf(" %s forget_password request", user.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -161,7 +161,7 @@ func (h *authHandler) resetPassword(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := service.CreateAdminLog(user.ID, model.ResetPassword, fmt.Sprintf(" %s reset_password request", user.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(user.ID, model.ResetPassword, fmt.Sprintf(" %s reset_password request", user.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 

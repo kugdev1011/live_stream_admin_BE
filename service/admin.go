@@ -117,6 +117,14 @@ func (s *AdminService) ById(id uint, apiURL string) (*dto.UserResponseDTO, error
 	return &result, err
 }
 
+func (s *AdminService) MakeAdminLogModel(userID uint, action model.AdminAction, details string) *model.AdminLog {
+	return &model.AdminLog{
+		UserID:  userID,
+		Action:  string(action),
+		Details: details,
+	}
+}
+
 func (s *AdminService) CreateLog(adminLog *model.AdminLog) error {
 	return s.repo.Admin.Create(adminLog)
 }

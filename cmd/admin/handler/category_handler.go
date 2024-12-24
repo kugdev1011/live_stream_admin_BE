@@ -63,7 +63,7 @@ func (h *categoryHandler) create(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := service.CreateAdminLog(req.CreatedByID, model.CreateCategory, fmt.Sprintf(" %s create_category request", currentUser.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(req.CreatedByID, model.CreateCategory, fmt.Sprintf(" %s create_category request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
