@@ -65,7 +65,7 @@ func (h *userHandler) byId(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := service.CreateAdminLog(data.ID, model.GetByIDAction, fmt.Sprintf(" %s make byID request", data.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(data.ID, model.GetByIDAction, fmt.Sprintf(" %s make byID request", data.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -93,7 +93,7 @@ func (h *userHandler) deleteByID(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := service.CreateAdminLog(uint(userID), model.DeleteUserAction, fmt.Sprintf(" %s make deleteUser request", currentUser.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(uint(userID), model.DeleteUserAction, fmt.Sprintf(" %s make deleteUser request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -159,7 +159,7 @@ func (h *userHandler) createUser(c echo.Context) error {
 	if err := h.srv.User.CreateUser(&req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := service.CreateAdminLog(*req.CreatedByID, model.CreateUserAction, fmt.Sprintf(" %s make createUser request", currentUser.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(*req.CreatedByID, model.CreateUserAction, fmt.Sprintf(" %s make createUser request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -191,7 +191,7 @@ func (h *userHandler) updateUser(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := service.CreateAdminLog(uint(id), model.UpdateUserAction, fmt.Sprintf(" %s update_user request", currentUser.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(uint(id), model.UpdateUserAction, fmt.Sprintf(" %s update_user request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -231,7 +231,7 @@ func (h *userHandler) page(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := service.CreateAdminLog(uint(userID), model.UserListAction, fmt.Sprintf(" %s make UserListAction request", currentUser.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(uint(userID), model.UserListAction, fmt.Sprintf(" %s make UserListAction request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 

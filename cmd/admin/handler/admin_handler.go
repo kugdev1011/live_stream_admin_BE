@@ -53,7 +53,7 @@ func (h *adminHandler) byId(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := service.CreateAdminLog(data.ID, model.GetByIDAction, fmt.Sprintf(" %s by Id request", data.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(data.ID, model.GetByIDAction, fmt.Sprintf(" %s by Id request", data.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -78,7 +78,7 @@ func (h *adminHandler) createAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := service.CreateAdminLog(data.ID, model.CreateAdmin, fmt.Sprintf(" %s created admin", data.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(data.ID, model.CreateAdmin, fmt.Sprintf(" %s created admin", data.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
