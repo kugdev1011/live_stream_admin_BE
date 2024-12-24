@@ -88,12 +88,12 @@ func (h *userHandler) deleteByID(c echo.Context) error {
 	if err := h.srv.User.DeleteByID(uint(id), currentUser.CreatedByID); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	userID, err := strconv.ParseUint(currentUser.ID, 10, 32)
+
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := service.CreateAdminLog(uint(userID), model.DeleteUserAction, fmt.Sprintf(" %s make deleteUser request", currentUser.Email))
+	adminLog := service.CreateAdminLog(currentUser.ID, model.DeleteUserAction, fmt.Sprintf(" %s make deleteUser request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
@@ -111,7 +111,7 @@ func (h *userHandler) createUser(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 	currentUser := c.Get("user").(*utils.Claims)
-	req.CreatedByID = &currentUser.CreatedByID
+	req.CreatedByID = &currentUser.ID
 
 	file, err := c.FormFile("avatar")
 	if err != nil && strings.Compare(err.Error(), "http: no such file") != 0 {
@@ -186,7 +186,7 @@ func (h *userHandler) updateUser(c echo.Context) error {
 	}
 
 	currentUser := c.Get("user").(*utils.Claims)
-	req.UpdatedByID = &currentUser.CreatedByID
+	req.UpdatedByID = &currentUser.ID
 	data, err := h.srv.User.UpdateUser(&req, uint(id))
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
@@ -227,11 +227,10 @@ func (h *userHandler) page(c echo.Context) error {
 
 	currentUser := c.Get("user").(*utils.Claims)
 
-	userID, err := strconv.ParseUint(currentUser.ID, 10, 32)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := service.CreateAdminLog(uint(userID), model.UserListAction, fmt.Sprintf(" %s make UserListAction request", currentUser.Email))
+	adminLog := service.CreateAdminLog(currentUser.ID, model.UserListAction, fmt.Sprintf(" %s make UserListAction request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 

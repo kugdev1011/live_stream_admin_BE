@@ -55,7 +55,7 @@ func (h *authHandler) login(c echo.Context) error {
 	}
 
 	roleType := model.RoleType(user.Role.Type)
-	token, err := utils.GenerateAccessToken(user.Email, roleType, user.ID) // createdByID is current user id login
+	token, expiredTime, err := utils.GenerateAccessToken(user.ID, user.Username, user.Email, roleType) // createdByID is current user id login
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
@@ -69,10 +69,11 @@ func (h *authHandler) login(c echo.Context) error {
 	}
 
 	response := map[string]interface{}{
-		"username": user.Username,
-		"email":    user.Email,
-		"role":     user.Role.Type,
-		"token":    token,
+		"username":     user.Username,
+		"email":        user.Email,
+		"role":         user.Role.Type,
+		"expired_time": expiredTime,
+		"token":        token,
 	}
 	return utils.BuildSuccessResponse(c, http.StatusOK, "Login successful", response)
 }

@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/rand"
 	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -12,6 +13,8 @@ func HashPassword(password string) (string, error) {
 }
 
 func CheckPasswordHash(password, hash string) bool {
+	a, _ := HashPassword("superAdmin123")
+	fmt.Println(a)
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

@@ -72,7 +72,7 @@ func (h *adminHandler) createAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 	currentUser := c.Get("user").(*utils.Claims)
-	req.CreatedByID = &currentUser.CreatedByID
+	req.CreatedByID = &currentUser.ID
 	data, err := h.srv.Admin.CreateAdmin(&req)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
