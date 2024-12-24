@@ -49,12 +49,12 @@ type RoleDTO struct {
 }
 
 type AdminLogDTO struct {
-	ID          uint            `json:"id,omitempty"`
-	UserID      uint            `json:"user_id,omitempty"`
-	Action      string          `json:"action,omitempty"`
-	Details     string          `json:"details,omitempty"`
-	PerformedAt time.Time       `json:"performed_at,omitempty"`
-	User        UserResponseDTO `json:"user,omitempty"`
+	ID          uint             `json:"id,omitempty"`
+	UserID      uint             `json:"user_id,omitempty"`
+	Action      string           `json:"action,omitempty"`
+	Details     string           `json:"details,omitempty"`
+	PerformedAt time.Time        `json:"performed_at,omitempty"`
+	User        *UserResponseDTO `json:"user,omitempty"`
 }
 
 type UpdateUserRequest struct {
