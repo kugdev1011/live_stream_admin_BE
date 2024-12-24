@@ -88,7 +88,7 @@ func (s *StreamService) GetStreamAnalyticsData(req *dto.StatisticsQuery) (*utils
 		live_stream_dto.Likes = v.Likes
 		live_stream_dto.VideoSize = int64(v.VideoSize)
 		live_stream_dto.Viewers = v.Views
-		live_stream_dto.CreatedAt = &v.Stream.CreatedAt
+		live_stream_dto.CreatedAt = &v.UpdatedAt
 		live_stream_dto.StreamID = v.StreamID
 
 		if v.Stream.EndedAt.Valid && v.Stream.StartedAt.Valid {

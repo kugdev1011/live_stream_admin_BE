@@ -40,6 +40,13 @@ func (s *StreamRepository) PaginateStreamStatisticsData(cond *dto.StatisticsQuer
 	} else {
 		query = query.Order(fmt.Sprintf("stream_analytics.%s %s", "created_at", "DESC"))
 	}
+
+	if cond != nil && cond.From != 0 && cond.To != 0 {
+		from := time.Unix(cond.From, 0).Format(utils.DATETIME_LAYOUT)
+		end := time.Unix(cond.To, 0).Format(utils.DATETIME_LAYOUT)
+		query = query.Where("stream_analytics.updated_at BETWEEN ? AND ?", from, end)
+	}
+
 	pagination, err := utils.CreatePage[model.StreamAnalytics](query, int(cond.Page), int(cond.Limit))
 	if err != nil {
 		return nil, err
