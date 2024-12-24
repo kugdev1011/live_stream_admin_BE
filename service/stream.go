@@ -89,6 +89,7 @@ func (s *StreamService) GetStreamAnalyticsData(req *dto.StatisticsQuery) (*utils
 		live_stream_dto.VideoSize = int64(v.VideoSize)
 		live_stream_dto.Viewers = v.Views
 		live_stream_dto.CreatedAt = &v.Stream.CreatedAt
+		live_stream_dto.StreamID = v.StreamID
 
 		if v.Stream.EndedAt.Valid && v.Stream.StartedAt.Valid {
 			live_stream_dto.Duration = int64(v.Stream.EndedAt.Time.Sub(v.Stream.StartedAt.Time))
@@ -145,6 +146,7 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 		liveStreamDto.LiveStreamAnalytic.VideoSize = int64(streamAnalytic.VideoSize)
 		liveStreamDto.LiveStreamAnalytic.Viewers = streamAnalytic.Views
 		liveStreamDto.LiveStreamAnalytic.Comments = streamAnalytic.Comments
+		liveStreamDto.LiveStreamAnalytic.StreamID = v.ID
 	}
 	return liveStreamDto
 }
@@ -162,6 +164,38 @@ func (s *StreamService) GetLiveStreamBroadCastWithPagination(page, limit uint, r
 		liveStreamDto := s.toLiveStreamBroadCastDto(&v, apiUrl, rtmpURL, hlsURL)
 		result.Page = append(result.Page, *liveStreamDto)
 	}
+
+	if req != nil && req.SortBy == "duration" && req.Sort != "" {
+
+		var containAnalytics, notContainAnalytics []dto.LiveStreamBroadCastDTO
+		for _, v := range result.Page {
+			if v.LiveStreamAnalytic != nil {
+				containAnalytics = append(containAnalytics, v)
+			} else {
+				notContainAnalytics = append(notContainAnalytics, v)
+			}
+		}
+
+		sortedAnalytics := s.sortByDuration(utils.Map(containAnalytics, func(e dto.LiveStreamBroadCastDTO) dto.LiveStreamRespDTO {
+			return *e.LiveStreamAnalytic
+		}), req.Sort)
+
+		var sortedPage []dto.LiveStreamBroadCastDTO
+
+		for _, v := range sortedAnalytics {
+			for _, k := range containAnalytics {
+				if k.ID == int(v.StreamID) {
+					sortedPage = append(sortedPage, k)
+					break
+				}
+			}
+
+		}
+		sortedPage = append(sortedPage, notContainAnalytics...)
+		result.Page = sortedPage
+
+	}
+
 	return result, nil
 }
 

@@ -6,6 +6,7 @@ import (
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/utils"
 	"log"
+	"slices"
 	"time"
 
 	"gorm.io/gorm"
@@ -89,8 +90,14 @@ func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit uint, con
 			query = query.Where("streams.ended_at BETWEEN ? AND ?", from, end)
 		}
 
-		if cond.Sort != "" && cond.SortBy != "" {
-			query = query.Order(fmt.Sprintf("streams.%s %s", cond.SortBy, cond.Sort))
+		if cond.Sort != "" && cond.SortBy != "" && cond.SortBy != "duration" {
+			if slices.Contains([]string{"views", "likes", "comments", "video_size"}, cond.SortBy) {
+				query = query.Joins("LEFT JOIN stream_analytics ON streams.id = stream_analytics.stream_id")
+				query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
+			} else {
+				query = query.Order(fmt.Sprintf("streams.%s %s", cond.SortBy, cond.Sort))
+			}
+
 		}
 	}
 	pagination, err := utils.CreatePage[model.Stream](query, int(page), int(limit))

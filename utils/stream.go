@@ -1,6 +1,8 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func MakePushURL(rtmpURL, token string) string {
 	return fmt.Sprintf("%s/%s", rtmpURL, token)

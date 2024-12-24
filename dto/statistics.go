@@ -7,6 +7,7 @@ import (
 
 type LiveStreamRespDTO struct {
 	Title       string     `json:"title"`
+	StreamID    uint       `json:"stream_id"`
 	Description string     `json:"description"`
 	VideoSize   int64      `json:"video_size"`
 	Likes       uint       `json:"likes"`
@@ -30,7 +31,7 @@ type StatisticsQuery struct {
 }
 
 type LiveStreamBroadCastQueryDTO struct {
-	SortBy          string               `query:"sort_by" validate:"omitempty,oneof=title started_at ended_at"`
+	SortBy          string               `query:"sort_by" validate:"omitempty,oneof=title started_at ended_at views likes comments video_size duration"`
 	Sort            string               `query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	Status          []model.StreamStatus `query:"status" validate:"omitempty"`
 	Type            model.StreamType     `query:"type" validate:"omitempty,oneof=camera software"`
@@ -57,5 +58,5 @@ type LiveStreamBroadCastDTO struct {
 	EndedAt            *time.Time         `json:"ended_at,omitempty"`
 	User               *UserResponseDTO   `json:"user,omitempty"`
 	Category           string             `json:"category,omitempty"`
-	LiveStreamAnalytic *LiveStreamRespDTO `json:"live_stream_analytic,omitempty"`
+	LiveStreamAnalytic *LiveStreamRespDTO `json:"live_stream_analytic"`
 }
