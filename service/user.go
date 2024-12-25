@@ -16,6 +16,14 @@ type UserService struct {
 	redis *redis.Client
 }
 
+func newUserService(repo *repository.Repository, redis *redis.Client) *UserService {
+	return &UserService{
+		repo:  repo,
+		redis: redis,
+	}
+
+}
+
 func (s *UserService) toUserResponseDTO(user *model.User, apiURL string) dto.UserResponseDTO {
 
 	var userResp = new(dto.UserResponseDTO)
@@ -137,14 +145,6 @@ func (s *UserService) UpdateUser(updatedUser *dto.UpdateUserRequest, id uint) (*
 
 }
 
-func newUserService(repo *repository.Repository, redis *redis.Client) *UserService {
-	return &UserService{
-		repo:  repo,
-		redis: redis,
-	}
-
-}
-
 func (s *UserService) CreateUser(request *dto.CreateUserRequest) error {
 	var newUser = new(model.User)
 	newUser.Username = request.UserName
@@ -194,4 +194,8 @@ func (s *UserService) ClearOTP(userID uint) error {
 
 func (s *UserService) UpdatePassword(userID uint, hashedPassword string) error {
 	return s.repo.User.UpdatePassword(userID, hashedPassword)
+}
+
+func (s *UserService) CheckUserTypeByID(id int) (*model.User, error) {
+	return s.repo.User.CheckUserTypeByID(id)
 }

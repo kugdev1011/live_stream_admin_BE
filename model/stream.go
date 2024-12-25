@@ -17,8 +17,9 @@ const (
 type StreamType string
 
 const (
-	CAMERASTREAM   StreamType = "camera"
-	SOFTWARESTREAM StreamType = "software" // like obs
+	CAMERASTREAM    StreamType = "camera"
+	SOFTWARESTREAM  StreamType = "software" // like obs
+	PRERECORDSTREAM StreamType = "pre_record"
 )
 
 type LikeEmoteType string
@@ -158,4 +159,14 @@ type View struct {
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+}
+
+type ScheduleStream struct {
+	ID          uint      `gorm:"primaryKey"`
+	ScheduledAt time.Time `gorm:"not null"`
+	StreamID    uint      `gorm:"not null"`
+	VideoName   string    `gorm:"type:text;not null"`
+	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
+	Stream      Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 }

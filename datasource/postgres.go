@@ -36,6 +36,7 @@ func LoadDB() (*gorm.DB, error) {
 	if err := db.AutoMigrate(
 		&model.Category{},
 		&model.View{},
+		&model.ScheduleStream{},
 	); err != nil {
 		return nil, err
 	}

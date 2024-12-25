@@ -184,8 +184,22 @@ func (r *StreamRepository) DeleteLiveStream(id int) error {
 		}
 	}()
 
-	tx.Commit()
+	return tx.Commit().Error
 
-	return nil
+}
 
+func (r *StreamRepository) CreateScheduleStream(stream *model.Stream, scheduleStream *model.ScheduleStream) error {
+	tx := r.db.Begin()
+	if err := tx.Create(stream).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	scheduleStream.StreamID = stream.ID
+	if err := tx.Create(scheduleStream).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }

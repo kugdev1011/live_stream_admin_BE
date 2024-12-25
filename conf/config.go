@@ -62,6 +62,7 @@ type FileStorageConfig struct {
 	ThumbnailFolder string `yaml:"thumbnail_folder"`
 	AvatarFolder    string `yaml:"avatar_folder"`
 	LiveFolder      string `yaml:"live_folder"`
+	VideoFolder     string `yaml:"video_folder"`
 }
 
 func LoadYaml(path string) (*Config, error) {

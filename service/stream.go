@@ -1,7 +1,6 @@
 package service
 
 import (
-	"database/sql"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
@@ -208,33 +207,33 @@ func (s *StreamService) GetLiveStreamBroadCastByID(id int, apiUrl, rtmpURL, hlsU
 }
 
 func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stream, error) {
-	channelKey := req.Record
+	channelKey := utils.MakeUniqueID()
 	token, err := s.streamServer.GetChannelKey(channelKey)
 	if err != nil {
 		return nil, err
 	}
-	startedAt, err := utils.ConvertDatetimeToTimestamp(req.StartedAt, utils.DATETIME_LAYOUT)
+	schduledAt, err := utils.ConvertDatetimeToTimestamp(req.ScheduledAt, utils.DATETIME_LAYOUT)
 	if err != nil {
 		return nil, err
 	}
-	endedAt, err := utils.ConvertDatetimeToTimestamp(req.EndedAt, utils.DATETIME_LAYOUT)
-	if err != nil {
-		return nil, err
-	}
+
 	stream := &model.Stream{
 		UserID:            req.UserID,
 		Title:             req.Title,
 		Description:       req.Description,
-		Status:            model.ENDED,
+		Status:            model.UPCOMING,
 		StreamToken:       token,
 		StreamKey:         channelKey,
-		StreamType:        req.StreamType,
+		StreamType:        model.PRERECORDSTREAM,
 		ThumbnailFileName: req.ThumbnailFileName,
-		StartedAt:         sql.NullTime{Time: *startedAt, Valid: true},
-		EndedAt:           sql.NullTime{Time: *endedAt, Valid: true},
 	}
 
-	if err := s.repo.Stream.Create(stream); err != nil {
+	schduleStream := &model.ScheduleStream{
+		ScheduledAt: *schduledAt,
+		VideoName:   req.VideoFileName,
+	}
+
+	if err := s.repo.Stream.CreateScheduleStream(stream, schduleStream); err != nil {
 		return nil, err
 	}
 

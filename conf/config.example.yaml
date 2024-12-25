@@ -19,6 +19,7 @@ file_storage:
   thumbnail_folder: ./tmp/thumbnail/
   avatar_folder: ./tmp/avatar/
   live_folder: ./tmp/recordings/live/
+  video_folder: ./tmp/videos/
 
 api_file:
   url: http://localhost:8787
