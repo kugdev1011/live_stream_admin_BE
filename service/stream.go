@@ -89,10 +89,7 @@ func (s *StreamService) GetStreamAnalyticsData(req *dto.StatisticsQuery) (*utils
 		live_stream_dto.Viewers = v.Views
 		live_stream_dto.CreatedAt = &v.UpdatedAt
 		live_stream_dto.StreamID = v.StreamID
-
-		if v.Stream.EndedAt.Valid && v.Stream.StartedAt.Valid {
-			live_stream_dto.Duration = int64(v.Stream.EndedAt.Time.Sub(v.Stream.StartedAt.Time))
-		}
+		live_stream_dto.Duration = int64(v.Duration)
 		result.Page = append(result.Page, *live_stream_dto)
 	}
 	if req != nil && req.SortBy == "duration" && req.Sort != "" {

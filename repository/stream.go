@@ -34,17 +34,24 @@ func (s *StreamRepository) PaginateStreamStatisticsData(cond *dto.StatisticsQuer
 				query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
 			}
 		}
-		if cond.Status != "" {
-			query = query.Where("st.status = ?", cond.Status)
-		}
 	} else {
 		query = query.Order(fmt.Sprintf("stream_analytics.%s %s", "created_at", "DESC"))
 	}
 
-	if cond != nil && cond.From != 0 && cond.To != 0 {
-		from := time.Unix(cond.From, 0).Format(utils.DATETIME_LAYOUT)
-		end := time.Unix(cond.To, 0).Format(utils.DATETIME_LAYOUT)
-		query = query.Where("stream_analytics.updated_at BETWEEN ? AND ?", from, end)
+	if cond != nil {
+		if cond.From != 0 && cond.To != 0 {
+			from := time.Unix(cond.From, 0).Format(utils.DATETIME_LAYOUT)
+			end := time.Unix(cond.To, 0).Format(utils.DATETIME_LAYOUT)
+			query = query.Where("stream_analytics.updated_at BETWEEN ? AND ?", from, end)
+		}
+
+		if cond.Status != "" {
+			query = query.Where("st.status = ?", cond.Status)
+		}
+
+		if cond.Keyword != "" {
+			query = query.Where("st.title ILIKE ?", "%"+cond.Keyword+"%")
+		}
 	}
 
 	pagination, err := utils.CreatePage[model.StreamAnalytics](query, int(cond.Page), int(cond.Limit))
@@ -78,7 +85,7 @@ func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit uint, con
 		}
 
 		if cond.Keyword != "" {
-			query = query.Where("streams.title LIKE ? OR streams.description LIKE ?", "%"+cond.Keyword+"%", "%"+cond.Keyword+"%")
+			query = query.Where("streams.title ILIKE ? OR streams.description ILIKE ?", "%"+cond.Keyword+"%", "%"+cond.Keyword+"%")
 		}
 		if len(cond.Status) > 0 {
 			query = query.Where("streams.status IN ?", cond.Status)
