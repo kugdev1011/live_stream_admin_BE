@@ -78,6 +78,7 @@ func main() {
 	v := validator.New()
 	// Register custom validator with Echo
 	e.Validator = &CustomValidator{validator: v}
+	log.Println(conf.GetFileStorageConfig().RootFolder)
 	e.Static("/api/file", conf.GetFileStorageConfig().RootFolder)
 	root := e.Group("/")
 
@@ -85,7 +86,7 @@ func main() {
 	handler.Register()
 
 	go func() {
-		if err := e.Start(":8080"); err != nil && err != http.ErrServerClosed {
+		if err := e.Start(fmt.Sprintf(":%d", conf.GetApplicationConfig().Port)); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server")
 		}
 	}()

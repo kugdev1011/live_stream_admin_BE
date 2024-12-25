@@ -53,8 +53,7 @@ type RedisConfig struct {
 }
 
 type ApplicationConfig struct {
-	SaltKey string `yaml:"salt_key"`
-	Port    int    `yaml:"port"`
+	Port int `yaml:"port"`
 }
 
 type FileStorageConfig struct {
