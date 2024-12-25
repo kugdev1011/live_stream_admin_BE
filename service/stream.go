@@ -230,7 +230,7 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 		VideoName:   req.VideoFileName,
 	}
 
-	if err := s.repo.Stream.CreateScheduleStream(stream, schduleStream); err != nil {
+	if err := s.repo.Stream.CreateScheduleStream(stream, schduleStream, req.CategoryIDs); err != nil {
 		return nil, err
 	}
 

@@ -195,11 +195,37 @@ func (r *StreamRepository) DeleteLiveStream(id int) error {
 
 }
 
-func (r *StreamRepository) CreateScheduleStream(stream *model.Stream, scheduleStream *model.ScheduleStream) error {
+func (r *StreamRepository) CreateScheduleStream(stream *model.Stream, scheduleStream *model.ScheduleStream, categoryIDs []uint) error {
 	tx := r.db.Begin()
+
+	var existingCategoryIDs []uint
+	if err := r.db.Model(&model.Category{}).Where("id IN ?", categoryIDs).Pluck("id", &existingCategoryIDs).Error; err != nil {
+		return err
+	}
+
+	log.Println(existingCategoryIDs, categoryIDs)
+
+	for _, categoryID := range categoryIDs {
+		if !slices.Contains(existingCategoryIDs, categoryID) {
+			return fmt.Errorf("category id %d does not exist", categoryID)
+		}
+	}
+
 	if err := tx.Create(stream).Error; err != nil {
 		tx.Rollback()
 		return err
+	}
+
+	for _, categoryID := range categoryIDs {
+		streamCategory := &model.StreamCategory{
+			StreamID:   stream.ID,
+			CategoryID: categoryID,
+		}
+
+		if err := tx.Create(streamCategory).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	scheduleStream.StreamID = stream.ID
