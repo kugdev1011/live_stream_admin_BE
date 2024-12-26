@@ -80,8 +80,8 @@ type Notification struct {
 
 type Subscription struct {
 	ID           uint      `gorm:"primaryKey"`
-	SubscriberID uint      `gorm:"not null"`
-	StreamerID   uint      `gorm:"not null"`
+	SubscriberID uint      `gorm:"not null;uniqueIndex:idx_streamer_subscriber"`
+	StreamerID   uint      `gorm:"not null;uniqueIndex:idx_streamer_subscriber"`
 	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
 	// StartDate      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	// EndDate        time.Time `gorm:"not null"`
