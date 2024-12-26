@@ -89,10 +89,6 @@ func (h *userHandler) deleteByID(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
-	}
-
 	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeleteUserAction, fmt.Sprintf(" %s make deleteUser request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
@@ -226,10 +222,6 @@ func (h *userHandler) page(c echo.Context) error {
 	}
 
 	currentUser := c.Get("user").(*utils.Claims)
-
-	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
-	}
 	adminLog := h.srv.Admin.MakeAdminLogModel(uint(currentUser.ID), model.UserListAction, fmt.Sprintf(" %s make UserListAction request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)

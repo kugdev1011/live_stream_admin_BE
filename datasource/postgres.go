@@ -59,6 +59,11 @@ func LoadDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
+	// for existed db
+	if err := db.Exec("ALTER TABLE streams ALTER COLUMN stream_token DROP NOT NULL").Error; err != nil {
+		return nil, err
+	}
+
 	return db, nil
 
 }

@@ -105,7 +105,9 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 	liveStreamDto.Description = v.Description
 	liveStreamDto.Status = v.Status
 	liveStreamDto.BroadcastURL = utils.MakeBroadcastURL(hlsURL, v.StreamKey)
-	liveStreamDto.PushURL = utils.MakePushURL(rtmpURL, v.StreamToken)
+	if v.StreamToken.Valid {
+		liveStreamDto.PushURL = utils.MakePushURL(rtmpURL, v.StreamToken.String)
+	}
 	liveStreamDto.StreamType = v.StreamType
 	liveStreamDto.ThumbnailFileName = utils.MakeThumbnailURL(apiUrl, v.ThumbnailFileName)
 	if v.StartedAt.Valid {
@@ -205,10 +207,6 @@ func (s *StreamService) GetLiveStreamBroadCastByID(id int, apiUrl, rtmpURL, hlsU
 
 func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stream, error) {
 	channelKey := utils.MakeUniqueID()
-	token, err := s.streamServer.GetChannelKey(channelKey)
-	if err != nil {
-		return nil, err
-	}
 	schduledAt, err := utils.ConvertDatetimeToTimestamp(req.ScheduledAt, utils.DATETIME_LAYOUT)
 	if err != nil {
 		return nil, err
@@ -219,7 +217,6 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 		Title:             req.Title,
 		Description:       req.Description,
 		Status:            model.UPCOMING,
-		StreamToken:       token,
 		StreamKey:         channelKey,
 		StreamType:        model.PRERECORDSTREAM,
 		ThumbnailFileName: req.ThumbnailFileName,

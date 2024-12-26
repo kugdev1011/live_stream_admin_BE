@@ -47,15 +47,15 @@ type Stream struct {
 	Description string       `gorm:"type:text"`
 	Status      StreamStatus `gorm:"type:varchar(50);not null"`
 	// StreamURL    string       `gorm:"type:text;not null"`
-	StreamToken       string       `gorm:"type:text;not null"` // generated from streaming server
-	StreamKey         string       `gorm:"type:text;not null"` // generated from web
-	StreamType        StreamType   `gorm:"type:varchar(50);not null"`
-	ThumbnailFileName string       `gorm:"type:text;not null"`
-	StartedAt         sql.NullTime `gorm:"column:started_at"`
-	EndedAt           sql.NullTime `gorm:"column:ended_at"`
-	CreatedAt         time.Time    `gorm:"default:CURRENT_TIMESTAMP;not null"`
-	UpdatedAt         time.Time    `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
-	User              User         `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	StreamToken       sql.NullString `gorm:"type:text"`          // generated from streaming server
+	StreamKey         string         `gorm:"type:text;not null"` // generated from web
+	StreamType        StreamType     `gorm:"type:varchar(50);not null"`
+	ThumbnailFileName string         `gorm:"type:text;not null"`
+	StartedAt         sql.NullTime   `gorm:"column:started_at"`
+	EndedAt           sql.NullTime   `gorm:"column:ended_at"`
+	CreatedAt         time.Time      `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt         time.Time      `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
+	User              User           `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 type Notification struct {
