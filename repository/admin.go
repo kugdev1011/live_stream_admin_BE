@@ -10,21 +10,21 @@ type AdminRepository struct {
 	db *gorm.DB
 }
 
-func (s *AdminRepository) CreateAdmin(newUser *model.User) (*model.User, error) {
+func (s *AdminRepository) CreateAdmin(newUser *model.User) error {
 
 	// find role admin
 	var role model.Role
 	if err := s.db.Model(model.Role{}).Where("type=?", newUser.Role.Type).First(&role).Error; err != nil {
-		return nil, err
+		return err
 	}
 
 	newUser.Role = model.Role{}
 	newUser.RoleID = role.ID
 	if err := s.db.Model(model.User{}).Create(newUser).Error; err != nil {
-		return nil, err
+		return err
 	}
 
-	return newUser, nil
+	return nil
 }
 
 func (s *AdminRepository) ById(id uint) (*model.User, error) {
