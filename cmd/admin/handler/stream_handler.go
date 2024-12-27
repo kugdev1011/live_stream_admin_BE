@@ -132,7 +132,7 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 	// save thumbnail
 	fileExt := utils.GetFileExtension(file)
 	req.ThumbnailFileName = fmt.Sprintf("%d_%s%s", req.UserID, utils.MakeUniqueIDWithTime(), fileExt)
-	thumbnailPath := fmt.Sprintf("%s/%s", h.thumbnailFolder, req.ThumbnailFileName)
+	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, req.ThumbnailFileName)
 
 	filesToRemove := []string{thumbnailPath}
 
