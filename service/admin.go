@@ -17,6 +17,7 @@ type AdminService struct {
 
 func (s *AdminService) toCreateAdminDto(user *model.User) *dto.CreateAdminResp {
 	return &dto.CreateAdminResp{
+		ID:             user.ID,
 		UserName:       user.Username,
 		Email:          user.Email,
 		DisplayName:    user.DisplayName,
@@ -97,12 +98,12 @@ func (s *AdminService) CreateAdmin(request *dto.CreateAdminRequest) (*dto.Create
 		newUser.AvatarFileName = sql.NullString{String: request.AvatarFileName, Valid: true}
 	}
 
-	createdUser, err := s.repo.Admin.CreateAdmin(newUser)
+	err := s.repo.Admin.CreateAdmin(newUser)
 	if err != nil {
 		return nil, err
 	}
-	createdUser.Role.Type = request.RoleType
-	return s.toCreateAdminDto(createdUser), err
+
+	return s.toCreateAdminDto(newUser), err
 }
 
 func (s *AdminService) ById(id uint, apiURL string) (*dto.UserResponseDTO, error) {
