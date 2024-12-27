@@ -17,9 +17,31 @@ type LiveStreamRespDTO struct {
 	CreatedAt   *time.Time `json:"created_at,omitempty"`
 }
 
+type LiveStatQuery struct {
+	SortBy  string             `query:"sort_by" validate:"omitempty,oneof=total_viewers likes comments current_viewers"`
+	Sort    string             `query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	Keyword string             `query:"keyword" validate:"omitempty"`
+	Status  model.StreamStatus `query:"status" validate:"omitempty,oneof=pending started upcoming"`
+	Page    uint               `query:"page" validate:"required,min=1"`
+	Limit   uint               `query:"limit" validate:"required,min=1,max=20"`
+}
+
+type LiveStatRespDTO struct {
+	StreamID       uint `json:"stream_id"`
+	Likes          uint `json:"likes"`
+	CurrentViewers uint `json:"current_viewers"`
+	TotalViewers   uint `json:"total_viewers"`
+	Comments       uint `json:"comments"`
+}
+
 type StatisticsTotalLiveStreamDTO struct {
 	ActiveLiveStreams uint `json:"active_live_streams"`
 	TotalLiveStreams  uint `json:"total_live_streams"`
+}
+
+type LiveCurrentViewers struct {
+	StreamID uint `json:"stream_id"`
+	Viewers  uint `json:"viewers"`
 }
 
 type StatisticsQuery struct {

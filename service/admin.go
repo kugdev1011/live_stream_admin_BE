@@ -62,7 +62,6 @@ func (s *AdminService) toAdminResponseDTO(user *model.User, apiURL string) dto.U
 	}
 
 	userResp.DeletedByID = user.DeletedByID
-	userResp.DeletedAt = user.DeletedAt
 	userResp.CreatedAt = user.CreatedAt
 	userResp.UpdatedAt = user.UpdatedAt
 
@@ -73,14 +72,6 @@ func (s *AdminService) toAdminResponseDTO(user *model.User, apiURL string) dto.U
 	userResp.Role.Description = user.Role.Description
 	userResp.Role.CreatedAt = user.Role.CreatedAt
 	userResp.Role.UpdatedAt = user.UpdatedAt
-
-	if len(user.AdminLogs) > 0 {
-		var adminLogs []dto.AdminLogDTO
-		for _, v := range user.AdminLogs {
-			adminLogs = append(adminLogs, dto.AdminLogDTO{ID: v.ID, UserID: v.UserID, Action: v.Action, PerformedAt: v.PerformedAt})
-		}
-		userResp.AdminLogs = append(userResp.AdminLogs, adminLogs...)
-	}
 
 	return *userResp
 }

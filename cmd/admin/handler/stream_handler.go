@@ -55,6 +55,7 @@ func (h *streamHandler) register() {
 	group.Use(h.JWTMiddleware())
 	group.Use(h.RoleGuardMiddleware())
 	group.GET("/statistics", h.getLiveStreamStatisticsData)
+	group.GET("/live-statistics", h.getLiveStatData)
 	group.GET("/statistics/total", h.getTotalLiveStream)
 	group.GET("", h.getLiveStreamWithPagination)
 	group.GET("/:id", h.getLiveStreamBroadCastByID)
@@ -243,6 +244,22 @@ func (h *streamHandler) getLiveStreamStatisticsData(c echo.Context) error {
 	}
 
 	data, err := h.srv.Stream.GetStreamAnalyticsData(&req)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", data)
+
+}
+
+func (h *streamHandler) getLiveStatData(c echo.Context) error {
+
+	var req dto.LiveStatQuery
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	data, err := h.srv.Stream.GetLiveStatWithPagination(&req)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}

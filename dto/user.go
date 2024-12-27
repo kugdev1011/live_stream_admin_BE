@@ -36,7 +36,6 @@ type UserResponseDTO struct {
 	UpdatedBy      *UserResponseDTO `json:"updated_by,omitempty"`
 	DeletedAt      gorm.DeletedAt   `json:"deleted_at,omitempty"`
 	DeletedByID    *uint            `json:"deleted_by_id,omitempty"`
-	AdminLogs      []AdminLogDTO    `json:"admin_logs"`
 }
 
 type RoleDTO struct {

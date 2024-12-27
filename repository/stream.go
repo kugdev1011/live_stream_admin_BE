@@ -7,6 +7,7 @@ import (
 	"gitlab/live/be-live-api/utils"
 	"log"
 	"slices"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -59,6 +60,45 @@ func (s *StreamRepository) PaginateStreamStatisticsData(cond *dto.StatisticsQuer
 		return nil, err
 	}
 	return utils.Create(pagination, int(cond.Page), int(cond.Limit))
+}
+
+func (s *StreamRepository) PaginateLiveStatData(cond *dto.LiveStatQuery) (*utils.PaginationModel[model.StreamAnalytics], error) {
+
+	var query = s.db.Model(model.StreamAnalytics{})
+	query = query.Joins("LEFT JOIN streams st ON st.id = stream_analytics.stream_id")
+	if cond != nil {
+		if cond.Keyword != "" {
+			query = query.Where("st.title ILIKE ?", "%"+cond.Keyword+"%")
+		}
+		if cond.Status != "" {
+			query = query.Where("st.status = ?", cond.Status)
+		}
+		if cond.SortBy != "" && cond.Sort != "" {
+			if strings.Contains(cond.SortBy, "total_viewers") {
+				query = query.Order(fmt.Sprintf("stream_analytics.views %s", cond.Sort))
+			} else if !strings.Contains(cond.SortBy, "current_viewers") {
+				query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
+			}
+		}
+	}
+
+	pagination, err := utils.CreatePage[model.StreamAnalytics](query, int(cond.Page), int(cond.Limit))
+	if err != nil {
+		return nil, err
+	}
+	return utils.Create(pagination, int(cond.Page), int(cond.Limit))
+}
+
+func (s *StreamRepository) FindStreamCurrentViews() (map[uint]uint, error) {
+	var liveCurrentViewers []dto.LiveCurrentViewers
+	if err := s.db.Raw("SELECT stream_id, count(is_viewing) AS viewers FROM \"views\" WHERE is_viewing = true GROUP BY stream_id").Scan(&liveCurrentViewers).Error; err != nil {
+		return nil, err
+	}
+	result := make(map[uint]uint)
+	for _, v := range liveCurrentViewers {
+		result[v.StreamID] = v.Viewers
+	}
+	return result, nil
 }
 
 func (s *StreamRepository) GetStreamAnalyticByStream(streamId int) (*model.StreamAnalytics, error) {

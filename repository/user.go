@@ -49,7 +49,7 @@ func (s *UserRepository) Page(filter *dto.UserQuery, page, limit uint) (*utils.P
 		query = query.Order(fmt.Sprintf("users.%s %s", "created_at", "DESC"))
 	}
 
-	query = query.Where("users.username != ?", "superAdmin").Preload("Role").Preload("AdminLogs").Preload("CreatedBy").Preload("UpdatedBy")
+	query = query.Where("users.username != ?", "superAdmin").Preload("Role").Preload("CreatedBy").Preload("UpdatedBy")
 	pagination, err := utils.CreatePage[model.User](query, int(page), int(limit))
 	if err != nil {
 		return nil, err
