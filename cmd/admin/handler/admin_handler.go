@@ -53,13 +53,6 @@ func (h *adminHandler) byId(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := h.srv.Admin.MakeAdminLogModel(data.ID, model.GetByIDAction, fmt.Sprintf(" %s by Id request", data.Email))
-
-	err = h.srv.Admin.CreateLog(adminLog)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
-	}
 
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 
