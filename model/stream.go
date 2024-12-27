@@ -120,6 +120,7 @@ type Comment struct {
 	StreamID  uint      `gorm:"not null"`
 	Comment   string    `gorm:"type:text;not null"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
