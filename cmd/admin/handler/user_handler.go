@@ -221,13 +221,5 @@ func (h *userHandler) page(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	currentUser := c.Get("user").(*utils.Claims)
-	adminLog := h.srv.Admin.MakeAdminLogModel(uint(currentUser.ID), model.UserListAction, fmt.Sprintf(" %s make UserListAction request", currentUser.Email))
-
-	err = h.srv.Admin.CreateLog(adminLog)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
-	}
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 }
