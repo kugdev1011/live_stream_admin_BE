@@ -14,8 +14,6 @@ const (
 	Logout            AdminAction = "banned_user"
 	LoginAction       AdminAction = "login"
 	LogoutAction      AdminAction = "logout"
-	GetByIDAction     AdminAction = "get_by_id"
-	UserListAction    AdminAction = "user_list"
 	CreateUserAction  AdminAction = "create_user"
 	UpdateUserAction  AdminAction = "update_user"
 	DeleteUserAction  AdminAction = "delete_user"
