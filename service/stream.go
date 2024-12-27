@@ -240,3 +240,41 @@ func (s *StreamService) DeleteLiveStream(id int) error {
 	}
 	return nil
 }
+
+func (s *StreamService) toLiveStatDto(v *model.StreamAnalytics, currentViewers uint) *dto.LiveStatRespDTO {
+
+	var live = new(dto.LiveStatRespDTO)
+	live.Comments = v.Comments
+	live.CurrentViewers = currentViewers
+	live.TotalViewers = v.Views
+	live.Likes = v.Likes
+	live.StreamID = v.StreamID
+	return live
+}
+
+func (s *StreamService) GetLiveStatWithPagination(req *dto.LiveStatQuery) (*utils.PaginationModel[dto.LiveStatRespDTO], error) {
+	pagination, err := s.repo.Stream.PaginateLiveStatData(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// get current viewers
+	curentNumOfViewersGroupByID, err := s.repo.Stream.FindStreamCurrentViews()
+
+	result := new(utils.PaginationModel[dto.LiveStatRespDTO])
+	result.BasePaginationModel = pagination.BasePaginationModel
+
+	for _, v := range pagination.Page {
+		var live *dto.LiveStatRespDTO
+		currentViewers, ok := curentNumOfViewersGroupByID[v.StreamID]
+		if ok {
+			live = s.toLiveStatDto(&v, currentViewers)
+		} else {
+			live = s.toLiveStatDto(&v, 0)
+		}
+
+		result.Page = append(result.Page, *live)
+	}
+
+	return result, nil
+}
