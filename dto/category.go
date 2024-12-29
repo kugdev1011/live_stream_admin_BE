@@ -14,7 +14,7 @@ type CategoryRespDto struct {
 }
 
 type CategoryRequestDTO struct {
-	Name        string `json:"name", validate:"required,min=3,max=50"`
+	Name        string `json:"name" validate:"required,min=3,max=50"`
 	CreatedByID uint   `json:"created_by_id,omitempty"`
 	UpdatedByID uint   `json:"updated_by_id,omitempty"`
 }

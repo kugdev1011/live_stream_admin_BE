@@ -57,7 +57,7 @@ func (h *categoryHandler) create(c echo.Context) error {
 	}
 	currentUser := c.Get("user").(*utils.Claims)
 
-	req.CreatedByID = currentUser.CreatedByID
+	req.CreatedByID = currentUser.ID
 
 	if err = h.srv.Category.CreateCategory(&req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
