@@ -69,19 +69,25 @@ func (s *StreamRepository) PaginateLiveStatData(cond *dto.LiveStatQuery) (*utils
 	if cond != nil {
 		if cond.Keyword != "" {
 			query = query.Where("st.title ILIKE ?", "%"+cond.Keyword+"%")
+			query = query.Or("st.description ILIKE ?", "%"+cond.Keyword+"%")
 		}
 		if cond.Status != "" {
 			query = query.Where("st.status = ?", cond.Status)
 		}
 		if cond.SortBy != "" && cond.Sort != "" {
-			if strings.Contains(cond.SortBy, "total_viewers") {
-				query = query.Order(fmt.Sprintf("stream_analytics.views %s", cond.Sort))
-			} else if !strings.Contains(cond.SortBy, "current_viewers") {
-				query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
+			if !strings.Contains(cond.SortBy, "title") && !strings.Contains(cond.SortBy, "description") {
+				if strings.Contains(cond.SortBy, "total_viewers") {
+					query = query.Order(fmt.Sprintf("stream_analytics.views %s", cond.Sort))
+				} else if !strings.Contains(cond.SortBy, "current_viewers") {
+					query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
+				}
+			} else {
+				query = query.Order(fmt.Sprintf("st.%s %s", cond.SortBy, cond.Sort))
 			}
+
 		}
 	}
-
+	query = query.Preload("Stream")
 	pagination, err := utils.CreatePage[model.StreamAnalytics](query, int(cond.Page), int(cond.Limit))
 	if err != nil {
 		return nil, err

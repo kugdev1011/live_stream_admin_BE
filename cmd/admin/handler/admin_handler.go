@@ -39,6 +39,7 @@ func (h *adminHandler) register() {
 	group.Use(h.JWTMiddleware())
 	group.Use(h.RoleGuardMiddleware())
 	group.POST("", h.createAdmin)
+	group.GET("/logs", h.getAdminLogs)
 	group.GET("/:id", h.byId)
 
 }
@@ -56,6 +57,22 @@ func (h *adminHandler) byId(c echo.Context) error {
 
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 
+}
+
+func (h *adminHandler) getAdminLogs(c echo.Context) error {
+
+	var req dto.AdminLogQuery
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	data, err := h.srv.Admin.GetAdminLogs(&req)
+
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 }
 
 func (h *adminHandler) createAdmin(c echo.Context) error {
