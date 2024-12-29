@@ -17,39 +17,29 @@ type UserRepository struct {
 
 func (s *UserRepository) Page(filter *dto.UserQuery, page, limit uint) (*utils.PaginationModel[model.User], error) {
 	var query = s.db.Model(model.User{})
+	query = query.Joins("LEFT JOIN roles ON roles.id = users.role_id")
+	query = query.Joins("LEFT JOIN users cr ON cr.id = users.created_by_id")
+	query = query.Joins("LEFT JOIN users ur ON ur.id = users.updated_by_id")
+
+	if filter != nil && filter.Keyword != "" {
+		query = query.Where("roles.type ILIKE ?", "%"+filter.Keyword+"%")
+		query = query.Or("users.username ILIKE ?", "%"+filter.Keyword+"%")
+		query = query.Or("users.display_name ILIKE ?", "%"+filter.Keyword+"%")
+		query = query.Or("users.email ILIKE ?", "%"+filter.Keyword+"%")
+		query = query.Or("cr.username ILIKE ?", "%"+filter.Keyword+"%")
+		query = query.Or("ur.username ILIKE ?", "%"+filter.Keyword+"%")
+	}
+
 	if filter != nil && filter.Role != "" {
-		query = query.Joins("LEFT JOIN roles ON roles.id = users.role_id").
-			Where("roles.type = ? AND roles.type != ?", filter.Role, model.SUPPERADMINROLE)
+		query = query.Where("roles.type = ?", filter.Role)
 	}
 
-	if filter != nil && filter.UserName != "" {
-		query = query.Where("users.username LIKE ?", "%"+filter.UserName+"%")
-	}
-
-	if filter != nil && filter.DisplayName != "" {
-		query = query.Where("users.display_name LIKE ?", "%"+filter.DisplayName+"%")
-	}
-
-	if filter != nil && filter.Email != "" {
-		query = query.Where("users.email LIKE ?", "%"+filter.Email+"%")
-	}
-
-	if filter != nil && filter.CreatedBy != "" {
-		query = query.Joins("LEFT JOIN users cr ON cr.id = users.created_by_id").
-			Where("cr.username LIKE ? OR cr.display_name LIKE ?", "%"+filter.CreatedBy+"%", "%"+filter.CreatedBy+"%")
-	}
-
-	if filter != nil && filter.UpdatedBy != "" {
-		query = query.Joins("LEFT JOIN users ur ON ur.id = users.updated_by_id").
-			Where("ur.username = ? OR ur.display_name = ?", "%"+filter.UpdatedBy+"%", "%"+filter.UpdatedBy+"%")
-	}
 	if filter != nil && filter.SortBy != "" && filter.Sort != "" {
 		query = query.Order(fmt.Sprintf("users.%s %s", filter.SortBy, filter.Sort))
-	} else {
-		query = query.Order(fmt.Sprintf("users.%s %s", "created_at", "DESC"))
 	}
 
-	query = query.Where("users.username != ?", "superAdmin").Preload("Role").Preload("CreatedBy").Preload("UpdatedBy")
+	query = query.Where("users.username != ?", "superAdmin")
+	query = query.Preload("Role").Preload("CreatedBy").Preload("UpdatedBy")
 	pagination, err := utils.CreatePage[model.User](query, int(page), int(limit))
 	if err != nil {
 		return nil, err

@@ -8,17 +8,17 @@ import (
 )
 
 type UserQuery struct {
-	Role        string `query:"role" validate:"omitempty,oneof=super_admin admin streamer user"`
-	UserName    string `query:"username" validate:"omitempty,min=1,max=50"`
-	DisplayName string `query:"display_name" validate:"omitempty,min=1,max=50"`
-	Email       string `query:"email" validate:"omitempty,email,max=100"`
-	Keyword     string `query:"email" validate:"omitempty,max=255"`
-	SortBy      string `query:"sort_by" validate:"omitempty,oneof=created_at updated_at username email display_name"`
-	Sort        string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
-	CreatedBy   string `query:"created_by" validate:"omitempty,min=1,max=50"`
-	UpdatedBy   string `query:"updated_by" validate:"omitempty,min=1,max=50"`
-	Page        uint   `query:"page" validate:"omitempty,min=1"`
-	Limit       uint   `query:"limit" validate:"omitempty,min=1,max=20"`
+	Role string `query:"role" validate:"omitempty,oneof=super_admin admin streamer user"`
+	// UserName    string `query:"username" validate:"omitempty,min=1,max=50"`
+	// DisplayName string `query:"display_name" validate:"omitempty,min=1,max=50"`
+	// Email       string `query:"email" validate:"omitempty,email,max=100"`
+	Keyword string `query:"keyword" validate:"omitempty,max=255"`
+	SortBy  string `query:"sort_by" validate:"omitempty,oneof=created_at updated_at username email display_name"`
+	Sort    string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	// CreatedBy string `query:"created_by" validate:"omitempty,min=1,max=50"`
+	// UpdatedBy string `query:"updated_by" validate:"omitempty,min=1,max=50"`
+	Page  uint `query:"page" validate:"omitempty,min=1"`
+	Limit uint `query:"limit" validate:"omitempty,min=1,max=20"`
 }
 
 type UserResponseDTO struct {
