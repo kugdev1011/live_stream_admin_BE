@@ -57,11 +57,12 @@ type ApplicationConfig struct {
 }
 
 type FileStorageConfig struct {
-	RootFolder      string `yaml:"root_folder"`
-	ThumbnailFolder string `yaml:"thumbnail_folder"`
-	AvatarFolder    string `yaml:"avatar_folder"`
-	LiveFolder      string `yaml:"live_folder"`
-	VideoFolder     string `yaml:"video_folder"`
+	RootFolder            string `yaml:"root_folder"`
+	ThumbnailFolder       string `yaml:"thumbnail_folder"`
+	AvatarFolder          string `yaml:"avatar_folder"`
+	LiveFolder            string `yaml:"live_folder"`
+	ScheduledVideosFolder string `yaml:"scheduled_videos_folder"`
+	VideoFolder           string `yaml:"video_folder"`
 }
 
 func LoadYaml(path string) (*Config, error) {

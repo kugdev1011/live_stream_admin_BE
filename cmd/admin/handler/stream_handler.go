@@ -18,14 +18,14 @@ import (
 
 type streamHandler struct {
 	Handler
-	r               *echo.Group
-	srv             *service.Service
-	thumbnailFolder string
-	rtmpURL         string
-	hlsURL          string
-	liveFolder      string
-	videoFolder     string
-	ApiURL          string
+	r                     *echo.Group
+	srv                   *service.Service
+	thumbnailFolder       string
+	rtmpURL               string
+	hlsURL                string
+	liveFolder            string
+	scheduledVideosFolder string
+	ApiURL                string
 }
 
 func newStreamHandler(r *echo.Group, srv *service.Service) *streamHandler {
@@ -34,14 +34,14 @@ func newStreamHandler(r *echo.Group, srv *service.Service) *streamHandler {
 	streamConfig := conf.GetStreamServerConfig()
 
 	stream := &streamHandler{
-		r:               r,
-		srv:             srv,
-		thumbnailFolder: fileStorageConfig.ThumbnailFolder,
-		rtmpURL:         streamConfig.RTMPURL,
-		hlsURL:          streamConfig.HLSURL,
-		liveFolder:      fileStorageConfig.LiveFolder,
-		videoFolder:     fileStorageConfig.VideoFolder,
-		ApiURL:          conf.GetApiFileConfig().Url,
+		r:                     r,
+		srv:                   srv,
+		thumbnailFolder:       fileStorageConfig.ThumbnailFolder,
+		rtmpURL:               streamConfig.RTMPURL,
+		hlsURL:                streamConfig.HLSURL,
+		liveFolder:            fileStorageConfig.LiveFolder,
+		scheduledVideosFolder: fileStorageConfig.ScheduledVideosFolder,
+		ApiURL:                conf.GetApiFileConfig().Url,
 	}
 
 	stream.register()
@@ -179,7 +179,7 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 
 	fileVideoExt := utils.GetFileExtension(video)
 	req.VideoFileName = fmt.Sprintf("%d_%s%s", req.UserID, utils.MakeUniqueIDWithTime(), fileVideoExt)
-	videoPath := fmt.Sprintf("%s%s", h.videoFolder, req.VideoFileName)
+	videoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, req.VideoFileName)
 
 	filesToRemove = append(filesToRemove, videoPath)
 
