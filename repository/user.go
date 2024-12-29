@@ -23,9 +23,9 @@ func (s *UserRepository) Page(filter *dto.UserQuery, page, limit uint) (*utils.P
 
 	if filter != nil && filter.Keyword != "" {
 		query = query.Where("roles.type ILIKE ?", "%"+filter.Keyword+"%")
-		query = query.Or("users.username ILIKE ?", "%"+filter.Keyword+"%")
+		query = query.Or("users.username ILIKE ? AND users.username NOT ILIKE ?", "%"+filter.Keyword+"%", "%"+"superAdmin"+"%")
 		query = query.Or("users.display_name ILIKE ?", "%"+filter.Keyword+"%")
-		query = query.Or("users.email ILIKE ?", "%"+filter.Keyword+"%")
+		query = query.Or("users.email ILIKE ? AND users.email NOT ILIKE ?", "%"+filter.Keyword+"%", "%"+"superAdmin"+"%")
 		query = query.Or("cr.username ILIKE ?", "%"+filter.Keyword+"%")
 		query = query.Or("ur.username ILIKE ?", "%"+filter.Keyword+"%")
 	}
@@ -37,8 +37,7 @@ func (s *UserRepository) Page(filter *dto.UserQuery, page, limit uint) (*utils.P
 	if filter != nil && filter.SortBy != "" && filter.Sort != "" {
 		query = query.Order(fmt.Sprintf("users.%s %s", filter.SortBy, filter.Sort))
 	}
-
-	query = query.Where("users.username != ?", "superAdmin")
+	query = query.Where("users.username NOT ILIKE ? AND users.email NOT ILIKE ?", "%\\superAdmin%", "%\\superAdmin%")
 	query = query.Preload("Role").Preload("CreatedBy").Preload("UpdatedBy")
 	pagination, err := utils.CreatePage[model.User](query, int(page), int(limit))
 	if err != nil {
