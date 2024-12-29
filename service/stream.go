@@ -249,6 +249,8 @@ func (s *StreamService) toLiveStatDto(v *model.StreamAnalytics, currentViewers u
 	live.TotalViewers = v.Views
 	live.Likes = v.Likes
 	live.StreamID = v.StreamID
+	live.Title = v.Stream.Title
+	live.Description = v.Stream.Description
 	return live
 }
 

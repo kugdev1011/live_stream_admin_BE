@@ -117,6 +117,32 @@ func (s *AdminService) MakeAdminLogModel(userID uint, action model.AdminAction, 
 	}
 }
 
+func (s *AdminService) GetAdminLogs(req *dto.AdminLogQuery) (*utils.PaginationModel[dto.AdminLogRespDTO], error) {
+	pagination, err := s.repo.Admin.GetAdminLogs(req)
+	if err != nil {
+		return nil, err
+	}
+	var result utils.PaginationModel[dto.AdminLogRespDTO]
+	result.BasePaginationModel = pagination.BasePaginationModel
+	for _, v := range pagination.Page {
+		var data dto.AdminLogRespDTO
+		data.ID = v.ID
+		data.Action = v.Action
+		data.Details = v.Details
+		data.PerformedAt = v.PerformedAt
+		data.User.ID = v.UserID
+		data.User.Username = v.User.Username
+		data.User.DisplayName = v.User.DisplayName
+		data.User.Email = v.User.Email
+		data.User.CreatedAt = v.User.CreatedAt
+		data.User.UpdatedAt = v.User.UpdatedAt
+
+		result.Page = append(result.Page, data)
+	}
+
+	return &result, err
+}
+
 func (s *AdminService) CreateLog(adminLog *model.AdminLog) error {
 	return s.repo.Admin.Create(adminLog)
 }
