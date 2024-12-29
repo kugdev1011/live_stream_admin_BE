@@ -70,6 +70,42 @@ func (s *StreamService) sortByDuration(a []dto.LiveStreamRespDTO, sort string) [
 	return a
 }
 
+func (s *StreamService) sortByCurrentViewers(a []dto.LiveStatRespDTO, sort string) []dto.LiveStatRespDTO {
+	if len(a) < 2 {
+		return a
+	}
+
+	left, right := 0, len(a)-1
+
+	// Pick a pivot
+	pivotIndex := rand.Int() % len(a)
+
+	// Move the pivot to the right
+	a[pivotIndex], a[right] = a[right], a[pivotIndex]
+
+	// Pile elements smaller than the pivot on the left
+	for i := range a {
+		if a[i].CurrentViewers < a[right].CurrentViewers && sort == "ASC" {
+			a[i], a[left] = a[left], a[i]
+			left++
+		}
+
+		if a[i].CurrentViewers > a[right].CurrentViewers && sort == "DESC" {
+			a[i], a[left] = a[left], a[i]
+			left++
+		}
+	}
+
+	// Place the pivot after the last smaller element
+	a[left], a[right] = a[right], a[left]
+
+	// Go down the rabbit hole
+	s.sortByCurrentViewers(a[:left], sort)
+	s.sortByCurrentViewers(a[left+1:], sort)
+
+	return a
+}
+
 func (s *StreamService) GetStreamAnalyticsData(req *dto.StatisticsQuery) (*utils.PaginationModel[dto.LiveStreamRespDTO], error) {
 	pagination, err := s.repo.Stream.PaginateStreamStatisticsData(req)
 	if err != nil {
@@ -137,9 +173,7 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 
 	if streamAnalytic != nil {
 		liveStreamDto.LiveStreamAnalytic = new(dto.LiveStreamRespDTO)
-		if v.EndedAt.Valid && v.StartedAt.Valid {
-			liveStreamDto.LiveStreamAnalytic.Duration = int64(v.EndedAt.Time.Sub(v.StartedAt.Time))
-		}
+		liveStreamDto.LiveStreamAnalytic.Duration = int64(streamAnalytic.Duration)
 		liveStreamDto.LiveStreamAnalytic.Likes = streamAnalytic.Likes
 		liveStreamDto.LiveStreamAnalytic.VideoSize = int64(streamAnalytic.VideoSize)
 		liveStreamDto.LiveStreamAnalytic.Viewers = streamAnalytic.Views
@@ -261,21 +295,39 @@ func (s *StreamService) GetLiveStatWithPagination(req *dto.LiveStatQuery) (*util
 	}
 
 	// get current viewers
-	curentNumOfViewersGroupByID, err := s.repo.Stream.FindStreamCurrentViews()
+	var curentNumOfViewersGroupByID map[uint]uint
+	if curentNumOfViewersGroupByID, err = s.repo.Stream.FindStreamCurrentViews(); err != nil {
+		return nil, err
+	}
 
 	result := new(utils.PaginationModel[dto.LiveStatRespDTO])
 	result.BasePaginationModel = pagination.BasePaginationModel
+	var containCurrentViewers, notContainCurrentViewers, liveStatDtos []dto.LiveStatRespDTO
 
 	for _, v := range pagination.Page {
 		var live *dto.LiveStatRespDTO
 		currentViewers, ok := curentNumOfViewersGroupByID[v.StreamID]
 		if ok {
 			live = s.toLiveStatDto(&v, currentViewers)
+			containCurrentViewers = append(containCurrentViewers, *live)
+			liveStatDtos = append(liveStatDtos, *live)
 		} else {
 			live = s.toLiveStatDto(&v, 0)
+			notContainCurrentViewers = append(notContainCurrentViewers, *live)
+			liveStatDtos = append(liveStatDtos, *live)
 		}
 
-		result.Page = append(result.Page, *live)
+	}
+
+	if req.SortBy == "current_viewers" && req.Sort != "" {
+		result.Page = s.sortByCurrentViewers(containCurrentViewers, req.Sort)
+		if req.Sort == "DESC" {
+			result.Page = append(result.Page, notContainCurrentViewers...)
+		} else {
+			result.Page = append(notContainCurrentViewers, result.Page...)
+		}
+	} else {
+		result.Page = append(result.Page, liveStatDtos...)
 	}
 
 	return result, nil
