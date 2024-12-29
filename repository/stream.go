@@ -97,7 +97,8 @@ func (s *StreamRepository) PaginateLiveStatData(cond *dto.LiveStatQuery) (*utils
 
 func (s *StreamRepository) FindStreamCurrentViews() (map[uint]uint, error) {
 	var liveCurrentViewers []dto.LiveCurrentViewers
-	if err := s.db.Raw("SELECT stream_id, count(is_viewing) AS viewers FROM \"views\" WHERE is_viewing = true GROUP BY stream_id").Scan(&liveCurrentViewers).Error; err != nil {
+	var query = "SELECT stream_id, count(is_viewing) AS viewers FROM \"views\" WHERE is_viewing = true GROUP BY stream_id"
+	if err := s.db.Raw(query).Scan(&liveCurrentViewers).Error; err != nil {
 		return nil, err
 	}
 	result := make(map[uint]uint)
