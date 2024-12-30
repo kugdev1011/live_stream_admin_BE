@@ -26,13 +26,14 @@ type LiveStatQuery struct {
 }
 
 type LiveStatRespDTO struct {
-	Title          string `json:"title"`
-	Description    string `json:"description"`
-	StreamID       uint   `json:"stream_id"`
-	Likes          uint   `json:"likes"`
-	CurrentViewers uint   `json:"current_viewers"`
-	TotalViewers   uint   `json:"total_viewers"`
-	Comments       uint   `json:"comments"`
+	Title          string             `json:"title"`
+	Description    string             `json:"description"`
+	StreamID       uint               `json:"stream_id"`
+	Status         model.StreamStatus `json:"status"`
+	Likes          uint               `json:"likes"`
+	CurrentViewers uint               `json:"current_viewers"`
+	TotalViewers   uint               `json:"total_viewers"`
+	Comments       uint               `json:"comments"`
 }
 
 type StatisticsTotalLiveStreamDTO struct {
