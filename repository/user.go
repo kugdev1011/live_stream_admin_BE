@@ -22,7 +22,7 @@ func (s *UserRepository) Page(filter *dto.UserQuery, page, limit uint) (*utils.P
 	query = query.Joins("LEFT JOIN users ur ON ur.id = users.updated_by_id")
 
 	if filter != nil && filter.Keyword != "" {
-		query = query.Where("roles.type ILIKE ?", "%"+filter.Keyword+"%")
+		query = query.Where("roles.type ILIKE ? AND roles.type NOT LIKE ?", "%"+filter.Keyword+"%", "%"+model.SUPPERADMINROLE+"%")
 		query = query.Or("users.username ILIKE ? AND users.username NOT ILIKE ?", "%"+filter.Keyword+"%", "%"+"superAdmin"+"%")
 		query = query.Or("users.display_name ILIKE ?", "%"+filter.Keyword+"%")
 		query = query.Or("users.email ILIKE ? AND users.email NOT ILIKE ?", "%"+filter.Keyword+"%", "%"+"superAdmin"+"%")

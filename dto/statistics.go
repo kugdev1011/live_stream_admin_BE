@@ -18,12 +18,11 @@ type LiveStreamRespDTO struct {
 }
 
 type LiveStatQuery struct {
-	SortBy  string             `query:"sort_by" validate:"omitempty,oneof=total_viewers likes comments current_viewers title description"`
-	Sort    string             `query:"sort" validate:"omitempty,oneof=DESC ASC"`
-	Keyword string             `query:"keyword" validate:"omitempty"`
-	Status  model.StreamStatus `query:"status" validate:"omitempty,oneof=pending started upcoming"`
-	Page    uint               `query:"page" validate:"required,min=1"`
-	Limit   uint               `query:"limit" validate:"required,min=1,max=20"`
+	SortBy  string `query:"sort_by" validate:"omitempty,oneof=total_viewers likes comments current_viewers title description"`
+	Sort    string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	Keyword string `query:"keyword" validate:"omitempty"`
+	Page    uint   `query:"page" validate:"required,min=1"`
+	Limit   uint   `query:"limit" validate:"required,min=1,max=20"`
 }
 
 type LiveStatRespDTO struct {
@@ -47,14 +46,13 @@ type LiveCurrentViewers struct {
 }
 
 type StatisticsQuery struct {
-	SortBy  string             `query:"sort_by" validate:"omitempty,oneof=title created_at views likes comments video_size duration stream_id id"`
-	Sort    string             `query:"sort" validate:"omitempty,oneof=DESC ASC"`
-	From    int64              `query:"from" validate:"omitempty"`
-	To      int64              `query:"to" validate:"omitempty"`
-	Keyword string             `query:"keyword" validate:"omitempty"`
-	Status  model.StreamStatus `query:"status" validate:"omitempty,oneof=pending started ended upcoming"`
-	Page    uint               `query:"page" validate:"required,min=1"`
-	Limit   uint               `query:"limit" validate:"required,min=1,max=20"`
+	SortBy  string `query:"sort_by" validate:"omitempty,oneof=title created_at views likes comments video_size duration stream_id id"`
+	Sort    string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	From    int64  `query:"from" validate:"omitempty"`
+	To      int64  `query:"to" validate:"omitempty"`
+	Keyword string `query:"keyword" validate:"omitempty"`
+	Page    uint   `query:"page" validate:"required,min=1"`
+	Limit   uint   `query:"limit" validate:"required,min=1,max=20"`
 }
 
 type LiveStreamBroadCastQueryDTO struct {
