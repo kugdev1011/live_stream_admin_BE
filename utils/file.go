@@ -176,3 +176,8 @@ func RemoveFiles(files []string) error {
 	}
 	return nil
 }
+
+const (
+	MAX_VIDEO_SIZE = 2 * 1024 * 1024 * 1024 // 2GB
+	MAX_IMAGE_SIZE = 1 * 1024 * 1024
+)

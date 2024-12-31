@@ -116,6 +116,10 @@ func (h *userHandler) createUser(c echo.Context) error {
 			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("file is not an image"), nil)
 		}
 
+		if file.Size > utils.MAX_IMAGE_SIZE {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, nil, "Image size exceeds the 1MB limit")
+		}
+
 		// save avatar
 		fileExt := utils.GetFileExtension(file)
 		req.AvatarFileName = fmt.Sprintf("%s%s", utils.MakeUniqueIDWithTime(), fileExt)
