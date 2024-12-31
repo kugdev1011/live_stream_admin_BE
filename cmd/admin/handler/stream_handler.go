@@ -120,6 +120,7 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, fmt.Sprintf("thumbnail field is required: %s", err.Error()))
 	}
+
 	claims := c.Get("user").(*utils.Claims)
 	isImage, err := utils.IsImage(file)
 	if err != nil {
@@ -130,6 +131,9 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("file is not an image"), nil)
 	}
 
+	if file.Size > utils.MAX_IMAGE_SIZE {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, nil, "Image size exceeds the 1MB limit")
+	}
 	// save thumbnail
 	fileExt := utils.GetFileExtension(file)
 	req.ThumbnailFileName = fmt.Sprintf("%d_%s%s", req.UserID, utils.MakeUniqueIDWithTime(), fileExt)
@@ -163,8 +167,7 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, fmt.Sprintf("video field is required: %s", err.Error()))
 	}
 
-	const maxVideoSize = 2 * 1024 * 1024 * 1024 // 2GB
-	if video.Size > maxVideoSize {
+	if video.Size > utils.MAX_VIDEO_SIZE {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, nil, "Video size exceeds the 2GB limit")
 	}
 
