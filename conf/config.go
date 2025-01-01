@@ -53,7 +53,8 @@ type RedisConfig struct {
 }
 
 type ApplicationConfig struct {
-	Port int `yaml:"port"`
+	Port           int      `yaml:"port"`
+	AllowedOrigins []string `yaml:"allowed_origins"`
 }
 
 type FileStorageConfig struct {

@@ -73,7 +73,7 @@ func main() {
 
 	// Use CORS middleware, for local run
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:5173"},                                                                // Allow all origins (use specific origins for production)
+		AllowOrigins:     conf.GetApplicationConfig().AllowedOrigins,                                                       // Allow all origins (use specific origins for production)
 		AllowMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions}, // Allowed HTTP methods
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Access-Token"},                  // Allowed headers
 		AllowCredentials: true,                                                                                             // Allow credentials like cookies
