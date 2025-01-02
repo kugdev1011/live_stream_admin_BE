@@ -88,6 +88,11 @@ func main() {
 	handler := handler.NewHandler(root, srv)
 
 	fileH := e.Group("/api/file")
+	fileH.GET("/avatar", func(c echo.Context) error {
+		avatarPath := conf.GetFileStorageConfig().AvatarFolder
+		return c.File(avatarPath)
+	})
+
 	fileH.Use(handler.JWTMiddleware())
 	fileH.Static("/", conf.GetFileStorageConfig().RootFolder)
 
