@@ -61,6 +61,8 @@ func (h *streamHandler) register() {
 	group.GET("", h.getLiveStreamWithPagination)
 	group.GET("/:id", h.getLiveStreamBroadCastByID)
 	group.POST("", h.createLiveStreamByAdmin)
+	group.PATCH("/:id", h.updateLiveStreamByAdmin)
+	group.PATCH("/:id/scheduled", h.updateScheduledStreamByAdmin)
 	group.DELETE("/:id", h.deleteLiveStream)
 
 }
@@ -97,6 +99,16 @@ func (h *streamHandler) deleteLiveStream(c echo.Context) error {
 	if err := h.srv.Stream.DeleteLiveStream(id); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+
+	currentUser := c.Get("user").(*utils.Claims)
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeleteLiveStreamByAdmin, fmt.Sprintf(" delete live_stream_broad_cast id %d", id))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", nil)
 }
 
@@ -120,6 +132,75 @@ func (h *streamHandler) getLiveStreamBroadCastByID(c echo.Context) error {
 	}
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 
+}
+
+func (h *streamHandler) updateLiveStreamByAdmin(c echo.Context) error {
+	var req dto.UpdateStreamRequest
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
+	}
+	stream, err := h.srv.Stream.UpdateStreamByAdmin(id, &req)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	currentUser := c.Get("user").(*utils.Claims)
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_live_stream_by_admin request", currentUser.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", map[string]any{
+		"id":            stream.ID,
+		"title":         stream.Title,
+		"description":   stream.Description,
+		"thumbnail_url": utils.MakeThumbnailURL(h.ApiURL, stream.ThumbnailFileName),
+	})
+}
+
+func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
+	var req dto.UpdateScheduledStreamRequest
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
+	}
+
+	if !utils.IsValidSchedule(req.ScheduledAt) {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid schedule"), nil)
+	}
+
+	stream, err := h.srv.Stream.UpdateScheduledStreamByAdmin(id, &req)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	currentUser := c.Get("user").(*utils.Claims)
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_live_stream_by_admin request", currentUser.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", map[string]any{
+		"id":            stream.ID,
+		"title":         stream.Title,
+		"description":   stream.Description,
+		"thumbnail_url": utils.MakeThumbnailURL(h.ApiURL, stream.ThumbnailFileName),
+	})
 }
 
 func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {

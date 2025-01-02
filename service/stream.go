@@ -2,12 +2,14 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"gitlab/live/be-live-admin/dto"
 	"gitlab/live/be-live-admin/model"
 	"gitlab/live/be-live-admin/repository"
 	"gitlab/live/be-live-admin/utils"
 	"log"
 	"math/rand"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -156,7 +158,6 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 	}
 	liveStreamDto.ID = int(v.ID)
 
-	//user if exist
 	liveStreamDto.User = new(dto.UserResponseDTO)
 	liveStreamDto.User.Username = v.User.Username
 	liveStreamDto.User.DisplayName = v.User.DisplayName
@@ -165,14 +166,13 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 	liveStreamDto.User.CreatedAt = v.User.CreatedAt
 	liveStreamDto.User.UpdatedAt = v.User.UpdatedAt
 
-	//user if exist
 	streamAnalytic, err := s.repo.Stream.GetStreamAnalyticByStream(int(v.ID))
 	if err != nil {
 		log.Println(err.Error())
 
 		return nil
 	}
-
+	//streamAnalytic if exist
 	if streamAnalytic != nil {
 		liveStreamDto.LiveStreamAnalytic = new(dto.LiveStreamRespDTO)
 		liveStreamDto.LiveStreamAnalytic.Duration = int64(streamAnalytic.Duration)
@@ -181,6 +181,27 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 		liveStreamDto.LiveStreamAnalytic.Viewers = streamAnalytic.Views
 		liveStreamDto.LiveStreamAnalytic.Comments = streamAnalytic.Comments
 		liveStreamDto.LiveStreamAnalytic.StreamID = v.ID
+	}
+
+	// scheduleStream if exist
+	scheduleStream, err := s.repo.Stream.GetScheduleStreamByStreamID(int(v.ID))
+	if err != nil {
+		log.Println(err.Error())
+		return nil
+	}
+	if scheduleStream != nil {
+		liveStreamDto.ScheduleStream = new(dto.ScheduleStreamDTO)
+		liveStreamDto.ScheduleStream.VideoName = utils.MakeScheduleVideoURL(apiUrl, scheduleStream.VideoName)
+		liveStreamDto.ScheduleStream.ScheduledAt = scheduleStream.ScheduledAt
+	}
+
+	// categories if exist
+	categories, err := s.repo.Stream.GetCategoriesByStreamID(v.ID)
+	if err != nil {
+		return nil
+	}
+	if len(categories) > 0 {
+		liveStreamDto.Categories = categories
 	}
 	return liveStreamDto
 }
@@ -268,6 +289,53 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 	}
 
 	return stream, nil
+}
+
+func (s *StreamService) UpdateScheduledStreamByAdmin(id int, req *dto.UpdateScheduledStreamRequest) (*model.Stream, error) {
+	var scheduleStream *model.ScheduleStream
+
+	liveStream, err := s.repo.Stream.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	liveStream.Title = req.Title
+	liveStream.Description = req.Description
+
+	scheduleStream, err = s.repo.Stream.GetScheduleStreamByStreamID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if scheduleStream.ScheduledAt.UTC().Before(time.Now().UTC()) {
+		return nil, fmt.Errorf("scheduled time has already passed and cannot be updated")
+	}
+
+	schduledAt, err := utils.ConvertDatetimeToTimestamp(req.ScheduledAt, utils.DATETIME_LAYOUT)
+	if err != nil {
+		return nil, err
+	}
+	scheduleStream.ScheduledAt = *schduledAt
+
+	if err := s.repo.Stream.UpdateStream(liveStream, scheduleStream, req.CategoryIDs); err != nil {
+		return nil, err
+	}
+
+	return liveStream, nil
+}
+
+func (s *StreamService) UpdateStreamByAdmin(id int, req *dto.UpdateStreamRequest) (*model.Stream, error) {
+	liveStream, err := s.repo.Stream.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	liveStream.Title = req.Title
+	liveStream.Description = req.Description
+
+	if err := s.repo.Stream.UpdateStream(liveStream, nil, req.CategoryIDs); err != nil {
+		return nil, err
+	}
+
+	return liveStream, nil
 }
 
 func (s *StreamService) DeleteLiveStream(id int) error {

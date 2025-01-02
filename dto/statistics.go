@@ -83,6 +83,12 @@ type LiveStreamBroadCastDTO struct {
 	StartedAt          *time.Time         `json:"started_at,omitempty"`
 	EndedAt            *time.Time         `json:"ended_at,omitempty"`
 	User               *UserResponseDTO   `json:"user,omitempty"`
-	Category           string             `json:"category,omitempty"`
+	Categories         []string           `json:"categories,omitempty"`
 	LiveStreamAnalytic *LiveStreamRespDTO `json:"live_stream_analytic"`
+	ScheduleStream     *ScheduleStreamDTO `json:"schedule_stream"`
+}
+
+type ScheduleStreamDTO struct {
+	ScheduledAt time.Time `json:"scheduled_at"`
+	VideoName   string    `json:"video_name"`
 }
