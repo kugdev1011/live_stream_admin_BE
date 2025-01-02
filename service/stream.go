@@ -2,12 +2,14 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"gitlab/live/be-live-admin/dto"
 	"gitlab/live/be-live-admin/model"
 	"gitlab/live/be-live-admin/repository"
 	"gitlab/live/be-live-admin/utils"
 	"log"
 	"math/rand"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -302,6 +304,10 @@ func (s *StreamService) UpdateScheduledStreamByAdmin(id int, req *dto.UpdateSche
 	scheduleStream, err = s.repo.Stream.GetScheduleStreamByStreamID(id)
 	if err != nil {
 		return nil, err
+	}
+
+	if scheduleStream.ScheduledAt.UTC().Before(time.Now().UTC()) {
+		return nil, fmt.Errorf("scheduled time has already passed and cannot be updated")
 	}
 
 	schduledAt, err := utils.ConvertDatetimeToTimestamp(req.ScheduledAt, utils.DATETIME_LAYOUT)
