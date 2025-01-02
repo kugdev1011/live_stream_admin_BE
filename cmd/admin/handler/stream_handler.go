@@ -78,12 +78,12 @@ func (h *streamHandler) deleteLiveStream(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
 	}
 	// remove thumbnail
-	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, deletedStream.ThumbnailFileName)
+	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, deletedStream.Stream.ThumbnailFileName)
 	thumbnailsToRemove := []string{thumbnailPath}
 	go utils.RemoveFiles(thumbnailsToRemove)
 
 	//remove video
-	if deletedStream.StreamType == model.PRERECORDSTREAM {
+	if deletedStream.Stream.StreamType == model.PRERECORDSTREAM && deletedStream.ScheduleStream != nil {
 		videoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, deletedStream.ScheduleStream.VideoName)
 		videosToRemove := []string{videoPath}
 		go utils.RemoveFiles(videosToRemove)

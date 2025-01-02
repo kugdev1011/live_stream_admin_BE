@@ -277,7 +277,7 @@ func (s *StreamService) DeleteLiveStream(id int) error {
 	return nil
 }
 
-func (s *StreamService) GetLiveStreamByID(id int) (*model.Stream, error) {
+func (s *StreamService) GetLiveStreamByID(id int) (*dto.StreamAndStreamScheduleDto, error) {
 	stream, err := s.repo.Stream.GetByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -285,8 +285,12 @@ func (s *StreamService) GetLiveStreamByID(id int) (*model.Stream, error) {
 		}
 		return nil, err
 	}
+	scheduleStream, err := s.repo.Stream.GetScheduleStreamByStreamID(id)
+	if err != nil {
+		return nil, err
+	}
 
-	return stream, err
+	return &dto.StreamAndStreamScheduleDto{Stream: stream, ScheduleStream: scheduleStream}, err
 }
 
 func (s *StreamService) toLiveStatDto(v *model.StreamAnalytics, currentViewers uint) *dto.LiveStatRespDTO {
