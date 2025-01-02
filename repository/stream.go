@@ -247,6 +247,18 @@ func (r *StreamRepository) DeleteLiveStream(id int) error {
 	return tx.Commit().Error
 
 }
+func (r *StreamRepository) GetCategoriesByStreamID(id uint) ([]string, error) {
+	var streamCategories []model.StreamCategory
+	if err := r.db.Model(model.StreamCategory{}).Where("stream_id = ?", id).Preload("Category").Find(&streamCategories).Error; err != nil {
+		return nil, err
+	}
+	var result []string
+	for _, v := range streamCategories {
+		result = append(result, v.Category.Name)
+	}
+
+	return result, nil
+}
 
 func (r *StreamRepository) CreateScheduleStream(stream *model.Stream, scheduleStream *model.ScheduleStream, categoryIDs []uint) error {
 	tx := r.db.Begin()
@@ -283,6 +295,52 @@ func (r *StreamRepository) CreateScheduleStream(stream *model.Stream, scheduleSt
 
 	scheduleStream.StreamID = stream.ID
 	if err := tx.Create(scheduleStream).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+func (r *StreamRepository) UpdateScheduleStream(stream *model.Stream, scheduleStream *model.ScheduleStream, categoryIDs []uint) error {
+	tx := r.db.Begin()
+
+	var existingCategoryIDs []uint
+	if err := r.db.Model(&model.Category{}).Where("id IN ?", categoryIDs).Pluck("id", &existingCategoryIDs).Error; err != nil {
+		return err
+	}
+
+	log.Println(existingCategoryIDs, categoryIDs)
+
+	for _, categoryID := range categoryIDs {
+		if !slices.Contains(existingCategoryIDs, categoryID) {
+			return fmt.Errorf("category id %d does not exist", categoryID)
+		}
+	}
+
+	if err := tx.Updates(stream).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// delete old stream categories
+	if err := tx.Exec("DELETE FROM stream_categories WHERE stream_id = ?", stream.ID).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	for _, categoryID := range categoryIDs {
+		streamCategory := &model.StreamCategory{
+			StreamID:   stream.ID,
+			CategoryID: categoryID,
+		}
+
+		if err := tx.Create(streamCategory).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if err := tx.Where("stream_id = ?", stream.ID).Updates(scheduleStream).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

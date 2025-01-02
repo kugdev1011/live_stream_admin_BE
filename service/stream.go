@@ -156,7 +156,6 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 	}
 	liveStreamDto.ID = int(v.ID)
 
-	//user if exist
 	liveStreamDto.User = new(dto.UserResponseDTO)
 	liveStreamDto.User.Username = v.User.Username
 	liveStreamDto.User.DisplayName = v.User.DisplayName
@@ -165,14 +164,13 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 	liveStreamDto.User.CreatedAt = v.User.CreatedAt
 	liveStreamDto.User.UpdatedAt = v.User.UpdatedAt
 
-	//user if exist
 	streamAnalytic, err := s.repo.Stream.GetStreamAnalyticByStream(int(v.ID))
 	if err != nil {
 		log.Println(err.Error())
 
 		return nil
 	}
-
+	//streamAnalytic if exist
 	if streamAnalytic != nil {
 		liveStreamDto.LiveStreamAnalytic = new(dto.LiveStreamRespDTO)
 		liveStreamDto.LiveStreamAnalytic.Duration = int64(streamAnalytic.Duration)
@@ -181,6 +179,27 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 		liveStreamDto.LiveStreamAnalytic.Viewers = streamAnalytic.Views
 		liveStreamDto.LiveStreamAnalytic.Comments = streamAnalytic.Comments
 		liveStreamDto.LiveStreamAnalytic.StreamID = v.ID
+	}
+
+	// scheduleStream if exist
+	scheduleStream, err := s.repo.Stream.GetScheduleStreamByStreamID(int(v.ID))
+	if err != nil {
+		log.Println(err.Error())
+		return nil
+	}
+	if scheduleStream != nil {
+		liveStreamDto.ScheduleStream = new(dto.ScheduleStreamDTO)
+		liveStreamDto.ScheduleStream.VideoName = utils.MakeScheduleVideoURL(apiUrl, scheduleStream.VideoName)
+		liveStreamDto.ScheduleStream.ScheduledAt = scheduleStream.ScheduledAt
+	}
+
+	// categories if exist
+	categories, err := s.repo.Stream.GetCategoriesByStreamID(v.ID)
+	if err != nil {
+		return nil
+	}
+	if len(categories) > 0 {
+		liveStreamDto.Categories = categories
 	}
 	return liveStreamDto
 }
@@ -268,6 +287,38 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 	}
 
 	return stream, nil
+}
+
+func (s *StreamService) UpdateStreamByAdmin(id int, req *dto.StreamRequest) (*model.Stream, error) {
+	channelKey := utils.MakeUniqueID()
+	schduledAt, err := utils.ConvertDatetimeToTimestamp(req.ScheduledAt, utils.DATETIME_LAYOUT)
+	if err != nil {
+		return nil, err
+	}
+
+	liveStream, err := s.repo.Stream.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	liveStream.UserID = req.UserID
+	liveStream.Title = req.Title
+	liveStream.Description = req.Description
+	liveStream.Status = req.Status
+	liveStream.StreamKey = channelKey
+	liveStream.StreamType = model.PRERECORDSTREAM
+	liveStream.ThumbnailFileName = req.ThumbnailFileName
+
+	schduleStream := &model.ScheduleStream{
+		ScheduledAt: *schduledAt,
+		VideoName:   req.VideoFileName,
+		StreamID:    uint(id),
+	}
+
+	if err := s.repo.Stream.UpdateScheduleStream(liveStream, schduleStream, req.CategoryIDs); err != nil {
+		return nil, err
+	}
+
+	return liveStream, nil
 }
 
 func (s *StreamService) DeleteLiveStream(id int) error {
