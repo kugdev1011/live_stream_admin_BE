@@ -2,10 +2,10 @@ package service
 
 import (
 	"errors"
-	"gitlab/live/be-live-api/dto"
-	"gitlab/live/be-live-api/model"
-	"gitlab/live/be-live-api/repository"
-	"gitlab/live/be-live-api/utils"
+	"gitlab/live/be-live-admin/dto"
+	"gitlab/live/be-live-admin/model"
+	"gitlab/live/be-live-admin/repository"
+	"gitlab/live/be-live-admin/utils"
 	"log"
 	"math/rand"
 

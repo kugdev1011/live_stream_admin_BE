@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"gitlab/live/be-live-api/model"
+	"gitlab/live/be-live-admin/model"
 	"time"
 
 	"gorm.io/gorm"

@@ -1,6 +1,6 @@
 package dto
 
-import "gitlab/live/be-live-api/model"
+import "gitlab/live/be-live-admin/model"
 
 type StreamRequest struct {
 	Title             string             `json:"title" form:"title" validate:"required"`
