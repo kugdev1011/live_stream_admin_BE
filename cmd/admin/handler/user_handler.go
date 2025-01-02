@@ -76,6 +76,22 @@ func (h *userHandler) deleteByID(c echo.Context) error {
 	}
 
 	currentUser := c.Get("user").(*utils.Claims)
+	deletedUser, err := h.srv.User.FindByID(uint(id))
+	if err != nil {
+
+	}
+
+	if deletedUser == nil {
+		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
+	}
+
+	// remove avatar
+	if deletedUser.AvatarFileName.Valid {
+
+		avatarPath := fmt.Sprintf("%s%s", h.avatarFolder, deletedUser.AvatarFileName.String)
+		avatarsToRemove := []string{avatarPath}
+		go utils.RemoveFiles(avatarsToRemove)
+	}
 
 	if err := h.srv.User.DeleteByID(uint(id), currentUser.ID); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)

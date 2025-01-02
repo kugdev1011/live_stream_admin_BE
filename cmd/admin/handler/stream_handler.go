@@ -69,6 +69,25 @@ func (h *streamHandler) deleteLiveStream(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
+
+	deletedStream, err := h.srv.Stream.GetLiveStreamByID(id)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	if deletedStream == nil {
+		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
+	}
+	// remove thumbnail
+	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, deletedStream.ThumbnailFileName)
+	thumbnailsToRemove := []string{thumbnailPath}
+	go utils.RemoveFiles(thumbnailsToRemove)
+
+	//remove video
+	if deletedStream.StreamType == model.PRERECORDSTREAM {
+		videoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, deletedStream.ScheduleStream.VideoName)
+		videosToRemove := []string{videoPath}
+		go utils.RemoveFiles(videosToRemove)
+	}
 	if err := h.srv.Stream.DeleteLiveStream(id); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}

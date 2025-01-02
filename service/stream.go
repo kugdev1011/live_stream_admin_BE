@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"gitlab/live/be-live-api/dto"
 	"gitlab/live/be-live-api/model"
 	"gitlab/live/be-live-api/repository"
@@ -9,6 +10,7 @@ import (
 	"math/rand"
 
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 type StreamService struct {
@@ -273,6 +275,18 @@ func (s *StreamService) DeleteLiveStream(id int) error {
 		return err
 	}
 	return nil
+}
+
+func (s *StreamService) GetLiveStreamByID(id int) (*model.Stream, error) {
+	stream, err := s.repo.Stream.GetByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return stream, err
 }
 
 func (s *StreamService) toLiveStatDto(v *model.StreamAnalytics, currentViewers uint) *dto.LiveStatRespDTO {
