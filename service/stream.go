@@ -198,11 +198,8 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 	if err != nil {
 		return nil
 	}
-	if categories != nil {
-		value, ok := categories[v.ID]
-		if ok {
-			liveStreamDto.Categories = value
-		}
+	if len(categories) > 0 {
+		liveStreamDto.Categories = categories
 	}
 	return liveStreamDto
 }
@@ -292,32 +289,43 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 	return stream, nil
 }
 
-func (s *StreamService) UpdateStreamByAdmin(id int, req *dto.StreamRequest) (*model.Stream, error) {
-	channelKey := utils.MakeUniqueID()
-	schduledAt, err := utils.ConvertDatetimeToTimestamp(req.ScheduledAt, utils.DATETIME_LAYOUT)
-	if err != nil {
-		return nil, err
-	}
+func (s *StreamService) UpdateScheduledStreamByAdmin(id int, req *dto.UpdateScheduledStreamRequest) (*model.Stream, error) {
+	var scheduleStream *model.ScheduleStream
 
 	liveStream, err := s.repo.Stream.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
-	liveStream.UserID = req.UserID
 	liveStream.Title = req.Title
 	liveStream.Description = req.Description
-	liveStream.Status = req.Status
-	liveStream.StreamKey = channelKey
-	liveStream.StreamType = model.PRERECORDSTREAM
-	liveStream.ThumbnailFileName = req.ThumbnailFileName
 
-	schduleStream := &model.ScheduleStream{
-		ScheduledAt: *schduledAt,
-		VideoName:   req.VideoFileName,
-		StreamID:    uint(id),
+	scheduleStream, err = s.repo.Stream.GetScheduleStreamByStreamID(id)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := s.repo.Stream.UpdateScheduleStream(liveStream, schduleStream, req.CategoryIDs); err != nil {
+	schduledAt, err := utils.ConvertDatetimeToTimestamp(req.ScheduledAt, utils.DATETIME_LAYOUT)
+	if err != nil {
+		return nil, err
+	}
+	scheduleStream.ScheduledAt = *schduledAt
+
+	if err := s.repo.Stream.UpdateStream(liveStream, scheduleStream, req.CategoryIDs); err != nil {
+		return nil, err
+	}
+
+	return liveStream, nil
+}
+
+func (s *StreamService) UpdateStreamByAdmin(id int, req *dto.UpdateStreamRequest) (*model.Stream, error) {
+	liveStream, err := s.repo.Stream.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+	liveStream.Title = req.Title
+	liveStream.Description = req.Description
+
+	if err := s.repo.Stream.UpdateStream(liveStream, nil, req.CategoryIDs); err != nil {
 		return nil, err
 	}
 

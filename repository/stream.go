@@ -247,14 +247,14 @@ func (r *StreamRepository) DeleteLiveStream(id int) error {
 	return tx.Commit().Error
 
 }
-func (r *StreamRepository) GetCategoriesByStreamID(id uint) (map[uint][]string, error) {
+func (r *StreamRepository) GetCategoriesByStreamID(id uint) ([]string, error) {
 	var streamCategories []model.StreamCategory
 	if err := r.db.Model(model.StreamCategory{}).Where("stream_id = ?", id).Preload("Category").Find(&streamCategories).Error; err != nil {
 		return nil, err
 	}
-	result := make(map[uint][]string)
+	var result []string
 	for _, v := range streamCategories {
-		result[v.StreamID] = append(result[v.StreamID], v.Category.Name)
+		result = append(result, v.Category.Name)
 	}
 
 	return result, nil
@@ -302,7 +302,7 @@ func (r *StreamRepository) CreateScheduleStream(stream *model.Stream, scheduleSt
 	return tx.Commit().Error
 }
 
-func (r *StreamRepository) UpdateScheduleStream(stream *model.Stream, scheduleStream *model.ScheduleStream, categoryIDs []uint) error {
+func (r *StreamRepository) UpdateStream(stream *model.Stream, scheduleStream *model.ScheduleStream, categoryIDs []uint) error {
 	tx := r.db.Begin()
 
 	var existingCategoryIDs []uint
@@ -325,6 +325,7 @@ func (r *StreamRepository) UpdateScheduleStream(stream *model.Stream, scheduleSt
 
 	// delete old stream categories
 	if err := tx.Exec("DELETE FROM stream_categories WHERE stream_id = ?", stream.ID).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 	for _, categoryID := range categoryIDs {
@@ -339,9 +340,11 @@ func (r *StreamRepository) UpdateScheduleStream(stream *model.Stream, scheduleSt
 		}
 	}
 
-	if err := tx.Where("stream_id = ?", stream.ID).Updates(scheduleStream).Error; err != nil {
-		tx.Rollback()
-		return err
+	if scheduleStream != nil {
+		if err := tx.Where("stream_id = ?", stream.ID).Updates(scheduleStream).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	return tx.Commit().Error

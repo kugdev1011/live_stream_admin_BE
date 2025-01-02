@@ -61,7 +61,8 @@ func (h *streamHandler) register() {
 	group.GET("", h.getLiveStreamWithPagination)
 	group.GET("/:id", h.getLiveStreamBroadCastByID)
 	group.POST("", h.createLiveStreamByAdmin)
-	group.PUT("/:id", h.updateLiveStreamByAdmin)
+	group.PATCH("/:id", h.updateLiveStreamByAdmin)
+	group.PATCH("/:id/scheduled", h.updateScheduledStreamByAdmin)
 	group.DELETE("/:id", h.deleteLiveStream)
 
 }
@@ -133,21 +134,40 @@ func (h *streamHandler) getLiveStreamBroadCastByID(c echo.Context) error {
 
 }
 
-func (h *streamHandler) removeFileLiveStreamAdminByID(liveStream *dto.StreamAndStreamScheduleDto) error {
-	// remove thumbnail
-	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, liveStream.Stream.ThumbnailFileName)
-	utils.RemoveFiles([]string{thumbnailPath})
-
-	//remove video
-	if liveStream.ScheduleStream != nil {
-		videoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, liveStream.ScheduleStream.VideoName)
-		utils.RemoveFiles([]string{videoPath})
+func (h *streamHandler) updateLiveStreamByAdmin(c echo.Context) error {
+	var req dto.UpdateStreamRequest
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
-	return nil
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
+	}
+	stream, err := h.srv.Stream.UpdateStreamByAdmin(id, &req)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	currentUser := c.Get("user").(*utils.Claims)
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_live_stream_by_admin request", currentUser.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", map[string]any{
+		"id":            stream.ID,
+		"title":         stream.Title,
+		"description":   stream.Description,
+		"thumbnail_url": utils.MakeThumbnailURL(h.ApiURL, stream.ThumbnailFileName),
+	})
 }
 
-func (h *streamHandler) updateLiveStreamByAdmin(c echo.Context) error {
-	var req dto.StreamRequest
+func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
+	var req dto.UpdateScheduledStreamRequest
 	if err := utils.BindAndValidate(c, &req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
@@ -157,129 +177,17 @@ func (h *streamHandler) updateLiveStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
 
-	streamer, err := h.srv.User.CheckUserTypeByID(int(req.UserID))
-	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
-	}
-
-	if streamer == nil || streamer.Role.Type != model.STREAMER {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("user is not a streamer"), nil)
-	}
-
 	if !utils.IsValidSchedule(req.ScheduledAt) {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid schedule"), nil)
 	}
 
-	liveStreamForRemoveFiles, err := h.srv.Stream.GetLiveStreamByID(id)
+	stream, err := h.srv.Stream.UpdateScheduledStreamByAdmin(id, &req)
 	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, fmt.Sprintf("get live stream broadCast by ID failed: %s", err.Error()))
-	}
-
-	//
-	file, err := c.FormFile("thumbnail")
-	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, fmt.Sprintf("thumbnail field is required: %s", err.Error()))
-	}
-
-	claims := c.Get("user").(*utils.Claims)
-	isImage, err := utils.IsImage(file)
-	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-	}
-
-	if !isImage {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("file is not an image"), nil)
-	}
-
-	if file.Size > utils.MAX_IMAGE_SIZE {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, nil, "Image size exceeds the 1MB limit")
-	}
-	// save thumbnail
-	fileExt := utils.GetFileExtension(file)
-	req.ThumbnailFileName = fmt.Sprintf("%d_%s%s", req.UserID, utils.MakeUniqueIDWithTime(), fileExt)
-	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, req.ThumbnailFileName)
-
-	filesToRemove := []string{thumbnailPath}
-
-	src, err := file.Open()
-	if err != nil {
-		go utils.RemoveFiles(filesToRemove)
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-	}
-
-	defer src.Close()
-
-	dst, err := os.Create(thumbnailPath)
-	if err != nil {
-		go utils.RemoveFiles(filesToRemove)
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-	}
-	defer dst.Close()
-
-	if _, err = io.Copy(dst, src); err != nil {
-		go utils.RemoveFiles(filesToRemove)
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-	}
-
-	//save recording
-	video, err := c.FormFile("video")
-	if err != nil {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, fmt.Sprintf("video field is required: %s", err.Error()))
-	}
-
-	if video.Size > utils.MAX_VIDEO_SIZE {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, nil, "Video size exceeds the 2GB limit")
-	}
-
-	// isVideo, err := utils.IsVideoFile(video)
-	// if err != nil {
-	// 	return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-	// }
-
-	// if !isVideo {
-	// 	return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("file is not a supported video format"), nil)
-	// }
-
-	fileVideoExt := utils.GetFileExtension(video)
-	req.VideoFileName = fmt.Sprintf("%d_%s%s", req.UserID, utils.MakeUniqueIDWithTime(), fileVideoExt)
-	videoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, req.VideoFileName)
-
-	filesToRemove = append(filesToRemove, videoPath)
-
-	videoSrc, err := video.Open()
-	if err != nil {
-		go utils.RemoveFiles(filesToRemove)
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-	}
-	defer videoSrc.Close()
-
-	dstRecord, err := os.Create(videoPath)
-	if err != nil {
-		go utils.RemoveFiles(filesToRemove)
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-	}
-	defer dstRecord.Close()
-
-	if _, err = io.Copy(dstRecord, videoSrc); err != nil {
-		go utils.RemoveFiles(filesToRemove)
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
-	}
-	//
-
-	stream, err := h.srv.Stream.UpdateStreamByAdmin(id, &req)
-	if err != nil {
-		go utils.RemoveFiles(filesToRemove)
-
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
-	}
-
-	// remove old files
-	if err := h.removeFileLiveStreamAdminByID(liveStreamForRemoveFiles); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
 	currentUser := c.Get("user").(*utils.Claims)
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_live_stream_by_admin request", claims.Email))
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_live_stream_by_admin request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
