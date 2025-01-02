@@ -174,6 +174,15 @@ func (s *StreamRepository) GetByID(id int) (*model.Stream, error) {
 	return &result, nil
 }
 
+func (s *StreamRepository) GetScheduleStreamByStreamID(id int) (*model.ScheduleStream, error) {
+	var result model.ScheduleStream
+
+	if err := s.db.Model(model.ScheduleStream{}).Where("stream_id=?", id).First(&result).Error; err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
 func (s *StreamRepository) GetStatisticsTotalStream() (int64, int64, error) {
 	var activeStream, totalStream int64
 
