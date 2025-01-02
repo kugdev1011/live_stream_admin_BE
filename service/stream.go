@@ -289,8 +289,7 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 	return stream, nil
 }
 
-func (s *StreamService) UpdateStreamByAdmin(id int, req *dto.StreamRequest) (*model.Stream, error) {
-	channelKey := utils.MakeUniqueID()
+func (s *StreamService) UpdateStreamByAdmin(id int, req *dto.UpdateStreamRequest) (*model.Stream, error) {
 	schduledAt, err := utils.ConvertDatetimeToTimestamp(req.ScheduledAt, utils.DATETIME_LAYOUT)
 	if err != nil {
 		return nil, err
@@ -303,18 +302,13 @@ func (s *StreamService) UpdateStreamByAdmin(id int, req *dto.StreamRequest) (*mo
 	liveStream.UserID = req.UserID
 	liveStream.Title = req.Title
 	liveStream.Description = req.Description
-	liveStream.Status = req.Status
-	liveStream.StreamKey = channelKey
-	liveStream.StreamType = model.PRERECORDSTREAM
-	liveStream.ThumbnailFileName = req.ThumbnailFileName
 
-	schduleStream := &model.ScheduleStream{
-		ScheduledAt: *schduledAt,
-		VideoName:   req.VideoFileName,
-		StreamID:    uint(id),
+	scheduleStream, err := s.repo.Stream.GetScheduleStreamByStreamID(id)
+	if err != nil {
+		return nil, err
 	}
-
-	if err := s.repo.Stream.UpdateScheduleStream(liveStream, schduleStream, req.CategoryIDs); err != nil {
+	scheduleStream.ScheduledAt = *schduledAt
+	if err := s.repo.Stream.UpdateScheduleStream(liveStream, scheduleStream, req.CategoryIDs); err != nil {
 		return nil, err
 	}
 
