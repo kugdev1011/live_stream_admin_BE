@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -68,6 +69,30 @@ func (h *streamHandler) deleteLiveStream(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
+	}
+
+	deletedStream, err := h.srv.Stream.GetLiveStreamByID(id)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	if deletedStream == nil {
+		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
+	}
+
+	if slices.Contains([]model.StreamStatus{model.STARTED, model.ENDED}, deletedStream.Stream.Status) {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("currently, started live-stream, ended live-stream don't allow deleting"), nil)
+	}
+
+	// remove thumbnail
+	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, deletedStream.Stream.ThumbnailFileName)
+	thumbnailsToRemove := []string{thumbnailPath}
+	go utils.RemoveFiles(thumbnailsToRemove)
+
+	//remove video
+	if deletedStream.Stream.StreamType == model.PRERECORDSTREAM && deletedStream.ScheduleStream != nil {
+		videoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, deletedStream.ScheduleStream.VideoName)
+		videosToRemove := []string{videoPath}
+		go utils.RemoveFiles(videosToRemove)
 	}
 	if err := h.srv.Stream.DeleteLiveStream(id); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)

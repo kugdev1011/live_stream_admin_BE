@@ -173,6 +173,10 @@ func (s *UserService) FindByEmail(email string) (*model.User, error) {
 	return s.repo.User.FindByEmail(email)
 }
 
+func (s *UserService) FindByID(id uint) (*model.User, error) {
+	return s.repo.User.FindByID(int(id))
+}
+
 func (s *UserService) FindByUsername(username string) (*model.User, error) {
 	return s.repo.User.FindByUsername(username)
 }
