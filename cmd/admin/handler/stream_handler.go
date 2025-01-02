@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -77,6 +78,11 @@ func (h *streamHandler) deleteLiveStream(c echo.Context) error {
 	if deletedStream == nil {
 		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
 	}
+
+	if slices.Contains([]model.StreamStatus{model.STARTED, model.ENDED}, deletedStream.Stream.Status) {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("currently, started live-stream, ended live-stream don't allow deleting"), nil)
+	}
+
 	// remove thumbnail
 	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, deletedStream.Stream.ThumbnailFileName)
 	thumbnailsToRemove := []string{thumbnailPath}
