@@ -3,9 +3,9 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"gitlab/live/be-live-api/dto"
-	"gitlab/live/be-live-api/model"
-	"gitlab/live/be-live-api/utils"
+	"gitlab/live/be-live-admin/dto"
+	"gitlab/live/be-live-admin/model"
+	"gitlab/live/be-live-admin/utils"
 	"time"
 
 	"gorm.io/gorm"

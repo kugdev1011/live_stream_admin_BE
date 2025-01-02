@@ -1,7 +1,7 @@
 package service
 
 import (
-	"gitlab/live/be-live-api/repository"
+	"gitlab/live/be-live-admin/repository"
 
 	"github.com/redis/go-redis/v9"
 )

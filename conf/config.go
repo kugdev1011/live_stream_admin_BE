@@ -2,9 +2,9 @@ package conf
 
 import (
 	"crypto/rsa"
-	"gitlab/live/be-live-api/model"
-	"gitlab/live/be-live-api/service"
-	"gitlab/live/be-live-api/utils"
+	"gitlab/live/be-live-admin/model"
+	"gitlab/live/be-live-admin/service"
+	"gitlab/live/be-live-admin/utils"
 	"log"
 	"os"
 
