@@ -88,8 +88,9 @@ func main() {
 	handler := handler.NewHandler(root, srv)
 
 	fileH := e.Group("/api/file")
-	fileH.GET("/avatar", func(c echo.Context) error {
-		avatarPath := conf.GetFileStorageConfig().AvatarFolder
+	fileH.GET("/avatar/:filename", func(c echo.Context) error {
+		avatarPath := conf.GetFileStorageConfig().AvatarFolder + c.Param("filename")
+
 		return c.File(avatarPath)
 	})
 
