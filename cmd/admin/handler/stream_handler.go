@@ -11,7 +11,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"slices"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -26,6 +25,7 @@ type streamHandler struct {
 	hlsURL                string
 	liveFolder            string
 	scheduledVideosFolder string
+	videoFolder           string
 	ApiURL                string
 }
 
@@ -42,6 +42,7 @@ func newStreamHandler(r *echo.Group, srv *service.Service) *streamHandler {
 		hlsURL:                streamConfig.HLSURL,
 		liveFolder:            fileStorageConfig.LiveFolder,
 		scheduledVideosFolder: fileStorageConfig.ScheduledVideosFolder,
+		videoFolder:           fileStorageConfig.VideoFolder,
 		ApiURL:                conf.GetApiFileConfig().Url,
 	}
 
@@ -81,30 +82,58 @@ func (h *streamHandler) deleteLiveStream(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
 	}
 
-	if slices.Contains([]model.StreamStatus{model.STARTED, model.ENDED}, deletedStream.Stream.Status) {
-		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("currently, started live-stream, ended live-stream don't allow deleting"), nil)
+	if deletedStream.Stream.Status == model.STARTED {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, fmt.Errorf("you can't delete stream while live"), nil)
 	}
+
+	filesToRemove := []string{}
 
 	// remove thumbnail
 	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, deletedStream.Stream.ThumbnailFileName)
-	thumbnailsToRemove := []string{thumbnailPath}
-	go utils.RemoveFiles(thumbnailsToRemove)
+	filesToRemove = append(filesToRemove, thumbnailPath)
 
-	//remove video
-	if deletedStream.Stream.StreamType == model.PRERECORDSTREAM && deletedStream.ScheduleStream != nil {
-		videoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, deletedStream.ScheduleStream.VideoName)
-		videosToRemove := []string{videoPath}
-		go utils.RemoveFiles(videosToRemove)
+	if deletedStream.Stream.Status == model.ENDED {
+		isEncoding, err := h.srv.Stream.IsEncodingVideo(c.Request().Context(), deletedStream.Stream.StreamKey)
+		if err != nil {
+			return err
+		}
+
+		if isEncoding {
+			return fmt.Errorf("you can't delete a stream while video is being encoded")
+		}
+
+		videoPath := utils.MakeVideoPath(h.videoFolder, deletedStream.Stream.StreamKey+".mp4")
+		filesToRemove = append(filesToRemove, videoPath)
+
+		liveVideoPath, err := utils.MakeLiveVideoPath(h.liveFolder, deletedStream.Stream.StreamKey)
+		if err == nil {
+			filesToRemove = append(filesToRemove, liveVideoPath)
+		}
+
+		if deletedStream.ScheduleStream != nil && deletedStream.ScheduleStream.ID != 0 {
+			scheduledVideoPath := utils.MakeVideoPath(h.scheduledVideosFolder, deletedStream.ScheduleStream.VideoName)
+			filesToRemove = append(filesToRemove, scheduledVideoPath)
+		}
+
+		// utils.RemoveFilesWithNoErrReturn(filesToRemove)
+
 	}
+
+	if deletedStream.Stream.Status == model.UPCOMING {
+		if deletedStream.ScheduleStream != nil && deletedStream.ScheduleStream.ID != 0 {
+			scheduledVideoPath := utils.MakeVideoPath(h.scheduledVideosFolder, deletedStream.ScheduleStream.VideoName)
+			filesToRemove = append(filesToRemove, scheduledVideoPath)
+		}
+	}
+
 	if err := h.srv.Stream.DeleteLiveStream(id); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
+	go utils.RemoveFilesWithNoErrReturn(filesToRemove)
 
 	currentUser := c.Get("user").(*utils.Claims)
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeleteLiveStreamByAdmin, fmt.Sprintf(" delete live_stream_broad_cast id %d", id))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeleteLiveStreamByAdmin, fmt.Sprintf(" delete live_stream_broad_cast id: %d, status: %s, stream_type: %s", id, deletedStream.Stream.Status, deletedStream.Stream.StreamType))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}

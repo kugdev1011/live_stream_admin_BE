@@ -230,6 +230,12 @@ func (r *StreamRepository) DeleteLiveStream(id int) error {
 		tx.Rollback()
 		return err
 	}
+
+	if err := tx.Unscoped().Where("stream_id = ?", id).Delete(&model.ScheduleStream{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	if err := tx.Unscoped().Where("id = ?", id).Delete(&model.Stream{}).Error; err != nil {
 		tx.Rollback()
 		return err

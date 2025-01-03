@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"gitlab/live/be-live-admin/cache"
@@ -12,6 +13,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -355,10 +357,13 @@ func (s *StreamService) GetLiveStreamByID(id int) (*dto.StreamAndStreamScheduleD
 	}
 	scheduleStream, err := s.repo.Stream.GetScheduleStreamByStreamID(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 
-	return &dto.StreamAndStreamScheduleDto{Stream: stream, ScheduleStream: scheduleStream}, err
+	return &dto.StreamAndStreamScheduleDto{Stream: stream, ScheduleStream: scheduleStream}, nil
 }
 
 func (s *StreamService) toLiveStatDto(v *model.StreamAnalytics, currentViewers uint) *dto.LiveStatRespDTO {
@@ -418,4 +423,18 @@ func (s *StreamService) GetLiveStatWithPagination(req *dto.LiveStatQuery) (*util
 	}
 
 	return result, nil
+}
+
+func (s *StreamService) IsEncodingVideo(ctx context.Context, streamKey string) (bool, error) {
+	cacheKey := fmt.Sprintf(cache.VIDEO_ENCODING_PREFIX, streamKey+".mp4")
+
+	isEncoding, err := cache.GetRedisValWithTyped[bool](s.redisStore, ctx, cacheKey)
+	if err != nil {
+		if !errors.Is(err, redis.Nil) {
+			log.Println(err)
+			return false, err
+		}
+	}
+
+	return isEncoding, nil
 }

@@ -24,3 +24,18 @@ func MakeAvatarURL(apiURL, fileName string) string {
 func MakeScheduleVideoURL(apiURL, fileName string) string {
 	return fmt.Sprintf("%s/api/file/scheduled-video/%s", apiURL, fileName)
 }
+
+// will be used by scheduled and ended videos
+func MakeVideoPath(videoFolder, fileName string) string {
+	return fmt.Sprintf("%s%s", videoFolder, fileName)
+}
+
+func MakeLiveVideoPath(liveFolder, streamKey string) (string, error) {
+	liveVideoPathPattern := fmt.Sprintf("%s%s_*.flv", liveFolder, streamKey)
+	liveVideoPath, err := getFilePath(liveVideoPathPattern)
+	if err != nil {
+		return "", err
+	}
+	return liveVideoPath, nil
+
+}
