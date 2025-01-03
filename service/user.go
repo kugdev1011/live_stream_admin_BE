@@ -137,19 +137,29 @@ func (s *UserService) UpdateUser(updatedUser *dto.UpdateUserRequest, id uint) (*
 	}
 	makeUpdatedUser, err := s.makeUpdatedUserModel(user, updatedUser)
 
-	if updatedUser.Password != "" {
-		makeUpdatedUser.PasswordHash, err = utils.HashPassword(updatedUser.Password)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	if err := s.repo.User.Update(makeUpdatedUser); err != nil {
 		return nil, err
 	}
 
 	return s.toUpdatedUserDTO(user, updatedUser.RoleType), err
 
+}
+
+func (s *UserService) ChangePassword(user *model.User, changePassword *dto.ChangePasswordRequest, id uint, updatedByID uint) (*dto.UpdateUserResponse, error) {
+	var err error
+	if changePassword.Password != "" {
+		user.PasswordHash, err = utils.HashPassword(changePassword.Password)
+		if err != nil {
+			return nil, err
+		}
+	}
+	user.UpdatedByID = &updatedByID
+	user.UpdatedBy = nil
+	if err = s.repo.User.Update(user); err != nil {
+		return nil, err
+	}
+
+	return s.toUpdatedUserDTO(user, user.Role.Type), err
 }
 
 func (s *UserService) CreateUser(request *dto.CreateUserRequest) error {

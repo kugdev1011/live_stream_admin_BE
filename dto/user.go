@@ -61,7 +61,6 @@ type UpdateUserRequest struct {
 	UserName    string         `json:"username" validate:"omitempty,min=3,max=50"`
 	Email       string         `json:"email" validate:"omitempty,email,max=100"`
 	DisplayName string         `json:"display_name" validate:"omitempty,min=3,max=100"`
-	Password    string         `json:"password" form:"password" validate:"omitempty,min=6,max=255"`
 	RoleType    model.RoleType `json:"role_type" validate:"omitempty,oneof=admin streamer user"`
 	UpdatedByID *uint          `json:"updated_by_id"`
 }
@@ -82,4 +81,9 @@ type CreateUserRequest struct {
 	RoleType       model.RoleType `json:"role_type" form:"role_type" validate:"required,oneof=admin streamer user"`
 	AvatarFileName string         `json:"-" form:"-"`
 	CreatedByID    *uint          `json:"-" form:"-"`
+}
+
+type ChangePasswordRequest struct {
+	Password        string `json:"password" form:"password" validate:"required,min=6,max=255"`
+	ConfirmPassword string `json:"confirm_password" form:"confirm_password" validate:"required,min=6,max=255"`
 }

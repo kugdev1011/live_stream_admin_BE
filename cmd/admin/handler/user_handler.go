@@ -50,6 +50,7 @@ func (h *userHandler) register() {
 	group.GET("", h.page)
 	group.POST("", h.createUser)
 	group.PUT("/:id", h.updateUser)
+	group.PATCH("/:id/change-password", h.changePassword)
 	group.GET("/:id", h.byId)
 	group.DELETE("/:id", h.deleteByID)
 
@@ -209,17 +210,12 @@ func (h *userHandler) updateUser(c echo.Context) error {
 	// validate super admin user
 	if currentUser.RoleType == model.SUPPERADMINROLE {
 		if currentUser.ID == uint(id) {
-			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("super admin don't update itself"), nil)
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request, super admin don't update itself"), nil)
 		}
 	} else {
 		// validate admin user
-		if currentUser.ID != uint(id) && (req.UserName != "" || req.DisplayName != "" || req.Email != "" || req.RoleType != "") {
+		if currentUser.ID != uint(id) {
 			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request, not allow update info of other account"), nil)
-		}
-		if req.Password != "" {
-			if !slices.Contains([]model.RoleType{model.STREAMER, model.USERROLE}, targetUser.Role.Type) && currentUser.ID != uint(id) {
-				return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request, just allow change password self and streamer, user"), nil)
-			}
 		}
 	}
 
@@ -228,6 +224,58 @@ func (h *userHandler) updateUser(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 	adminLog := h.srv.Admin.MakeAdminLogModel(uint(id), model.UpdateUserAction, fmt.Sprintf(" %s update_user request", currentUser.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
+	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
+}
+
+func (h *userHandler) changePassword(c echo.Context) error {
+	var err error
+	var id int
+	var req dto.ChangePasswordRequest
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	if c.Param("id") != "" {
+		id, err = strconv.Atoi(c.Param("id"))
+		if err != nil {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
+		}
+	}
+
+	if req.Password != req.ConfirmPassword {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("password not match confirm_password"), nil)
+	}
+
+	currentUser := c.Get("user").(*utils.Claims)
+
+	targetUser, err := h.srv.User.FindByID(uint(id))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	if targetUser == nil {
+		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
+	}
+
+	var data *dto.UpdateUserResponse
+	// validate admin user
+	if currentUser.RoleType == model.ADMINROLE {
+		if !slices.Contains([]model.RoleType{model.STREAMER, model.USERROLE}, targetUser.Role.Type) && currentUser.ID != uint(id) {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request, just allow change password self and streamer, user"), nil)
+		}
+	}
+
+	data, err = h.srv.User.ChangePassword(targetUser, &req, uint(id), currentUser.ID)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.ChangeUserPasswordAction, fmt.Sprintf(" %s change_user_password request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 
