@@ -2,7 +2,6 @@ package service
 
 import (
 	"database/sql"
-	"errors"
 	"gitlab/live/be-live-admin/cache"
 	"gitlab/live/be-live-admin/dto"
 	"gitlab/live/be-live-admin/model"
@@ -105,34 +104,47 @@ func (s *UserService) toUpdatedUserDTO(user *model.User, role model.RoleType) *d
 	}
 }
 
+func (s *UserService) makeUpdatedUserModel(user *model.User, updatedUser *dto.UpdateUserRequest) (*model.User, error) {
+	if updatedUser.UserName != "" {
+		user.Username = updatedUser.UserName
+	}
+	if updatedUser.DisplayName != "" {
+		user.DisplayName = updatedUser.DisplayName
+	}
+	if updatedUser.Email != "" {
+		user.Email = updatedUser.Email
+	}
+	if updatedUser.RoleType != "" {
+		role, err := s.repo.Role.FindByType(updatedUser.RoleType)
+		if err != nil {
+			return nil, err
+		}
+		user.Role = *role
+	}
+
+	user.UpdatedBy = nil
+	user.UpdatedByID = updatedUser.UpdatedByID
+	user.UpdatedAt = time.Now()
+
+	return user, nil
+}
+
 func (s *UserService) UpdateUser(updatedUser *dto.UpdateUserRequest, id uint) (*dto.UpdateUserResponse, error) {
 
 	user, err := s.repo.Admin.ById(id)
 	if err != nil {
 		return nil, err
 	}
+	makeUpdatedUser, err := s.makeUpdatedUserModel(user, updatedUser)
 
-	if user.Role.Type == model.ADMINROLE {
-		return nil, errors.New("invalid user")
+	if updatedUser.Password != "" {
+		makeUpdatedUser.PasswordHash, err = utils.HashPassword(updatedUser.Password)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	role, err := s.repo.Role.FindByType(updatedUser.RoleType)
-	if err != nil {
-		return nil, err
-	}
-
-	user.Username = updatedUser.UserName
-	user.DisplayName = updatedUser.DisplayName
-	user.Email = updatedUser.Email
-	user.Role = *role
-	if updatedUser.AvatarFileName != "" {
-		user.AvatarFileName = sql.NullString{String: updatedUser.AvatarFileName, Valid: true}
-	}
-	user.UpdatedBy = nil
-	user.UpdatedByID = updatedUser.UpdatedByID
-	user.UpdatedAt = time.Now()
-
-	if err := s.repo.User.Update(user); err != nil {
+	if err := s.repo.User.Update(makeUpdatedUser); err != nil {
 		return nil, err
 	}
 

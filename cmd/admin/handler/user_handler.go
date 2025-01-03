@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -195,7 +196,34 @@ func (h *userHandler) updateUser(c echo.Context) error {
 
 	currentUser := c.Get("user").(*utils.Claims)
 	req.UpdatedByID = &currentUser.ID
-	data, err := h.srv.User.UpdateUser(&req, uint(id))
+
+	targetUser, err := h.srv.User.FindByID(uint(id))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	if targetUser == nil {
+		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
+	}
+
+	var data *dto.UpdateUserResponse
+	// validate super admin user
+	if currentUser.RoleType == model.SUPPERADMINROLE {
+		if currentUser.ID == uint(id) {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("super admin don't update itself"), nil)
+		}
+	} else {
+		// validate admin user
+		if currentUser.ID != uint(id) && (req.UserName != "" || req.DisplayName != "" || req.Email != "" || req.RoleType != "") {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request, not allow update info of other account"), nil)
+		}
+		if req.Password != "" {
+			if !slices.Contains([]model.RoleType{model.STREAMER, model.USERROLE}, targetUser.Role.Type) && currentUser.ID != uint(id) {
+				return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request, just allow change password self and streamer, user"), nil)
+			}
+		}
+	}
+
+	data, err = h.srv.User.UpdateUser(&req, uint(id))
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}

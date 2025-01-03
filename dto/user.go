@@ -58,12 +58,12 @@ type AdminLogDTO struct {
 }
 
 type UpdateUserRequest struct {
-	UserName       string         `json:"username" validate:"required,min=3,max=50"`
-	Email          string         `json:"email" validate:"required,email,max=100"`
-	DisplayName    string         `json:"display_name" validate:"required,min=3,max=100"`
-	RoleType       model.RoleType `json:"role_type" validate:"required,oneof=admin streamer user"`
-	AvatarFileName string         `json:"avatar_file_name" validate:"omitempty,min=3,max=200"`
-	UpdatedByID    *uint          `json:"updated_by_id"`
+	UserName    string         `json:"username" validate:"omitempty,min=3,max=50"`
+	Email       string         `json:"email" validate:"omitempty,email,max=100"`
+	DisplayName string         `json:"display_name" validate:"omitempty,min=3,max=100"`
+	Password    string         `json:"password" form:"password" validate:"omitempty,min=6,max=255"`
+	RoleType    model.RoleType `json:"role_type" validate:"omitempty,oneof=admin streamer user"`
+	UpdatedByID *uint          `json:"updated_by_id"`
 }
 
 type UpdateUserResponse struct {

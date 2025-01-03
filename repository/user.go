@@ -97,7 +97,7 @@ func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 
 func (r *UserRepository) FindByID(id int) (*model.User, error) {
 	var user model.User
-	if err := r.db.Where("id = ?", id).First(&user).Error; err != nil {
+	if err := r.db.Where("id = ?", id).Preload("Role").First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil // User not found
 		}
