@@ -20,7 +20,7 @@ var cfg *Config
 
 type Config struct {
 	DB           DBConfig           `yaml:"database"`
-	Redis        DBConfig           `yaml:"redis"`
+	Redis        RedisConfig        `yaml:"redis"`
 	Web          ApplicationConfig  `yaml:"web"`
 	FileStorage  FileStorageConfig  `yaml:"file_storage"`
 	StreamServer StreamServerConfig `yaml:"stream_server"`
@@ -145,6 +145,10 @@ func init() {
 
 func GetDatabaseConfig() *DBConfig {
 	return &cfg.DB
+}
+
+func GetRedisConfig() *RedisConfig {
+	return &cfg.Redis
 }
 
 func GetApplicationConfig() *ApplicationConfig {

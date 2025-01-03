@@ -6,13 +6,16 @@ import (
 	"gitlab/live/be-live-admin/model"
 	"gitlab/live/be-live-admin/repository"
 	"gitlab/live/be-live-admin/utils"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type AdminService struct {
-	repo  *repository.Repository
-	redis *redis.Client
+	repo *repository.Repository
+}
+
+func newAdminService(repo *repository.Repository) *AdminService {
+	return &AdminService{
+		repo: repo,
+	}
 }
 
 func (s *AdminService) toCreateAdminDto(user *model.User) *dto.CreateAdminResp {
@@ -145,10 +148,4 @@ func (s *AdminService) GetAdminLogs(req *dto.AdminLogQuery) (*utils.PaginationMo
 
 func (s *AdminService) CreateLog(adminLog *model.AdminLog) error {
 	return s.repo.Admin.Create(adminLog)
-}
-func newAdminService(repo *repository.Repository, redis *redis.Client) *AdminService {
-	return &AdminService{
-		repo:  repo,
-		redis: redis,
-	}
 }

@@ -6,19 +6,15 @@ import (
 	"gitlab/live/be-live-admin/repository"
 	"gitlab/live/be-live-admin/utils"
 	"time"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type CategoryService struct {
-	repo  *repository.Repository
-	redis *redis.Client
+	repo *repository.Repository
 }
 
-func newCategoryService(repo *repository.Repository, redis *redis.Client) *CategoryService {
+func newCategoryService(repo *repository.Repository) *CategoryService {
 	return &CategoryService{
-		repo:  repo,
-		redis: redis,
+		repo: repo,
 	}
 
 }

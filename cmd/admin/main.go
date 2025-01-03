@@ -50,7 +50,7 @@ func main() {
 	streamServerConfig := conf.GetStreamServerConfig()
 	streamServer := service.NewStreamServerService(streamServerConfig.HTTPURL, streamServerConfig.RTMPURL)
 	//roleService := service.NewRoleService(repo, ds.RClient)
-	srv := service.NewService(repo, ds.RClient, streamServer)
+	srv := service.NewService(repo, ds.RedisStore, streamServer)
 	conf.SeedRoles(srv.Role)
 	conf.SeedSuperAdminUser(srv.User, srv.Role)
 

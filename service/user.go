@@ -3,24 +3,23 @@ package service
 import (
 	"database/sql"
 	"errors"
+	"gitlab/live/be-live-admin/cache"
 	"gitlab/live/be-live-admin/dto"
 	"gitlab/live/be-live-admin/model"
 	"gitlab/live/be-live-admin/repository"
 	"gitlab/live/be-live-admin/utils"
 	"time"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type UserService struct {
-	repo  *repository.Repository
-	redis *redis.Client
+	repo       *repository.Repository
+	redisStore cache.RedisStore
 }
 
-func newUserService(repo *repository.Repository, redis *redis.Client) *UserService {
+func newUserService(repo *repository.Repository, redis cache.RedisStore) *UserService {
 	return &UserService{
-		repo:  repo,
-		redis: redis,
+		repo:       repo,
+		redisStore: redis,
 	}
 
 }

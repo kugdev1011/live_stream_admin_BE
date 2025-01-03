@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"gitlab/live/be-live-admin/cache"
 	"gitlab/live/be-live-admin/dto"
 	"gitlab/live/be-live-admin/model"
 	"gitlab/live/be-live-admin/repository"
@@ -11,20 +12,19 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 type StreamService struct {
 	repo         *repository.Repository
-	redis        *redis.Client
+	redisStore   cache.RedisStore
 	streamServer *streamServerService
 }
 
-func newStreamService(repo *repository.Repository, redis *redis.Client, streamServer *streamServerService) *StreamService {
+func newStreamService(repo *repository.Repository, redis cache.RedisStore, streamServer *streamServerService) *StreamService {
 	return &StreamService{
 		repo:         repo,
-		redis:        redis,
+		redisStore:   redis,
 		streamServer: streamServer,
 	}
 
