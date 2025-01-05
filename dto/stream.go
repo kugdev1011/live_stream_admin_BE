@@ -28,3 +28,20 @@ type UpdateScheduledStreamRequest struct {
 	UpdateStreamRequest
 	ScheduledAt string `json:"scheduled_at" form:"scheduled_at" validate:"required,datetime=2006-01-02 15:04:05.999 -0700"` //expect in utc
 }
+
+const (
+	SORT_BY_DURATION        = "duration"
+	SORT_BY_CURRENT_VIEWERS = "currents_viewers"
+	SORT_BY_DESCRIPTION     = "description"
+	SORT_BY_TITLE           = "title"
+	SORT_BY_TOTAL_VIEWERS   = "total_viewers"
+	SORT_BY_VIEWERS         = "views"
+	SORT_BY_LIKES           = "likes"
+	SORT_BY_COMMENTS        = "comments"
+	SORT_BY_VIDEO_SIZE      = "video_size"
+)
+
+const (
+	SORT_DESC = "DESC"
+	SORT_ASC  = "ASC"
+)

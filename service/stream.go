@@ -55,12 +55,12 @@ func (s *StreamService) sortByDuration(a []dto.LiveStreamRespDTO, sort string) [
 
 	// Pile elements smaller than the pivot on the left
 	for i := range a {
-		if a[i].Duration < a[right].Duration && sort == "ASC" {
+		if a[i].Duration < a[right].Duration && sort == dto.SORT_ASC {
 			a[i], a[left] = a[left], a[i]
 			left++
 		}
 
-		if a[i].Duration > a[right].Duration && sort == "DESC" {
+		if a[i].Duration > a[right].Duration && sort == dto.SORT_DESC {
 			a[i], a[left] = a[left], a[i]
 			left++
 		}
@@ -91,12 +91,12 @@ func (s *StreamService) sortByCurrentViewers(a []dto.LiveStatRespDTO, sort strin
 
 	// Pile elements smaller than the pivot on the left
 	for i := range a {
-		if a[i].CurrentViewers < a[right].CurrentViewers && sort == "ASC" {
+		if a[i].CurrentViewers < a[right].CurrentViewers && sort == dto.SORT_ASC {
 			a[i], a[left] = a[left], a[i]
 			left++
 		}
 
-		if a[i].CurrentViewers > a[right].CurrentViewers && sort == "DESC" {
+		if a[i].CurrentViewers > a[right].CurrentViewers && sort == dto.SORT_DESC {
 			a[i], a[left] = a[left], a[i]
 			left++
 		}
@@ -134,7 +134,7 @@ func (s *StreamService) GetStreamAnalyticsData(req *dto.StatisticsQuery) (*utils
 		live_stream_dto.Duration = int64(v.Duration)
 		result.Page = append(result.Page, *live_stream_dto)
 	}
-	if req != nil && req.SortBy == "duration" && req.Sort != "" {
+	if req != nil && req.SortBy == dto.SORT_BY_DURATION && req.Sort != "" {
 		result.Page = s.sortByDuration(result.Page, req.Sort)
 	}
 	return result, nil
@@ -187,7 +187,7 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 
 	// scheduleStream if exist
 	scheduleStream, err := s.repo.Stream.GetScheduleStreamByStreamID(int(v.ID))
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Println(err.Error())
 		return nil
 	}
@@ -222,7 +222,7 @@ func (s *StreamService) GetLiveStreamBroadCastWithPagination(page, limit uint, r
 		result.Page = append(result.Page, *liveStreamDto)
 	}
 
-	if req != nil && req.SortBy == "duration" && req.Sort != "" {
+	if req != nil && req.SortBy == dto.SORT_BY_DURATION && req.Sort != "" {
 
 		var containAnalytics, notContainAnalytics []dto.LiveStreamBroadCastDTO
 		for _, v := range result.Page {
@@ -411,9 +411,9 @@ func (s *StreamService) GetLiveStatWithPagination(req *dto.LiveStatQuery) (*util
 
 	}
 
-	if req.SortBy == "current_viewers" && req.Sort != "" {
+	if req.SortBy == dto.SORT_BY_CURRENT_VIEWERS && req.Sort != "" {
 		result.Page = s.sortByCurrentViewers(containCurrentViewers, req.Sort)
-		if req.Sort == "DESC" {
+		if req.Sort == dto.SORT_DESC {
 			result.Page = append(result.Page, notContainCurrentViewers...)
 		} else {
 			result.Page = append(notContainCurrentViewers, result.Page...)
