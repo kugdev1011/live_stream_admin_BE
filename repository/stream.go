@@ -36,7 +36,7 @@ func (s *StreamRepository) PaginateStreamStatisticsData(cond *dto.StatisticsQuer
 			}
 		}
 	} else {
-		query = query.Order(fmt.Sprintf("stream_analytics.%s %s", "created_at", "DESC"))
+		query = query.Order(fmt.Sprintf("stream_analytics.%s %s", "created_at", dto.SORT_DESC))
 	}
 
 	if cond != nil {
@@ -71,10 +71,10 @@ func (s *StreamRepository) PaginateLiveStatData(cond *dto.LiveStatQuery) (*utils
 		}
 
 		if cond.SortBy != "" && cond.Sort != "" {
-			if !strings.Contains(cond.SortBy, "title") && !strings.Contains(cond.SortBy, "description") {
-				if strings.Contains(cond.SortBy, "total_viewers") {
+			if !strings.Contains(cond.SortBy, dto.SORT_BY_TITLE) && !strings.Contains(cond.SortBy, dto.SORT_BY_DESCRIPTION) {
+				if strings.Contains(cond.SortBy, dto.SORT_BY_TOTAL_VIEWERS) {
 					query = query.Order(fmt.Sprintf("stream_analytics.views %s", cond.Sort))
-				} else if !strings.Contains(cond.SortBy, "current_viewers") {
+				} else if !strings.Contains(cond.SortBy, dto.SORT_BY_CURRENT_VIEWERS) {
 					query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
 				}
 			} else {
@@ -148,8 +148,8 @@ func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit uint, con
 			query = query.Where("streams.ended_at BETWEEN ? AND ?", from, end)
 		}
 
-		if cond.Sort != "" && cond.SortBy != "" && cond.SortBy != "duration" {
-			if slices.Contains([]string{"views", "likes", "comments", "video_size"}, cond.SortBy) {
+		if cond.Sort != "" && cond.SortBy != "" && cond.SortBy != dto.SORT_BY_DURATION {
+			if slices.Contains([]string{dto.SORT_BY_VIEWERS, dto.SORT_BY_LIKES, dto.SORT_BY_COMMENTS, dto.SORT_BY_VIDEO_SIZE}, cond.SortBy) {
 				query = query.Joins("LEFT JOIN stream_analytics ON streams.id = stream_analytics.stream_id")
 				query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
 			} else {
