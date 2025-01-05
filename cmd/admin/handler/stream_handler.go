@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"gitlab/live/be-live-admin/cache"
 	"gitlab/live/be-live-admin/conf"
 	"gitlab/live/be-live-admin/dto"
 	"gitlab/live/be-live-admin/model"
@@ -12,8 +13,10 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 type streamHandler struct {
@@ -65,6 +68,7 @@ func (h *streamHandler) register() {
 	group.PATCH("/:id", h.updateLiveStreamByAdmin)
 	group.PATCH("/:id/scheduled", h.updateScheduledStreamByAdmin)
 	group.DELETE("/:id", h.deleteLiveStream)
+	group.POST("/:id/end_live", h.endLiveStream)
 
 }
 
@@ -420,4 +424,38 @@ func (h *streamHandler) getLiveStreamWithPagination(c echo.Context) error {
 
 	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", data)
 
+}
+
+func (h *streamHandler) endLiveStream(c echo.Context) error {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
+	}
+
+	stream, err := h.srv.Stream.GetStreamByID(uint(id))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id"), nil)
+		}
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	if stream.Status != model.STARTED {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("you can't end a live stream which is not started"), nil)
+	}
+
+	isEndingLive, err := h.srv.Stream.IsEndingLive(c.Request().Context(), stream.ID)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	if isEndingLive {
+		return utils.BuildSuccessResponse(c, http.StatusAccepted, "Stream is ending. Wait for a few minutes", nil)
+	}
+	cacheKey := fmt.Sprintf(cache.IS_ENDING_LIVE_PREFIX, stream.ID)
+	if err := h.srv.SetCache(c.Request().Context(), cacheKey, true, time.Hour); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Stream is ending. Wait for a few minutes", nil)
 }
