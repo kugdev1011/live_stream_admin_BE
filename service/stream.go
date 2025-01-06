@@ -457,3 +457,14 @@ func (s *StreamService) IsEndingLive(ctx context.Context, id uint) (bool, error)
 	return isEndingLive, nil
 
 }
+
+func (s *StreamService) EndLivByRedis(ctx context.Context, id uint) error {
+	cacheKey := fmt.Sprintf(cache.IS_ENDING_LIVE_PREFIX, id)
+	if err := s.redisStore.Set(ctx, cacheKey, true, time.Hour); err != nil {
+		return err
+	}
+
+	channelKey := fmt.Sprintf(cache.CHANNEL_END_LIVE, id)
+
+	return s.redisStore.Publish(ctx, channelKey, true)
+}

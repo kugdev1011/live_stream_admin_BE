@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"gitlab/live/be-live-admin/cache"
 	"gitlab/live/be-live-admin/conf"
 	"gitlab/live/be-live-admin/dto"
 	"gitlab/live/be-live-admin/model"
@@ -13,7 +12,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -452,8 +450,7 @@ func (h *streamHandler) endLiveStream(c echo.Context) error {
 	if isEndingLive {
 		return utils.BuildSuccessResponse(c, http.StatusAccepted, "Stream is ending. Wait for a few minutes", nil)
 	}
-	cacheKey := fmt.Sprintf(cache.IS_ENDING_LIVE_PREFIX, stream.ID)
-	if err := h.srv.SetCache(c.Request().Context(), cacheKey, true, time.Hour); err != nil {
+	if err := h.srv.Stream.EndLivByRedis(c.Request().Context(), stream.ID); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 

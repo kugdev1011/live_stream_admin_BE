@@ -20,11 +20,12 @@ type Service struct {
 
 func NewService(repo *repository.Repository, redis cache.RedisStore, streamServer *streamServerService) *Service {
 	return &Service{
-		User:     newUserService(repo, redis),
-		Admin:    newAdminService(repo),
-		Role:     NewRoleService(repo),
-		Category: newCategoryService(repo),
-		Stream:   newStreamService(repo, redis, streamServer),
+		User:       newUserService(repo, redis),
+		Admin:      newAdminService(repo),
+		Role:       NewRoleService(repo),
+		Category:   newCategoryService(repo),
+		Stream:     newStreamService(repo, redis, streamServer),
+		redisStore: redis,
 	}
 }
 
