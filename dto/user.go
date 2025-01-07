@@ -67,6 +67,7 @@ type UpdateUserRequest struct {
 
 type UpdateUserResponse struct {
 	UserName    string         `json:"username,omitempty"`
+	Avatar      string         `json:"avatar"`
 	DisplayName string         `json:"display_name,omitempty"`
 	Email       string         `json:"email,omitempty"`
 	Role        model.RoleType `json:"role,omitempty"`
@@ -86,4 +87,9 @@ type CreateUserRequest struct {
 type ChangePasswordRequest struct {
 	Password        string `json:"password" form:"password" validate:"required,min=6,max=255"`
 	ConfirmPassword string `json:"confirm_password" form:"confirm_password" validate:"required,min=6,max=255"`
+}
+
+type ChangeAvatarRequest struct {
+	AvatarFileName string `json:"-" form:"-"`
+	UpdatedByID    *uint  `json:"-" form:"-"`
 }

@@ -17,6 +17,7 @@ const (
 	CreateUserAction         AdminAction = "create_user"
 	UpdateUserAction         AdminAction = "update_user"
 	ChangeUserPasswordAction AdminAction = "change_user_password"
+	ChangeAvatarByAdmin      AdminAction = "change_avatar_by_admin"
 	DeleteUserAction         AdminAction = "delete_user"
 	LiveBroadCastByID        AdminAction = "live_broad_cast_by_id"
 	DeleteLiveStreamByAdmin  AdminAction = "delete_live_stream_by_admin"

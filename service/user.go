@@ -104,6 +104,7 @@ func (s *UserService) toUpdatedUserDTO(user *model.User, role model.RoleType) *d
 		DisplayName: user.DisplayName,
 		Email:       user.Email,
 		UpdatedAt:   user.UpdatedAt,
+		Avatar:      user.AvatarFileName.String,
 		Role:        role,
 	}
 }
@@ -164,6 +165,19 @@ func (s *UserService) ChangePassword(user *model.User, changePassword *dto.Chang
 	}
 
 	return s.toUpdatedUserDTO(user, user.Role.Type), err
+}
+
+func (s *UserService) ChangeAvatar(user *model.User, changeAvartar *dto.ChangeAvatarRequest, id uint, updatedByID uint) (*dto.UpdateUserResponse, error) {
+
+	user.UpdatedByID = &updatedByID
+	user.AvatarFileName = sql.NullString{Valid: true, String: changeAvartar.AvatarFileName}
+	user.UpdatedBy = nil
+
+	if err := s.repo.User.Update(user); err != nil {
+		return nil, err
+	}
+
+	return s.toUpdatedUserDTO(user, user.Role.Type), nil
 }
 
 func (s *UserService) CreateUser(request *dto.CreateUserRequest) error {
