@@ -90,7 +90,7 @@ type LiveStreamBroadCastDTO struct {
 
 type ScheduleStreamDTO struct {
 	ScheduledAt time.Time `json:"scheduled_at"`
-	VideoName   string    `json:"video_name"`
+	VideoURL    string    `json:"video_url"`
 }
 
 type CategoryDTO struct {
