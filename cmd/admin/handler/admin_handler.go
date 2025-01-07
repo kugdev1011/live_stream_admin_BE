@@ -55,6 +55,10 @@ func (h *adminHandler) byId(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
+	if data == nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("not found"), nil)
+	}
+
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 
 }
