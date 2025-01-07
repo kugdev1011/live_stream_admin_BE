@@ -51,6 +51,7 @@ func (h *userHandler) register() {
 	group.POST("", h.createUser)
 	group.PUT("/:id", h.updateUser)
 	group.PATCH("/:id/change-password", h.changePassword)
+	group.PATCH("/:id/change-avatar", h.changeAvatar)
 	group.GET("/:id", h.byId)
 	group.DELETE("/:id", h.deleteByID)
 
@@ -155,7 +156,7 @@ func (h *userHandler) createUser(c echo.Context) error {
 		// save avatar
 		fileExt := utils.GetFileExtension(file)
 		req.AvatarFileName = fmt.Sprintf("%s%s", utils.MakeUniqueIDWithTime(), fileExt)
-		avatarPath := fmt.Sprintf("%s/%s", h.avatarFolder, req.AvatarFileName)
+		avatarPath := fmt.Sprintf("%s%s", h.avatarFolder, req.AvatarFileName)
 
 		src, err := file.Open()
 
@@ -192,6 +193,96 @@ func (h *userHandler) createUser(c echo.Context) error {
 	}
 
 	return utils.BuildSuccessResponseWithData(c, http.StatusCreated, nil)
+}
+
+func (h *userHandler) changeAvatar(c echo.Context) error {
+
+	var req dto.ChangeAvatarRequest
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
+	}
+
+	currentUser := c.Get("user").(*utils.Claims)
+	req.UpdatedByID = &currentUser.ID
+
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+	if file != nil {
+
+		isImage, err := utils.IsImage(file)
+		if err != nil {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+
+		if !isImage {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("file is not an image"), nil)
+		}
+
+		if file.Size > utils.MAX_IMAGE_SIZE {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, nil, "Image size exceeds the 1MB limit")
+		}
+
+		// save avatar
+		fileExt := utils.GetFileExtension(file)
+		req.AvatarFileName = fmt.Sprintf("%s%s", utils.MakeUniqueIDWithTime(), fileExt)
+		avatarPath := fmt.Sprintf("%s%s", h.avatarFolder, req.AvatarFileName)
+
+		src, err := file.Open()
+
+		if err != nil {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+
+		defer src.Close()
+
+		dst, err := os.Create(avatarPath)
+		if err != nil {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+		defer dst.Close()
+
+		if _, err = io.Copy(dst, src); err != nil {
+			if err := os.Remove(avatarPath); err != nil {
+				log.Println(err)
+			}
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+		//
+	}
+
+	updatedUser, err := h.srv.User.FindByID(uint(id))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	if updatedUser == nil {
+		return utils.BuildErrorResponse(c, http.StatusNotFound, err, nil)
+	}
+
+	// remove avatar
+	if updatedUser.AvatarFileName.Valid {
+
+		avatarPath := fmt.Sprintf("%s%s", h.avatarFolder, updatedUser.AvatarFileName.String)
+		avatarsToRemove := []string{avatarPath}
+		go utils.RemoveFiles(avatarsToRemove)
+	}
+
+	data, err := h.srv.User.ChangeAvatar(updatedUser, &req, uint(id), currentUser.ID)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.ChangeAvatarByAdmin, fmt.Sprintf(" %s make changeAvatar request", currentUser.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
+	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 }
 
 func (h *userHandler) updateUser(c echo.Context) error {

@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"gitlab/live/be-live-admin/conf"
 	"gitlab/live/be-live-admin/dto"
 	"gitlab/live/be-live-admin/model"
 	"gitlab/live/be-live-admin/service"
@@ -16,14 +17,17 @@ import (
 
 type authHandler struct {
 	Handler
-	r   *echo.Group
-	srv *service.Service
+	r      *echo.Group
+	srv    *service.Service
+	apiURL string
 }
 
 func newAuthHandler(r *echo.Group, srv *service.Service) *authHandler {
+	apiURL := conf.GetApiFileConfig().Url
 	auth := &authHandler{
-		r:   r,
-		srv: srv,
+		r:      r,
+		srv:    srv,
+		apiURL: apiURL,
 	}
 
 	auth.register()
@@ -71,8 +75,13 @@ func (h *authHandler) login(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 
+	var avartarFileName = ""
+	if user.AvatarFileName.Valid {
+		avartarFileName = utils.MakeAvatarURL(h.apiURL, user.AvatarFileName.String)
+	}
 	response := map[string]interface{}{
 		"id":           user.ID,
+		"avartar":      avartarFileName,
 		"username":     user.Username,
 		"email":        user.Email,
 		"role":         user.Role.Type,
