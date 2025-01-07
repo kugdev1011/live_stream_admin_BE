@@ -46,7 +46,6 @@ func (h *userHandler) register() {
 	group := h.r.Group("api/users")
 
 	group.Use(h.JWTMiddleware())
-	group.Use(h.RoleGuardMiddleware())
 	group.GET("", h.page)
 	group.GET("/list-username", h.getUsernameList)
 	group.POST("", h.createUser)

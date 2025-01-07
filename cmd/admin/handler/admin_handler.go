@@ -37,7 +37,6 @@ func (h *adminHandler) register() {
 	group := h.r.Group("api/admins")
 
 	group.Use(h.JWTMiddleware())
-	group.Use(h.RoleGuardMiddleware())
 	group.POST("", h.createAdmin)
 	group.GET("/logs", h.getAdminLogs)
 	group.GET("/:id", h.byId)

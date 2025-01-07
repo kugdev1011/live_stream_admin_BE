@@ -32,7 +32,6 @@ func (h *categoryHandler) register() {
 	group := h.r.Group("api/categories")
 
 	group.Use(h.JWTMiddleware())
-	group.Use(h.RoleGuardMiddleware())
 	group.GET("", h.getAll)
 	group.POST("", h.create)
 }
