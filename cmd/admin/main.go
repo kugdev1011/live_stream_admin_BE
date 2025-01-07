@@ -6,7 +6,6 @@ import (
 	"gitlab/live/be-live-admin/cmd/admin/handler"
 	"gitlab/live/be-live-admin/conf"
 	"gitlab/live/be-live-admin/datasource"
-	cmiddleware "gitlab/live/be-live-admin/middleware"
 	"gitlab/live/be-live-admin/model"
 	"gitlab/live/be-live-admin/repository"
 	"gitlab/live/be-live-admin/service"
@@ -69,7 +68,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// it would be messed up if config change to other paths
-	e.Use(cmiddleware.ExcludePathMiddleware("/api/file/recordings/", "/api/file/scheduled_videos/"))
+	//e.Use(cmiddleware.ExcludePathMiddleware("/api/file/recordings/", "/api/file/scheduled_videos/"))
 
 	// Use CORS middleware, for local run
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
