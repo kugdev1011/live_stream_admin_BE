@@ -72,6 +72,7 @@ func (h *authHandler) login(c echo.Context) error {
 	}
 
 	response := map[string]interface{}{
+		"id":           user.ID,
 		"username":     user.Username,
 		"email":        user.Email,
 		"role":         user.Role.Type,

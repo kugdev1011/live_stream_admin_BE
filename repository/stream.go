@@ -265,14 +265,14 @@ func (r *StreamRepository) DeleteLiveStream(id int) error {
 	return tx.Commit().Error
 
 }
-func (r *StreamRepository) GetCategoriesByStreamID(id uint) ([]string, error) {
+func (r *StreamRepository) GetCategoriesByStreamID(id uint) ([]model.Category, error) {
 	var streamCategories []model.StreamCategory
 	if err := r.db.Model(model.StreamCategory{}).Where("stream_id = ?", id).Preload("Category").Find(&streamCategories).Error; err != nil {
 		return nil, err
 	}
-	var result []string
+	var result []model.Category
 	for _, v := range streamCategories {
-		result = append(result, v.Category.Name)
+		result = append(result, v.Category)
 	}
 
 	return result, nil

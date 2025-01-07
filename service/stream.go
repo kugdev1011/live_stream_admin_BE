@@ -203,7 +203,9 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 		return nil
 	}
 	if len(categories) > 0 {
-		liveStreamDto.Categories = categories
+		liveStreamDto.Categories = utils.Map(categories, func(category model.Category) dto.CategoryDTO {
+			return dto.CategoryDTO{ID: category.ID, Name: category.Name, CreatedAt: category.CreatedAt}
+		})
 	}
 	return liveStreamDto
 }
