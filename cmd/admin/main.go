@@ -69,7 +69,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// it would be messed up if config change to other paths
-	e.Use(cmiddleware.ExcludePathMiddleware("/api/file/recordings/", ""))
+	e.Use(cmiddleware.ExcludePathMiddleware("/api/file/recordings/"))
 
 	// Use CORS middleware, for local run
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
