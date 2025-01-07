@@ -8,6 +8,7 @@ import (
 	"gitlab/live/be-live-admin/service"
 	"gitlab/live/be-live-admin/utils"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -49,13 +50,15 @@ func (h *authHandler) login(c echo.Context) error {
 	}
 
 	user, err := h.srv.User.FindByEmail(loginDTO.Email)
-
 	if err != nil || user == nil || !utils.CheckPasswordHash(loginDTO.Password, user.PasswordHash) {
 		return utils.BuildErrorResponse(c, http.StatusUnauthorized, errors.New("invalid username or password"), nil)
 	}
 
-	roleType := model.RoleType(user.Role.Type)
-	token, expiredTime, err := utils.GenerateAccessToken(user.ID, user.Username, user.Email, roleType) // createdByID is current user id login
+	if !slices.Contains([]model.RoleType{model.ADMINROLE, model.SUPPERADMINROLE}, user.Role.Type) {
+		return utils.BuildErrorResponse(c, http.StatusUnauthorized, errors.New("you have no permission to login"), nil)
+	}
+
+	token, expiredTime, err := utils.GenerateAccessToken(user.ID, user.Username, user.Email, user.Role.Type) // createdByID is current user id login
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
