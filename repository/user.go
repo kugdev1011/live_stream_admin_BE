@@ -182,7 +182,7 @@ func (r *UserRepository) GetUserStatistics(req *dto.UserStatisticsRequest) (*uti
 		Joins("LEFT JOIN comments c ON u.id = c.user_id").
 		Joins("LEFT JOIN subscriptions sub ON u.id = sub.subscriber_id").
 		Joins("LEFT JOIN views v ON u.id = v.user_id").
-		Where("u.role_id != (SELECT id FROM roles WHERE type = ?)", "super_admin").
+		Where("u.username != ?", "superAdmin").
 		Group("u.id, u.username, u.display_name")
 
 	if req.Keyword != "" {
