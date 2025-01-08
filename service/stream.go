@@ -194,6 +194,7 @@ func (s *StreamService) toLiveStreamBroadCastDto(v *model.Stream, apiUrl, rtmpUR
 	if scheduleStream != nil {
 		liveStreamDto.ScheduleStream = new(dto.ScheduleStreamDTO)
 		liveStreamDto.ScheduleStream.VideoURL = utils.MakeScheduleVideoURL(apiUrl, scheduleStream.VideoName)
+		liveStreamDto.ScheduleStream.VideoName = scheduleStream.VideoName
 		liveStreamDto.ScheduleStream.ScheduledAt = scheduleStream.ScheduledAt
 	}
 
