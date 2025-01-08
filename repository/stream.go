@@ -367,3 +367,7 @@ func (r *StreamRepository) UpdateStream(stream *model.Stream, scheduleStream *mo
 
 	return tx.Commit().Error
 }
+
+func (r *StreamRepository) UpdateThumbnailStream(id int, thumbnail string) error {
+	return r.db.Model(model.Stream{}).Where("id=?", id).Update("thumbnail_file_name", thumbnail).Error
+}

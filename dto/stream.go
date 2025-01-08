@@ -29,6 +29,11 @@ type UpdateScheduledStreamRequest struct {
 	ScheduledAt string `json:"scheduled_at" form:"scheduled_at" validate:"required,datetime=2006-01-02 15:04:05.999 -0700"` //expect in utc
 }
 
+type UpdateStreamThumbnailRequest struct {
+	ThumbnailFileName string `json:"-" form:"-"`
+	UpdatedByID       uint   `json:"-" form:"-"`
+}
+
 const (
 	SORT_BY_DURATION        = "duration"
 	SORT_BY_CURRENT_VIEWERS = "currents_viewers"
