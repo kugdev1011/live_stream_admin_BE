@@ -238,3 +238,7 @@ func (s *UserService) UpdatePassword(userID uint, hashedPassword string) error {
 func (s *UserService) CheckUserTypeByID(id int) (*model.User, error) {
 	return s.repo.User.CheckUserTypeByID(id)
 }
+
+func (s *UserService) GetUserStatistics(req *dto.UserStatisticsRequest) (*utils.PaginationModel[dto.UserStatisticsResponse], error) {
+	return s.repo.User.GetUserStatistics(req)
+}

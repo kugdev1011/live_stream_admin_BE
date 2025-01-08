@@ -161,3 +161,52 @@ func (r *UserRepository) CheckUserTypeByID(id int) (*model.User, error) {
 	}
 	return &user, nil
 }
+
+// need to cache this query.
+// beaware views, likes and comments are handled by be-api.
+// so it will be hard to cache.
+func (r *UserRepository) GetUserStatistics(req *dto.UserStatisticsRequest) (*utils.PaginationModel[dto.UserStatisticsResponse], error) {
+	subQuery := r.db.Table("users u").
+		Select(`
+			u.id AS user_id,
+			u.username,
+			u.display_name,
+			COUNT(DISTINCT s.id) AS total_streams,
+			COUNT(DISTINCT l.id) AS total_likes,
+			COUNT(DISTINCT c.id) AS total_comments,
+			COUNT(DISTINCT sub.id) AS total_subscriptions,
+			COUNT(DISTINCT v.id) AS total_views
+		`).
+		Joins("LEFT JOIN streams s ON u.id = s.user_id").
+		Joins("LEFT JOIN likes l ON u.id = l.user_id").
+		Joins("LEFT JOIN comments c ON u.id = c.user_id").
+		Joins("LEFT JOIN subscriptions sub ON u.id = sub.subscriber_id").
+		Joins("LEFT JOIN views v ON u.id = v.user_id").
+		Where("u.role_id != (SELECT id FROM roles WHERE type = ?)", "super_admin").
+		Group("u.id, u.username, u.display_name")
+
+	if req.Keyword != "" {
+		subQuery = subQuery.Where("u.username ILIKE ?", "%"+req.Keyword+"%")
+		subQuery = subQuery.Or("u.display_name ILIKE ?", "%"+req.Keyword+"%")
+	}
+
+	// Wrap the subquery to enable sorting and pagination
+	query := r.db.Table("(?) as aggregated", subQuery)
+
+	defaultOrder := []string{"total_streams DESC", "total_likes DESC", "total_comments DESC", "total_views DESC"}
+
+	if req.Sort != "" && req.SortBy != "" {
+		query = query.Order(fmt.Sprintf("%s %s", req.SortBy, req.Sort))
+	} else {
+		for _, order := range defaultOrder {
+			query = query.Order(order)
+		}
+	}
+
+	pagination, err := utils.CreatePage[dto.UserStatisticsResponse](query, int(req.Page), int(req.Limit))
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.Create(pagination, int(req.Page), int(req.Limit))
+}

@@ -93,3 +93,25 @@ type ChangeAvatarRequest struct {
 	AvatarFileName string `json:"-" form:"-"`
 	UpdatedByID    *uint  `json:"-" form:"-"`
 }
+
+type UserStatisticsRequest struct {
+	Page    uint   `query:"page" validate:"min=1"`
+	Limit   uint   `query:"limit" validate:"min=1,max=20"`
+	SortBy  string `query:"sort_by" validate:"omitempty,oneof=user_id username display_name total_streams total_likes total_comments total_subscriptions total_views"`
+	Sort    string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	Keyword string `query:"keyword" validate:"omitempty,max=255"`
+}
+
+type UserStatisticsResponse struct {
+	UserID        uint   `json:"user_id"`
+	Username      string `json:"username"`
+	DisplayName   string `json:"display_name"`
+	TotalStreams  uint   `json:"total_streams"`
+	TotalLikes    uint   `json:"total_likes"`
+	TotalComments uint   `json:"total_comments"`
+	TotalViews    uint   `json:"total_views"`
+}
+
+func (r *UserStatisticsResponse) TableName() string {
+	return "users"
+}

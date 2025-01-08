@@ -54,6 +54,7 @@ func (h *userHandler) register() {
 	group.PATCH("/:id/change-avatar", h.changeAvatar)
 	group.GET("/:id", h.byId)
 	group.DELETE("/:id", h.deleteByID)
+	group.GET("/statistics", h.getUserStatistics)
 
 }
 
@@ -409,6 +410,21 @@ func (h *userHandler) page(c echo.Context) error {
 		limit = req.Limit
 	}
 	data, err := h.srv.User.GetUserList(&req, page, limit, h.apiURL)
+
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
+}
+
+func (h *userHandler) getUserStatistics(c echo.Context) error {
+	var req dto.UserStatisticsRequest
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	data, err := h.srv.User.GetUserStatistics(&req)
 
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
