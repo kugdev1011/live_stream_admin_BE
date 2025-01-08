@@ -64,6 +64,7 @@ func (h *streamHandler) register() {
 	group.POST("", h.createLiveStreamByAdmin)
 	group.PATCH("/:id", h.updateLiveStreamByAdmin)
 	group.PATCH("/:id/scheduled", h.updateScheduledStreamByAdmin)
+	group.PATCH("/:id/change-thumbnail", h.updateThumbnailByAdmin)
 	group.DELETE("/:id", h.deleteLiveStream)
 	group.POST("/:id/end_live", h.endLiveStream)
 
@@ -231,6 +232,90 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 		"description":   stream.Description,
 		"thumbnail_url": utils.MakeThumbnailURL(h.ApiURL, stream.ThumbnailFileName),
 	})
+}
+
+func (h *streamHandler) updateThumbnailByAdmin(c echo.Context) error {
+	var req dto.UpdateStreamThumbnailRequest
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
+	}
+
+	file, err := c.FormFile("thumbnail")
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, fmt.Sprintf("thumbnail field is required: %s", err.Error()))
+	}
+
+	stream, err := h.srv.Stream.GetStreamByID(uint(id))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	claims := c.Get("user").(*utils.Claims)
+	req.UpdatedByID = claims.ID
+
+	isImage, err := utils.IsImage(file)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	if !isImage {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("file is not an image"), nil)
+	}
+
+	if file.Size > utils.MAX_IMAGE_SIZE {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, nil, "Image size exceeds the 1MB limit")
+	}
+
+	// save thumbnail
+	fileExt := utils.GetFileExtension(file)
+	req.ThumbnailFileName = fmt.Sprintf("%d_%s%s", req.UpdatedByID, utils.MakeUniqueIDWithTime(), fileExt)
+	thumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, req.ThumbnailFileName)
+
+	filesToRemove := []string{thumbnailPath}
+
+	src, err := file.Open()
+	if err != nil {
+		go utils.RemoveFiles(filesToRemove)
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	defer src.Close()
+
+	dst, err := os.Create(thumbnailPath)
+	if err != nil {
+		go utils.RemoveFiles(filesToRemove)
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+	defer dst.Close()
+
+	if _, err = io.Copy(dst, src); err != nil {
+		go utils.RemoveFiles(filesToRemove)
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	//delete the old thumbnail
+	oldThumbnailPath := fmt.Sprintf("%s%s", h.thumbnailFolder, stream.ThumbnailFileName)
+	oldThumbnailsToRemove := []string{oldThumbnailPath}
+
+	err = h.srv.Stream.UpdateThumbnailStreamByAdmin(id, &req)
+	if err != nil {
+		// if update fails, remove newly created one
+		go utils.RemoveFiles(filesToRemove)
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	// if update success, remove old one
+	go utils.RemoveFiles(oldThumbnailsToRemove)
+
+	adminLog := h.srv.Admin.MakeAdminLogModel(claims.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_thumbnail_stream_by_admin request", claims.Email))
+
+	err = h.srv.Admin.CreateLog(adminLog)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", nil)
 }
 
 func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {

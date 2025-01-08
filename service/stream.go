@@ -343,11 +343,12 @@ func (s *StreamService) UpdateStreamByAdmin(id int, req *dto.UpdateStreamRequest
 	return liveStream, nil
 }
 
+func (s *StreamService) UpdateThumbnailStreamByAdmin(id int, req *dto.UpdateStreamThumbnailRequest) error {
+	return s.repo.Stream.UpdateThumbnailStream(id, req.ThumbnailFileName)
+}
+
 func (s *StreamService) DeleteLiveStream(id int) error {
-	if err := s.repo.Stream.DeleteLiveStream(id); err != nil {
-		return err
-	}
-	return nil
+	return s.repo.Stream.DeleteLiveStream(id)
 }
 
 func (s *StreamService) GetLiveStreamByID(id int) (*dto.StreamAndStreamScheduleDto, error) {
