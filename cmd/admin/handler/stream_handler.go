@@ -134,7 +134,7 @@ func (h *streamHandler) deleteLiveStream(c echo.Context) error {
 	go utils.RemoveFilesWithNoErrReturn(filesToRemove)
 
 	currentUser := c.Get("user").(*utils.Claims)
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeleteLiveStreamByAdmin, fmt.Sprintf(" delete live_stream_broad_cast id: %d, status: %s, stream_type: %s", id, deletedStream.Stream.Status, deletedStream.Stream.StreamType))
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeleteStreamByAdmin, fmt.Sprintf("%s deleted stream id: %d, status: %s and stream_type: %s.", currentUser.Username, deletedStream.Stream.ID, deletedStream.Stream.Status, deletedStream.Stream.StreamType))
 	err = h.srv.Admin.CreateLog(adminLog)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
@@ -154,13 +154,7 @@ func (h *streamHandler) getLiveStreamBroadCastByID(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := h.srv.Admin.MakeAdminLogModel(data.User.ID, model.LiveBroadCastByID, fmt.Sprintf(" %s live_stream_broad_cast request", data.User.DisplayName))
 
-	err = h.srv.Admin.CreateLog(adminLog)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
-	}
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
 
 }
@@ -181,10 +175,8 @@ func (h *streamHandler) updateLiveStreamByAdmin(c echo.Context) error {
 	}
 
 	currentUser := c.Get("user").(*utils.Claims)
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_live_stream_by_admin request", currentUser.Email))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf("%s updated a stream with id %d and status %s.", currentUser.Username, stream.ID, stream.Status))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -218,10 +210,8 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 	}
 
 	currentUser := c.Get("user").(*utils.Claims)
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_live_stream_by_admin request", currentUser.Email))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateScheduledStreamByAdmin, fmt.Sprintf("%s updated a scheduled stream %d.", currentUser.Username, stream.ID))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -308,8 +298,7 @@ func (h *streamHandler) updateThumbnailByAdmin(c echo.Context) error {
 	// if update success, remove old one
 	go utils.RemoveFiles(oldThumbnailsToRemove)
 
-	adminLog := h.srv.Admin.MakeAdminLogModel(claims.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_thumbnail_stream_by_admin request", claims.Email))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(claims.ID, model.UpdateThumbnailByAdmin, fmt.Sprintf("%s updated thumbnail of a stream %d.", claims.Username, stream.ID))
 	err = h.srv.Admin.CreateLog(adminLog)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
@@ -434,10 +423,8 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := h.srv.Admin.MakeAdminLogModel(req.UserID, model.LiveStreamByAdmin, fmt.Sprintf(" %s create_live_stream_by_admin request", claims.Email))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(req.UserID, model.ScheduledLiveStreamByAdmin, fmt.Sprintf("%s scheduled a live stream %d", claims.Username, stream.ID))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -539,9 +526,8 @@ func (h *streamHandler) endLiveStream(c echo.Context) error {
 	}
 
 	currentUser := c.Get("user").(*utils.Claims)
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf("Admin %d made end_live_stream request", currentUser.ID))
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.EndLiveStreamByAdmin, fmt.Sprintf("%s ended a live stream %d.", currentUser.Username, stream.ID))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}

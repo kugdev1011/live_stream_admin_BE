@@ -115,10 +115,8 @@ func (h *userHandler) deleteByID(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeleteUserAction, fmt.Sprintf(" %s make deleteUser request", currentUser.Email))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeleteUserAction, fmt.Sprintf("%s deleted %s.", currentUser.Username, deletedUser.Username))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -185,10 +183,9 @@ func (h *userHandler) createUser(c echo.Context) error {
 	if err := h.srv.User.CreateUser(&req); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := h.srv.Admin.MakeAdminLogModel(*req.CreatedByID, model.CreateUserAction, fmt.Sprintf(" %s make createUser request", currentUser.Email))
 
+	adminLog := h.srv.Admin.MakeAdminLogModel(*req.CreatedByID, model.CreateUserAction, fmt.Sprintf("%s created %s with role type %s.", currentUser.Username, req.UserName, req.RoleType))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -275,10 +272,9 @@ func (h *userHandler) changeAvatar(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.ChangeAvatarByAdmin, fmt.Sprintf(" %s make changeAvatar request", currentUser.Email))
 
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.ChangeAvatarByAdmin, fmt.Sprintf("%s changed avatar of %s.", currentUser.Username, updatedUser.Username))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -329,10 +325,9 @@ func (h *userHandler) updateUser(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := h.srv.Admin.MakeAdminLogModel(uint(id), model.UpdateUserAction, fmt.Sprintf(" %s update_user request", currentUser.Email))
 
+	adminLog := h.srv.Admin.MakeAdminLogModel(uint(id), model.UpdateUserAction, fmt.Sprintf("%s updated %s. ", currentUser.Username, targetUser.Username))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -381,10 +376,9 @@ func (h *userHandler) changePassword(c echo.Context) error {
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.ChangeUserPasswordAction, fmt.Sprintf(" %s change_user_password request", currentUser.Email))
 
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.ChangeUserPasswordAction, fmt.Sprintf("%s changed password of %s.", currentUser.Username, targetUser.Username))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}

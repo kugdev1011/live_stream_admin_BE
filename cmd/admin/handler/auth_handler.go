@@ -67,10 +67,8 @@ func (h *authHandler) login(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := h.srv.Admin.MakeAdminLogModel(user.ID, model.LoginAction, fmt.Sprintf(" %s logged in", user.Email))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(user.ID, model.LoginAction, fmt.Sprintf("%s logged in.", user.Username))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -123,10 +121,8 @@ func (h *authHandler) forgetPassword(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 
 	}
-	adminLog := h.srv.Admin.MakeAdminLogModel(user.ID, model.ForgetPassword, fmt.Sprintf(" %s forget_password request", user.Email))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(user.ID, model.ForgetPassword, fmt.Sprintf("%s made forget password request.", user.Username))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
@@ -174,10 +170,8 @@ func (h *authHandler) resetPassword(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := h.srv.Admin.MakeAdminLogModel(user.ID, model.ResetPassword, fmt.Sprintf(" %s reset_password request", user.Email))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(user.ID, model.ResetPassword, fmt.Sprintf("%s made reset password.", user.Username))
 	err = h.srv.Admin.CreateLog(adminLog)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
