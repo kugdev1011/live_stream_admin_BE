@@ -296,36 +296,8 @@ func (s *StreamService) CreateStreamByAdmin(req *dto.StreamRequest) (*model.Stre
 	return stream, nil
 }
 
-func (s *StreamService) UpdateScheduledStreamByAdmin(id int, req *dto.UpdateScheduledStreamRequest) (*model.Stream, error) {
-	var scheduleStream *model.ScheduleStream
-
-	liveStream, err := s.repo.Stream.GetByIDWithUserPreload(id)
-	if err != nil {
-		return nil, err
-	}
-	liveStream.Title = req.Title
-	liveStream.Description = req.Description
-
-	scheduleStream, err = s.repo.Stream.GetScheduleStreamByStreamID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	if scheduleStream.ScheduledAt.UTC().Before(time.Now().UTC()) {
-		return nil, fmt.Errorf("scheduled time has already passed and cannot be updated")
-	}
-
-	schduledAt, err := utils.ConvertDatetimeToTimestamp(req.ScheduledAt, utils.DATETIME_LAYOUT)
-	if err != nil {
-		return nil, err
-	}
-	scheduleStream.ScheduledAt = *schduledAt
-
-	if err := s.repo.Stream.UpdateStream(liveStream, scheduleStream, req.CategoryIDs); err != nil {
-		return nil, err
-	}
-
-	return liveStream, nil
+func (s *StreamService) UpdateScheduledStreamByAdmin(id int, req *dto.UpdateScheduledStreamRequest) error {
+	return s.repo.Stream.UpdateScheduledStream(id, req)
 }
 
 func (s *StreamService) UpdateStreamByAdmin(id int, req *dto.UpdateStreamRequest) (*model.Stream, error) {
@@ -372,6 +344,10 @@ func (s *StreamService) GetLiveStreamByID(id int) (*dto.StreamAndStreamScheduleD
 
 func (s *StreamService) GetStreamByID(id uint) (*model.Stream, error) {
 	return s.repo.Stream.GetByID(id)
+}
+
+func (s *StreamService) GetSechduleStreamByID(id uint) (*model.ScheduleStream, error) {
+	return s.repo.Stream.GetScheduleStreamByID(id)
 }
 
 func (s *StreamService) toLiveStatDto(v *model.StreamAnalytics, currentViewers uint) *dto.LiveStatRespDTO {

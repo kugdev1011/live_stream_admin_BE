@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -200,28 +201,85 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
 
-	if !utils.IsValidSchedule(req.ScheduledAt) {
+	if !utils.IsValidScheduleTimestamp(req.ScheduledAt) {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid schedule"), nil)
 	}
 
-	stream, err := h.srv.Stream.UpdateScheduledStreamByAdmin(id, &req)
+	// remove old scheduled stream video
+	scheduleStream, err := h.srv.Stream.GetSechduleStreamByID(uint(id))
 	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+	oldScheduledVideoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, scheduleStream.VideoName)
+
+	currentUser := c.Get("user").(*utils.Claims)
+
+	//save video
+	video, err := c.FormFile("video")
+	if err != nil && strings.Compare(err.Error(), "http: no such file") != 0 {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, fmt.Sprintf("upload video failed: %s", err.Error()))
+	}
+
+	var filesToRemove []string
+	if video != nil {
+
+		if video.Size > utils.MAX_VIDEO_SIZE {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, nil, "Video size exceeds the 2GB limit")
+		}
+
+		isVideo, err := utils.IsVideoFile(video)
+		if err != nil {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+
+		if !isVideo {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("file is not a supported video format"), nil)
+		}
+
+		fileVideoExt := utils.GetFileExtension(video)
+		req.VideoFileName = fmt.Sprintf("%d_%s%s", currentUser.ID, utils.MakeUniqueIDWithTime(), fileVideoExt)
+		videoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, req.VideoFileName)
+
+		filesToRemove := append(filesToRemove, videoPath)
+
+		videoSrc, err := video.Open()
+		if err != nil {
+			go utils.RemoveFiles(filesToRemove)
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+		defer videoSrc.Close()
+
+		dstRecord, err := os.Create(videoPath)
+		if err != nil {
+			go utils.RemoveFiles(filesToRemove)
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+		defer dstRecord.Close()
+
+		if _, err = io.Copy(dstRecord, videoSrc); err != nil {
+			go utils.RemoveFiles(filesToRemove)
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+		}
+		//
+	}
+
+	// update stream
+	if err := h.srv.Stream.UpdateScheduledStreamByAdmin(id, &req); err != nil {
+		go utils.RemoveFiles(filesToRemove)
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	currentUser := c.Get("user").(*utils.Claims)
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateScheduledStreamByAdmin, fmt.Sprintf("%s updated a scheduled stream %d.", currentUser.Username, stream.ID))
+	if video != nil {
+		go utils.RemoveFiles([]string{oldScheduledVideoPath})
+	}
+
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateScheduledStreamByAdmin, fmt.Sprintf("%s updated a scheduled stream with id %d.", currentUser.Username, scheduleStream.StreamID))
 	err = h.srv.Admin.CreateLog(adminLog)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 
-	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", map[string]any{
-		"id":            stream.ID,
-		"title":         stream.Title,
-		"description":   stream.Description,
-		"thumbnail_url": utils.MakeThumbnailURL(h.ApiURL, stream.ThumbnailFileName),
-	})
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", nil)
 }
 
 func (h *streamHandler) updateThumbnailByAdmin(c echo.Context) error {
