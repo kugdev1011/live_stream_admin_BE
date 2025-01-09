@@ -538,5 +538,13 @@ func (h *streamHandler) endLiveStream(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
+	currentUser := c.Get("user").(*utils.Claims)
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf("Admin %d made end_live_stream request", currentUser.ID))
+	err = h.srv.Admin.CreateLog(adminLog)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
+	}
+
 	return utils.BuildSuccessResponse(c, http.StatusOK, "Stream is ending. Wait for a few minutes", nil)
 }

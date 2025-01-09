@@ -23,6 +23,7 @@ const (
 	DeleteLiveStreamByAdmin  AdminAction = "delete_live_stream_by_admin"
 	LiveStreamByAdmin        AdminAction = "live_stream_by_admin"
 	UpdateStreamByAdmin      AdminAction = "update_live_stream_by_admin"
+	EndLiveStreamByAdmin     AdminAction = "end_live_stream_by_admin"
 	CreateCategory           AdminAction = "create_category"
 	ForgetPassword           AdminAction = "forget_password"
 	ResetPassword            AdminAction = "reset_password"
