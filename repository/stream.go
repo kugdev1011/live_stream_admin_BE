@@ -383,8 +383,11 @@ func (r *StreamRepository) UpdateScheduledStream(streamID int, req *dto.UpdateSc
 	if err := r.db.Model(model.ScheduleStream{}).Where("stream_id = ?", streamID).First(&scheduleStream).Error; err != nil {
 		return err
 	}
-
-	scheduleStream.ScheduledAt = time.Unix(int64(req.ScheduledAt), 0)
+	parsedTime, err := time.Parse(utils.DATETIME_LAYOUT, req.ScheduledAt)
+	if err != nil {
+		return nil
+	}
+	scheduleStream.ScheduledAt = parsedTime
 	scheduleStream.VideoName = req.VideoFileName
 	return r.db.Model(model.ScheduleStream{}).Where("stream_id = ?", streamID).Updates(scheduleStream).Error
 }

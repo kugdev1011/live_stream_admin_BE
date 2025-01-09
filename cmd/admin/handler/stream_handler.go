@@ -201,7 +201,7 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
 
-	if !utils.IsValidScheduleTimestamp(req.ScheduledAt) {
+	if !utils.IsValidSchedule(req.ScheduledAt) {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid schedule"), nil)
 	}
 
