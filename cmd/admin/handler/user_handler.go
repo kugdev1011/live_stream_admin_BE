@@ -190,7 +190,7 @@ func (h *userHandler) createUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 
-	return utils.BuildSuccessResponseWithData(c, http.StatusCreated, nil)
+	return utils.BuildSuccessResponse(c, http.StatusCreated, "Successfully created", nil)
 }
 
 func (h *userHandler) changeAvatar(c echo.Context) error {

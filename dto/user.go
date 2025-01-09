@@ -86,7 +86,7 @@ type CreateUserRequest struct {
 
 type ChangePasswordRequest struct {
 	Password        string `json:"password" form:"password" validate:"required,min=6,max=255"`
-	ConfirmPassword string `json:"confirm_password" form:"confirm_password" validate:"required,min=6,max=255"`
+	ConfirmPassword string `json:"confirm_password" form:"confirm_password" validate:"required,min=8,max=255"`
 }
 
 type ChangeAvatarRequest struct {
