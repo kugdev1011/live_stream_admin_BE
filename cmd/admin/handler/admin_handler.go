@@ -69,6 +69,10 @@ func (h *adminHandler) getAdminLogs(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
+	if req.IsMe {
+		currentUser := c.Get("user").(*utils.Claims)
+		req.UserID = currentUser.ID
+	}
 	data, err := h.srv.Admin.GetAdminLogs(&req)
 
 	if err != nil {

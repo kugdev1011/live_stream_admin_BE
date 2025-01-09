@@ -67,8 +67,8 @@ func (s *AdminRepository) GetAdminLogs(req *dto.AdminLogQuery) (*utils.Paginatio
 			}
 
 		}
-		if len(req.UserIDs) > 0 {
-			query = query.Where("admin_logs.user_id IN ?", req.UserIDs)
+		if req.UserID > 0 {
+			query = query.Where("admin_logs.user_id = ?", req.UserID)
 		}
 		if req.Sort != "" && req.SortBy != "" {
 			query = query.Order(fmt.Sprintf("admin_logs.%s %s", req.SortBy, req.Sort))
