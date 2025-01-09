@@ -69,6 +69,19 @@ func (h *adminHandler) getAdminLogs(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
 	}
 
+	currentUser := c.Get("user").(*utils.Claims)
+	if currentUser.RoleType != model.SUPPERADMINROLE {
+		if !req.IsMe {
+			return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request, is_me is not empty"), nil)
+		} else {
+			req.UserID = currentUser.ID
+		}
+	} else {
+		if req.IsMe {
+			req.UserID = currentUser.ID
+		}
+	}
+
 	data, err := h.srv.Admin.GetAdminLogs(&req)
 
 	if err != nil {

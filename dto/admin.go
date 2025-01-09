@@ -30,7 +30,8 @@ type AdminLogQuery struct {
 	Sort     string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	FilterBy string `query:"filter_by" validate:"omitempty,oneof=action details id username email"`
 	Keyword  string `query:"keyword" validate:"omitempty,max=255"`
-	UserIDs  []uint `query:"user_ids" validate:"omitempty"`
+	IsMe     bool   `query:"is_me" validate:"omitempty"`
+	UserID   uint   `query:"user_id" validate:"omitempty"`
 	Page     uint   `query:"page" validate:"omitempty,min=1"`
 	Limit    uint   `query:"limit" validate:"omitempty,min=1,max=20"`
 }
