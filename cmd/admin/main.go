@@ -54,6 +54,10 @@ func main() {
 	conf.SeedRoles(srv.Role)
 	conf.SeedSuperAdminUser(srv.User, srv.Role)
 
+	if err := repo.User.SetRoleMap(); err != nil {
+		log.Fatalf("Failed to set role map: %v", err)
+	}
+
 	log.Println("Seeding completed successfully")
 
 	// conf.SeedRoles(srv.Role)

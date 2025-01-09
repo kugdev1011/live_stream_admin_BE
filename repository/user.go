@@ -6,13 +6,37 @@ import (
 	"gitlab/live/be-live-admin/dto"
 	"gitlab/live/be-live-admin/model"
 	"gitlab/live/be-live-admin/utils"
+	"log"
 	"time"
 
 	"gorm.io/gorm"
 )
 
 type UserRepository struct {
-	db *gorm.DB
+	db      *gorm.DB
+	roleMap map[model.RoleType]uint
+}
+
+func newUserRepository(db *gorm.DB) *UserRepository {
+	return &UserRepository{
+		db:      db,
+		roleMap: map[model.RoleType]uint{},
+	}
+}
+
+func (s *UserRepository) SetRoleMap() error {
+	var roles []model.Role
+	if err := s.db.Find(&roles).Error; err != nil {
+		return fmt.Errorf("failed to fetch roles: %w", err)
+	}
+
+	for _, role := range roles {
+		s.roleMap[role.Type] = role.ID
+	}
+
+	log.Printf("Role map set: %v\n", s.roleMap)
+
+	return nil
 }
 
 func (s *UserRepository) Page(filter *dto.UserQuery, page, limit uint) (*utils.PaginationModel[model.User], error) {
@@ -74,12 +98,6 @@ func (r *UserRepository) Delete(id, deletedByID uint) error {
 		return err
 	}
 	return nil
-}
-
-func newUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{
-		db: db,
-	}
 }
 
 func (r *UserRepository) Create(user *model.User) error {
@@ -182,7 +200,7 @@ func (r *UserRepository) GetUserStatistics(req *dto.UserStatisticsRequest) (*uti
 		Joins("LEFT JOIN comments c ON u.id = c.user_id").
 		Joins("LEFT JOIN subscriptions sub ON u.id = sub.subscriber_id").
 		Joins("LEFT JOIN views v ON u.id = v.user_id").
-		Where("u.username != ?", "superAdmin").
+		Where("u.role_id NOT IN ?", []uint{r.roleMap[model.SUPPERADMINROLE], r.roleMap[model.ADMINROLE]}).
 		Group("u.id, u.username, u.display_name")
 
 	if req.Keyword != "" {
