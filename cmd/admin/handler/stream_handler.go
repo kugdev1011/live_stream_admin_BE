@@ -201,17 +201,16 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
 
-	_, err = h.srv.Stream.GetStreamByID(uint(id))
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("record not found"), nil)
-		}
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
-	}
-
 	if !utils.IsValidScheduleTimestamp(req.ScheduledAt) {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid schedule"), nil)
 	}
+
+	// remove old scheduled stream video
+	scheduleStream, err := h.srv.Stream.GetSechduleStreamByID(uint(id))
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+	oldScheduledVideoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, scheduleStream.VideoName)
 
 	currentUser := c.Get("user").(*utils.Claims)
 
@@ -264,24 +263,17 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 		//
 	}
 
-	// remove old scheduled stream video
-	scheduleStream, err := h.srv.Stream.GetSechduleStreamByID(uint(id))
-	if err != nil {
-		go utils.RemoveFiles(filesToRemove)
-		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
-	}
-	oldScheduledVideoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, scheduleStream.VideoName)
-
 	// update stream
 	if err := h.srv.Stream.UpdateScheduledStreamByAdmin(id, &req); err != nil {
 		go utils.RemoveFiles(filesToRemove)
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	go utils.RemoveFiles([]string{oldScheduledVideoPath})
+	if video != nil {
+		go utils.RemoveFiles([]string{oldScheduledVideoPath})
+	}
 
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateScheduledStreamByAdmin, fmt.Sprintf(" %s update_schedule_stream_by_admin request", currentUser.Email))
-
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateScheduledStreamByAdmin, fmt.Sprintf("%s updated a scheduled stream with id %d.", currentUser.Username, scheduleStream.StreamID))
 	err = h.srv.Admin.CreateLog(adminLog)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
