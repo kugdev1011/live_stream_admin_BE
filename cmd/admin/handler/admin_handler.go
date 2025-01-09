@@ -71,9 +71,7 @@ func (h *adminHandler) getAdminLogs(c echo.Context) error {
 	if currentUser.RoleType == model.ADMINROLE {
 		req.IsAdmin = true
 	}
-	if currentUser.RoleType != model.SUPPERADMINROLE {
-		req.UserID = currentUser.ID
-	}
+	req.UserID = currentUser.ID
 
 	data, err := h.srv.Admin.GetAdminLogs(&req)
 
