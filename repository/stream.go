@@ -184,6 +184,16 @@ func (s *StreamRepository) GetByID(id uint) (*model.Stream, error) {
 	return &stream, nil
 }
 
+func (s *StreamRepository) GetScheduleStreamByID(id uint) (*model.ScheduleStream, error) {
+	var stream model.ScheduleStream
+
+	if err := s.db.Model(model.ScheduleStream{}).Where("stream_id = ?", id).First(&stream).Error; err != nil {
+		return nil, err
+	}
+
+	return &stream, nil
+}
+
 // func (s *StreamRepository) GetBy
 
 func (s *StreamRepository) GetScheduleStreamByStreamID(id int) (*model.ScheduleStream, error) {
@@ -366,6 +376,17 @@ func (r *StreamRepository) UpdateStream(stream *model.Stream, scheduleStream *mo
 	}
 
 	return tx.Commit().Error
+}
+
+func (r *StreamRepository) UpdateScheduledStream(streamID int, req *dto.UpdateScheduledStreamRequest) error {
+	var scheduleStream model.ScheduleStream
+	if err := r.db.Model(model.ScheduleStream{}).Where("stream_id = ?", streamID).First(&scheduleStream).Error; err != nil {
+		return err
+	}
+
+	scheduleStream.ScheduledAt = time.Unix(int64(req.ScheduledAt), 0)
+	scheduleStream.VideoName = req.VideoFileName
+	return r.db.Model(model.ScheduleStream{}).Where("stream_id = ?", streamID).Updates(scheduleStream).Error
 }
 
 func (r *StreamRepository) UpdateThumbnailStream(id int, thumbnail string) error {
