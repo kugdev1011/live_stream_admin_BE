@@ -201,6 +201,14 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
 
+	_, err = h.srv.Stream.GetStreamByID(uint(id))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("record not found"), nil)
+		}
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
 	if !utils.IsValidScheduleTimestamp(req.ScheduledAt) {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid schedule"), nil)
 	}
@@ -263,7 +271,6 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 	oldScheduledVideoPath := fmt.Sprintf("%s%s", h.scheduledVideosFolder, scheduleStream.VideoName)
-	go utils.RemoveFiles([]string{oldScheduledVideoPath})
 
 	// update stream
 	if err := h.srv.Stream.UpdateScheduledStreamByAdmin(id, &req); err != nil {
@@ -271,7 +278,9 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateStreamByAdmin, fmt.Sprintf(" %s update_schedule_stream_by_admin request", currentUser.Email))
+	go utils.RemoveFiles([]string{oldScheduledVideoPath})
+
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.UpdateScheduledStreamByAdmin, fmt.Sprintf(" %s update_schedule_stream_by_admin request", currentUser.Email))
 
 	err = h.srv.Admin.CreateLog(adminLog)
 	if err != nil {
