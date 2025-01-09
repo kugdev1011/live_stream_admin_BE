@@ -78,14 +78,14 @@ type CreateUserRequest struct {
 	UserName       string         `json:"username" form:"username" validate:"required,min=3,max=50"`
 	Email          string         `json:"email" form:"email" validate:"required,email,max=100"`
 	DisplayName    string         `json:"display_name" form:"display_name" validate:"required,min=3,max=100"`
-	Password       string         `json:"password" form:"password" validate:"required,min=6,max=255"`
+	Password       string         `json:"password" form:"password" validate:"required,min=8,max=255"`
 	RoleType       model.RoleType `json:"role_type" form:"role_type" validate:"required,oneof=admin streamer user"`
 	AvatarFileName string         `json:"-" form:"-"`
 	CreatedByID    *uint          `json:"-" form:"-"`
 }
 
 type ChangePasswordRequest struct {
-	Password        string `json:"password" form:"password" validate:"required,min=6,max=255"`
+	Password        string `json:"password" form:"password" validate:"required,min=8,max=255"`
 	ConfirmPassword string `json:"confirm_password" form:"confirm_password" validate:"required,min=8,max=255"`
 }
 
