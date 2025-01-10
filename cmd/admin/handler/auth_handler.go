@@ -81,6 +81,7 @@ func (h *authHandler) login(c echo.Context) error {
 		"id":           user.ID,
 		"avatar":       avatarFileName,
 		"username":     user.Username,
+		"display_name": user.DisplayName,
 		"email":        user.Email,
 		"role":         user.Role.Type,
 		"expired_time": expiredTime,
