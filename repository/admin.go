@@ -68,7 +68,13 @@ func (s *AdminRepository) GetAdminLogs(req *dto.AdminLogQuery) (*utils.Paginatio
 
 		}
 		if req.UserID > 0 {
-			query = query.Where("admin_logs.user_id = ?", req.UserID)
+			if req.IsMe {
+				query = query.Where("admin_logs.user_id = ?", req.UserID)
+			} else {
+				if req.IsAdmin {
+					query = query.Where("admin_logs.user_id IN(SELECT users.id FROM users INNER JOIN roles ON users.role_id = roles.id WHERE roles.type IN ? OR users.id = ?)", []model.RoleType{model.USERROLE, model.STREAMER}, req.UserID)
+				}
+			}
 		}
 		if req.Sort != "" && req.SortBy != "" {
 			query = query.Order(fmt.Sprintf("admin_logs.%s %s", req.SortBy, req.Sort))

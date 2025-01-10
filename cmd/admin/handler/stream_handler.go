@@ -281,7 +281,6 @@ func (h *streamHandler) updateScheduledStreamByAdmin(c echo.Context) error {
 
 	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", nil)
 }
-
 func (h *streamHandler) updateThumbnailByAdmin(c echo.Context) error {
 	var req dto.UpdateStreamThumbnailRequest
 
