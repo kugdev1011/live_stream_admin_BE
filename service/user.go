@@ -98,13 +98,14 @@ func (s *UserService) DeleteByID(id uint, deletedByID uint) error {
 
 }
 
-func (s *UserService) toUpdatedUserDTO(user *model.User, role model.RoleType) *dto.UpdateUserResponse {
+func (s *UserService) toUpdatedUserDTO(user *model.User, role model.RoleType, apiURL string) *dto.UpdateUserResponse {
 	return &dto.UpdateUserResponse{
+		ID:          user.ID,
 		UserName:    user.Username,
 		DisplayName: user.DisplayName,
 		Email:       user.Email,
 		UpdatedAt:   user.UpdatedAt,
-		Avatar:      user.AvatarFileName.String,
+		Avatar:      utils.MakeAvatarURL(apiURL, user.AvatarFileName.String),
 		Role:        role,
 	}
 }
@@ -134,7 +135,7 @@ func (s *UserService) makeUpdatedUserModel(user *model.User, updatedUser *dto.Up
 	return user, nil
 }
 
-func (s *UserService) UpdateUser(updatedUser *dto.UpdateUserRequest, id uint) (*dto.UpdateUserResponse, error) {
+func (s *UserService) UpdateUser(updatedUser *dto.UpdateUserRequest, id uint, apiUrl string) (*dto.UpdateUserResponse, error) {
 
 	user, err := s.repo.Admin.ById(id)
 	if err != nil {
@@ -146,11 +147,11 @@ func (s *UserService) UpdateUser(updatedUser *dto.UpdateUserRequest, id uint) (*
 		return nil, err
 	}
 
-	return s.toUpdatedUserDTO(user, updatedUser.RoleType), err
+	return s.toUpdatedUserDTO(user, updatedUser.RoleType, apiUrl), err
 
 }
 
-func (s *UserService) ChangePassword(user *model.User, changePassword *dto.ChangePasswordRequest, id uint, updatedByID uint) (*dto.UpdateUserResponse, error) {
+func (s *UserService) ChangePassword(user *model.User, changePassword *dto.ChangePasswordRequest, id uint, updatedByID uint, apiUrl string) (*dto.UpdateUserResponse, error) {
 	var err error
 	if changePassword.Password != "" {
 		user.PasswordHash, err = utils.HashPassword(changePassword.Password)
@@ -164,10 +165,10 @@ func (s *UserService) ChangePassword(user *model.User, changePassword *dto.Chang
 		return nil, err
 	}
 
-	return s.toUpdatedUserDTO(user, user.Role.Type), err
+	return s.toUpdatedUserDTO(user, user.Role.Type, apiUrl), err
 }
 
-func (s *UserService) ChangeAvatar(user *model.User, changeAvartar *dto.ChangeAvatarRequest, id uint, updatedByID uint) (*dto.UpdateUserResponse, error) {
+func (s *UserService) ChangeAvatar(user *model.User, changeAvartar *dto.ChangeAvatarRequest, id uint, updatedByID uint, apiUrl string) (*dto.UpdateUserResponse, error) {
 
 	user.UpdatedByID = &updatedByID
 	user.AvatarFileName = sql.NullString{Valid: true, String: changeAvartar.AvatarFileName}
@@ -177,7 +178,7 @@ func (s *UserService) ChangeAvatar(user *model.User, changeAvartar *dto.ChangeAv
 		return nil, err
 	}
 
-	return s.toUpdatedUserDTO(user, user.Role.Type), nil
+	return s.toUpdatedUserDTO(user, user.Role.Type, apiUrl), nil
 }
 
 func (s *UserService) CreateUser(request *dto.CreateUserRequest) error {

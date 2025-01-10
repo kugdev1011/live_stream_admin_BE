@@ -268,7 +268,7 @@ func (h *userHandler) changeAvatar(c echo.Context) error {
 		go utils.RemoveFiles(avatarsToRemove)
 	}
 
-	data, err := h.srv.User.ChangeAvatar(updatedUser, &req, uint(id), currentUser.ID)
+	data, err := h.srv.User.ChangeAvatar(updatedUser, &req, uint(id), currentUser.ID, h.apiURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
@@ -321,7 +321,7 @@ func (h *userHandler) updateUser(c echo.Context) error {
 		}
 	}
 
-	data, err = h.srv.User.UpdateUser(&req, uint(id))
+	data, err = h.srv.User.UpdateUser(&req, uint(id), h.apiURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
@@ -372,7 +372,7 @@ func (h *userHandler) changePassword(c echo.Context) error {
 		}
 	}
 
-	data, err = h.srv.User.ChangePassword(targetUser, &req, uint(id), currentUser.ID)
+	data, err = h.srv.User.ChangePassword(targetUser, &req, uint(id), currentUser.ID, h.apiURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
