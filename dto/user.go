@@ -66,6 +66,7 @@ type UpdateUserRequest struct {
 }
 
 type UpdateUserResponse struct {
+	ID          uint           `json:"id"`
 	UserName    string         `json:"username,omitempty"`
 	Avatar      string         `json:"avatar"`
 	DisplayName string         `json:"display_name,omitempty"`

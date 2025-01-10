@@ -73,13 +73,13 @@ func (h *authHandler) login(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
 	}
 
-	var avartarFileName = ""
+	var avatarFileName = ""
 	if user.AvatarFileName.Valid {
-		avartarFileName = utils.MakeAvatarURL(h.apiURL, user.AvatarFileName.String)
+		avatarFileName = utils.MakeAvatarURL(h.apiURL, user.AvatarFileName.String)
 	}
 	response := map[string]interface{}{
 		"id":           user.ID,
-		"avartar":      avartarFileName,
+		"avatar":       avatarFileName,
 		"username":     user.Username,
 		"email":        user.Email,
 		"role":         user.Role.Type,
