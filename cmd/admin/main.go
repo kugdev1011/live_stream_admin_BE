@@ -17,9 +17,12 @@ import (
 	"syscall"
 	"time"
 
+	_ "gitlab/live/be-live-admin/docs"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 type CustomValidator struct {
@@ -100,6 +103,8 @@ func main() {
 
 	fileH.Use(handler.JWTMiddleware())
 	fileH.Static("/", conf.GetFileStorageConfig().RootFolder)
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	handler.Register()
 
