@@ -41,6 +41,17 @@ func (h *adminHandler) register() {
 
 }
 
+// @Summary      Get Admin by ID
+// @Description  Get admin details by ID
+// @Tags         Admin
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Admin ID"
+// @Success      200  {object}  dto.UserResponseDTO  "Admin details"
+// @Failure      400         "Invalid ID parameter or not found"
+// @Failure      500         "Internal Server Error"
+// @Security     Bearer
+// @Router       /api/admin/{id} [get]
 func (h *adminHandler) byId(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -60,6 +71,17 @@ func (h *adminHandler) byId(c echo.Context) error {
 
 }
 
+// @Summary      Get Admin Logs
+// @Description  Get logs for the current admin
+// @Tags         Admin
+// @Accept       json
+// @Produce      json
+// @Param        adminLogQuery  body      dto.AdminLogQuery  true  "Admin Log Query"
+// @Success      200 {object} utils.PaginationModel[dto.AdminLogRespDTO]  "Admin logs"
+// @Failure      400                  "Bad Request"
+// @Failure      500                  "Internal Server Error"
+// @Security     Bearer
+// @Router       /admin/logs [get]
 func (h *adminHandler) getAdminLogs(c echo.Context) error {
 
 	var req dto.AdminLogQuery

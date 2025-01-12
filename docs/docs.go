@@ -15,6 +15,94 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/logs": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get logs for the current admin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get Admin Logs",
+                "parameters": [
+                    {
+                        "description": "Admin Log Query",
+                        "name": "adminLogQuery",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AdminLogQuery"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Admin logs",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationModel-dto_AdminLogRespDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/admin/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get admin details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get Admin by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Admin ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Admin details",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID parameter or not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/api/auth/forgetPassword": {
             "post": {
                 "security": [
@@ -96,6 +184,11 @@ const docTemplate = `{
         },
         "/api/auth/resetPassword": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Resets the user's password using OTP",
                 "consumes": [
                     "application/json"
@@ -136,6 +229,70 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.AdminLogQuery": {
+            "type": "object",
+            "properties": {
+                "filterBy": {
+                    "type": "string",
+                    "enum": [
+                        "action",
+                        "details",
+                        "id",
+                        "username",
+                        "email"
+                    ]
+                },
+                "isMe": {
+                    "type": "boolean"
+                },
+                "keyword": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "limit": {
+                    "type": "integer",
+                    "maximum": 20,
+                    "minimum": 1
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "sort": {
+                    "type": "string",
+                    "enum": [
+                        "DESC",
+                        "ASC"
+                    ]
+                },
+                "sortBy": {
+                    "type": "string",
+                    "enum": [
+                        "performed_at"
+                    ]
+                }
+            }
+        },
+        "dto.AdminLogRespDTO": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "performed_at": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/dto.UserResponseDTO"
+                }
+            }
+        },
         "dto.ForgetPasswordDTO": {
             "type": "object",
             "required": [
@@ -216,6 +373,79 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.RoleDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.RoleType"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserResponseDTO"
+                    }
+                }
+            }
+        },
+        "dto.UserResponseDTO": {
+            "type": "object",
+            "properties": {
+                "avatar_file_name": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "$ref": "#/definitions/dto.UserResponseDTO"
+                },
+                "created_by_id": {
+                    "type": "integer"
+                },
+                "deleted_by_id": {
+                    "type": "integer"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "$ref": "#/definitions/dto.RoleDTO"
+                },
+                "role_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "$ref": "#/definitions/dto.UserResponseDTO"
+                },
+                "updated_by_id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "model.RoleType": {
             "type": "string",
             "enum": [
@@ -230,6 +460,54 @@ const docTemplate = `{
                 "STREAMER",
                 "USERROLE"
             ]
+        },
+        "utils.PaginationModel-dto_AdminLogRespDTO": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "exec_time": {
+                    "type": "number"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "is_new_filter": {
+                    "type": "boolean"
+                },
+                "length": {
+                    "type": "integer"
+                },
+                "next": {
+                    "type": "integer"
+                },
+                "obj": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "page": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AdminLogRespDTO"
+                    }
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "previous": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "route": {
+                    "type": "string"
+                },
+                "total_items": {
+                    "type": "integer"
+                }
+            }
         }
     }
 }`

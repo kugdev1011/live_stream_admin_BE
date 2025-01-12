@@ -100,6 +100,19 @@ func (h *authHandler) login(c echo.Context) error {
 	return utils.BuildSuccessResponse(c, http.StatusOK, "Login successful", response)
 }
 
+// forgetPassword godoc
+// @Summary      Forget Password
+// @Description  Generates an OTP for password reset
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        forgetPasswordDTO  body      dto.ForgetPasswordDTO  true  "Forget Password DTO"
+// @Success      200                      "OTP generated successfully"
+// @Failure      400                      "Bad Request"
+// @Failure      400                      "Email not found"
+// @Failure      500                      "Internal Server Error"
+// @Security Bearer
+// @Router       /api/auth/forgetPassword [post]
 func (h *authHandler) forgetPassword(c echo.Context) error {
 	var forgetPasswordDTO dto.ForgetPasswordDTO
 
@@ -141,6 +154,18 @@ func (h *authHandler) forgetPassword(c echo.Context) error {
 
 }
 
+// @Summary      Reset Password
+// @Description  Resets the user's password using OTP
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        resetPasswordDTO  body      dto.ResetPasswordDTO  true  "Reset Password DTO"
+// @Success      200                    "Password reset successfully"
+// @Failure      400                    "Bad Request"
+// @Failure      404                    "Email not found"
+// @Failure      500                    "Internal Server Error"
+// @Security Bearer
+// @Router       /api/auth/resetPassword [post]
 func (h *authHandler) resetPassword(c echo.Context) error {
 
 	var resetPasswordDTO dto.ResetPasswordDTO

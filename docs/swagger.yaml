@@ -1,4 +1,49 @@
 definitions:
+  dto.AdminLogQuery:
+    properties:
+      filterBy:
+        enum:
+        - action
+        - details
+        - id
+        - username
+        - email
+        type: string
+      isMe:
+        type: boolean
+      keyword:
+        maxLength: 255
+        type: string
+      limit:
+        maximum: 20
+        minimum: 1
+        type: integer
+      page:
+        minimum: 1
+        type: integer
+      sort:
+        enum:
+        - DESC
+        - ASC
+        type: string
+      sortBy:
+        enum:
+        - performed_at
+        type: string
+    type: object
+  dto.AdminLogRespDTO:
+    properties:
+      action:
+        type: string
+      details:
+        type: string
+      id:
+        type: integer
+      performed_at:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserResponseDTO'
+    type: object
   dto.ForgetPasswordDTO:
     properties:
       email:
@@ -54,6 +99,54 @@ definitions:
     - otp
     - password
     type: object
+  dto.RoleDTO:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      type:
+        $ref: '#/definitions/model.RoleType'
+      updated_at:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/dto.UserResponseDTO'
+        type: array
+    type: object
+  dto.UserResponseDTO:
+    properties:
+      avatar_file_name:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/dto.UserResponseDTO'
+      created_by_id:
+        type: integer
+      deleted_by_id:
+        type: integer
+      display_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        $ref: '#/definitions/dto.RoleDTO'
+      role_id:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        $ref: '#/definitions/dto.UserResponseDTO'
+      updated_by_id:
+        type: integer
+      username:
+        type: string
+    type: object
   model.RoleType:
     enum:
     - super_admin
@@ -66,9 +159,96 @@ definitions:
     - ADMINROLE
     - STREAMER
     - USERROLE
+  utils.PaginationModel-dto_AdminLogRespDTO:
+    properties:
+      current_page:
+        type: integer
+      exec_time:
+        type: number
+      index:
+        type: integer
+      is_new_filter:
+        type: boolean
+      length:
+        type: integer
+      next:
+        type: integer
+      obj:
+        additionalProperties: true
+        type: object
+      page:
+        items:
+          $ref: '#/definitions/dto.AdminLogRespDTO'
+        type: array
+      page_size:
+        type: integer
+      previous:
+        type: integer
+      query:
+        type: string
+      route:
+        type: string
+      total_items:
+        type: integer
+    type: object
 info:
   contact: {}
 paths:
+  /admin/logs:
+    get:
+      consumes:
+      - application/json
+      description: Get logs for the current admin
+      parameters:
+      - description: Admin Log Query
+        in: body
+        name: adminLogQuery
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AdminLogQuery'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Admin logs
+          schema:
+            $ref: '#/definitions/utils.PaginationModel-dto_AdminLogRespDTO'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get Admin Logs
+      tags:
+      - Admin
+  /api/admin/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get admin details by ID
+      parameters:
+      - description: Admin ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Admin details
+          schema:
+            $ref: '#/definitions/dto.UserResponseDTO'
+        "400":
+          description: Invalid ID parameter or not found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get Admin by ID
+      tags:
+      - Admin
   /api/auth/forgetPassword:
     post:
       consumes:
@@ -142,6 +322,8 @@ paths:
           description: Email not found
         "500":
           description: Internal Server Error
+      security:
+      - Bearer: []
       summary: Reset Password
       tags:
       - Auth

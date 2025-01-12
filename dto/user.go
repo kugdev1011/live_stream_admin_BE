@@ -3,8 +3,6 @@ package dto
 import (
 	"gitlab/live/be-live-admin/model"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type UserQuery struct {
@@ -35,7 +33,6 @@ type UserResponseDTO struct {
 	UpdatedAt      time.Time        `json:"updated_at,omitempty"`
 	UpdatedByID    *uint            `json:"updated_by_id,omitempty"`
 	UpdatedBy      *UserResponseDTO `json:"updated_by,omitempty"`
-	DeletedAt      gorm.DeletedAt   `json:"deleted_at,omitempty"`
 	DeletedByID    *uint            `json:"deleted_by_id,omitempty"`
 }
 
