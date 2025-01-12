@@ -184,47 +184,51 @@ func (r *UserRepository) CheckUserTypeByID(id int) (*model.User, error) {
 // beaware views, likes and comments are handled by be-api.
 // so it will be hard to cache.
 func (r *UserRepository) GetUserStatistics(req *dto.UserStatisticsRequest) (*utils.PaginationModel[dto.UserStatisticsResponse], error) {
-	subQuery := r.db.Table("users u").
-		Select(`
-			u.id AS user_id,
-			u.username,
-			u.display_name,
-			COUNT(DISTINCT s.id) AS total_streams,
-			COUNT(DISTINCT l.id) AS total_likes,
-			COUNT(DISTINCT c.id) AS total_comments,
-			COUNT(DISTINCT sub.id) AS total_subscriptions,
-			COUNT(DISTINCT v.id) AS total_views
-		`).
-		Joins("LEFT JOIN streams s ON u.id = s.user_id").
-		Joins("LEFT JOIN likes l ON u.id = l.user_id").
-		Joins("LEFT JOIN comments c ON u.id = c.user_id").
-		Joins("LEFT JOIN subscriptions sub ON u.id = sub.subscriber_id").
-		Joins("LEFT JOIN views v ON u.id = v.user_id").
-		Where("u.role_id NOT IN ?", []uint{r.roleMap[model.SUPPERADMINROLE], r.roleMap[model.ADMINROLE]}).
-		Group("u.id, u.username, u.display_name")
-
+	query := r.db.Model(model.User{}).Joins("INNER JOIN roles ON users.role_id = roles.id").Select("users.id as user_id, roles.type as role_type, users.username, users.display_name").Where("roles.type NOT IN ?", []model.RoleType{model.SUPPERADMINROLE, model.ADMINROLE})
 	if req.Keyword != "" {
-		subQuery = subQuery.Where("u.username ILIKE ?", "%"+req.Keyword+"%")
-		subQuery = subQuery.Or("u.display_name ILIKE ?", "%"+req.Keyword+"%")
+		query = query.Where("users.username ILIKE ? OR users.display_name ILIKE ?", "%"+req.Keyword+"%", "%"+req.Keyword+"%")
 	}
-
-	// Wrap the subquery to enable sorting and pagination
-	query := r.db.Table("(?) as aggregated", subQuery)
-
-	defaultOrder := []string{"total_streams DESC", "total_likes DESC", "total_comments DESC", "total_views DESC"}
-
-	if req.Sort != "" && req.SortBy != "" {
-		query = query.Order(fmt.Sprintf("%s %s", req.SortBy, req.Sort))
-	} else {
-		for _, order := range defaultOrder {
-			query = query.Order(order)
+	if req.SortBy != "" && req.Sort != "" {
+		if req.SortBy == "username" || req.SortBy == "display_name" {
+			query = query.Order(fmt.Sprintf("users.%s %s", req.SortBy, req.Sort))
 		}
 	}
-
 	pagination, err := utils.CreatePage[dto.UserStatisticsResponse](query, int(req.Page), int(req.Limit))
 	if err != nil {
 		return nil, err
 	}
 
 	return utils.Create(pagination, int(req.Page), int(req.Limit))
+}
+
+func (r *UserRepository) GetLikesByUserID(id uint) (int64, error) {
+	var count int64
+	if err := r.db.Model(model.Like{}).Where("user_id = ?", id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (r *UserRepository) GetCommentsByUserID(id uint) (int64, error) {
+	var count int64
+	if err := r.db.Model(model.Comment{}).Where("user_id = ?", id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (r *UserRepository) GetViewsByUserID(id uint) (int64, error) {
+	var count int64
+	if err := r.db.Model(model.View{}).Where("user_id = ?", id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (r *UserRepository) GetStreamsByUserID(id uint) (int64, error) {
+	var count int64
+	if err := r.db.Model(model.Stream{}).Where("user_id = ?", id).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }
