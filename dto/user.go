@@ -104,13 +104,14 @@ type UserStatisticsRequest struct {
 }
 
 type UserStatisticsResponse struct {
-	UserID        uint   `json:"user_id"`
-	Username      string `json:"username"`
-	DisplayName   string `json:"display_name"`
-	TotalStreams  uint   `json:"total_streams"`
-	TotalLikes    uint   `json:"total_likes"`
-	TotalComments uint   `json:"total_comments"`
-	TotalViews    uint   `json:"total_views"`
+	UserID        uint           `json:"user_id"`
+	RoleType      model.RoleType `json:"role_type"`
+	Username      string         `json:"username"`
+	DisplayName   string         `json:"display_name"`
+	TotalStreams  uint           `json:"total_streams"`
+	TotalLikes    uint           `json:"total_likes"`
+	TotalComments uint           `json:"total_comments"`
+	TotalViews    uint           `json:"total_views"`
 }
 
 func (r *UserStatisticsResponse) TableName() string {
