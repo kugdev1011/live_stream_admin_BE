@@ -171,3 +171,13 @@ type ScheduleStream struct {
 	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
 	Stream      Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 }
+
+type SavedVideo struct {
+	ID        uint      `gorm:"primaryKey"`
+	UserID    uint      `gorm:"not null;uniqueIndex:idx_view_user_stream"`
+	StreamID  uint      `gorm:"not null;uniqueIndex:idx_view_user_stream"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;autoUpdateTime;not null"`
+	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
+	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+}

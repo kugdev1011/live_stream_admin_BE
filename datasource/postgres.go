@@ -37,6 +37,7 @@ func LoadDB() (*gorm.DB, error) {
 		&model.Category{},
 		&model.View{},
 		&model.ScheduleStream{},
+		&model.SavedVideo{},
 	); err != nil {
 		return nil, err
 	}
