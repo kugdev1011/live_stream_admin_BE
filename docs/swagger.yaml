@@ -1,4 +1,12 @@
 definitions:
+  dto.ForgetPasswordDTO:
+    properties:
+      email:
+        maxLength: 100
+        type: string
+    required:
+    - email
+    type: object
   dto.LoginDTO:
     properties:
       email:
@@ -31,6 +39,21 @@ definitions:
       username:
         type: string
     type: object
+  dto.ResetPasswordDTO:
+    properties:
+      confirmPassword:
+        minLength: 8
+        type: string
+      otp:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - confirmPassword
+    - otp
+    - password
+    type: object
   model.RoleType:
     enum:
     - super_admin
@@ -46,6 +69,32 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/auth/forgetPassword:
+    post:
+      consumes:
+      - application/json
+      description: Generates an OTP for password reset
+      parameters:
+      - description: Forget Password DTO
+        in: body
+        name: forgetPasswordDTO
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ForgetPasswordDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OTP generated successfully
+        "400":
+          description: Email not found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Forget Password
+      tags:
+      - Auth
   /api/auth/login:
     post:
       consumes:
@@ -68,6 +117,32 @@ paths:
         "400":
           description: Invalid request
       summary: Login a user
+      tags:
+      - Auth
+  /api/auth/resetPassword:
+    post:
+      consumes:
+      - application/json
+      description: Resets the user's password using OTP
+      parameters:
+      - description: Reset Password DTO
+        in: body
+        name: resetPasswordDTO
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password reset successfully
+        "400":
+          description: Bad Request
+        "404":
+          description: Email not found
+        "500":
+          description: Internal Server Error
+      summary: Reset Password
       tags:
       - Auth
 swagger: "2.0"
