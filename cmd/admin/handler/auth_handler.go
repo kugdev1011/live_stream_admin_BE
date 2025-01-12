@@ -46,6 +46,15 @@ func (h *authHandler) register() {
 
 }
 
+// @Summary Login a user
+// @Description Authenticates the user and returns a JWT token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param login body dto.LoginDTO true "User Login Data"
+// @Success 200 {object} dto.LoginResponse "Login successful"
+// @Failure 400  "Invalid request"
+// @Router /api/auth/login [post]
 func (h *authHandler) login(c echo.Context) error {
 	var loginDTO dto.LoginDTO
 
@@ -77,16 +86,17 @@ func (h *authHandler) login(c echo.Context) error {
 	if user.AvatarFileName.Valid {
 		avatarFileName = utils.MakeAvatarURL(h.apiURL, user.AvatarFileName.String)
 	}
-	response := map[string]interface{}{
-		"id":           user.ID,
-		"avatar":       avatarFileName,
-		"username":     user.Username,
-		"display_name": user.DisplayName,
-		"email":        user.Email,
-		"role":         user.Role.Type,
-		"expired_time": expiredTime,
-		"token":        token,
+	response := dto.LoginResponse{
+		ID:          user.ID,
+		Avatar:      avatarFileName,
+		Username:    user.Username,
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+		Role:        user.Role.Type,
+		ExpiredTime: expiredTime,
+		Token:       token,
 	}
+
 	return utils.BuildSuccessResponse(c, http.StatusOK, "Login successful", response)
 }
 

@@ -1,0 +1,73 @@
+definitions:
+  dto.LoginDTO:
+    properties:
+      email:
+        maxLength: 100
+        type: string
+      password:
+        maxLength: 255
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.LoginResponse:
+    properties:
+      avatar:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      expired_time:
+        type: string
+      id:
+        type: integer
+      role:
+        $ref: '#/definitions/model.RoleType'
+      token:
+        type: string
+      username:
+        type: string
+    type: object
+  model.RoleType:
+    enum:
+    - super_admin
+    - admin
+    - streamer
+    - user
+    type: string
+    x-enum-varnames:
+    - SUPPERADMINROLE
+    - ADMINROLE
+    - STREAMER
+    - USERROLE
+info:
+  contact: {}
+paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates the user and returns a JWT token
+      parameters:
+      - description: User Login Data
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Invalid request
+      summary: Login a user
+      tags:
+      - Auth
+swagger: "2.0"
