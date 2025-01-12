@@ -96,11 +96,12 @@ type ChangeAvatarRequest struct {
 }
 
 type UserStatisticsRequest struct {
-	Page    uint   `query:"page" validate:"min=1"`
-	Limit   uint   `query:"limit" validate:"min=1,max=20"`
-	SortBy  string `query:"sort_by" validate:"omitempty,oneof=user_id username display_name total_streams total_likes total_comments total_subscriptions total_views"`
-	Sort    string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
-	Keyword string `query:"keyword" validate:"omitempty,max=255"`
+	Page     uint   `query:"page" validate:"min=1"`
+	Limit    uint   `query:"limit" validate:"min=1,max=20"`
+	SortBy   string `query:"sort_by" validate:"omitempty,oneof=user_id username display_name total_streams total_likes total_comments total_subscriptions total_views"`
+	Sort     string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	RoleType string `query:"role_type" validate:"omitempty,oneof=user streamer"`
+	Keyword  string `query:"keyword" validate:"omitempty,max=255"`
 }
 
 type UserStatisticsResponse struct {

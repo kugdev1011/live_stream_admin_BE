@@ -188,6 +188,10 @@ func (r *UserRepository) GetUserStatistics(req *dto.UserStatisticsRequest) (*uti
 	if req.Keyword != "" {
 		query = query.Where("users.username ILIKE ? OR users.display_name ILIKE ?", "%"+req.Keyword+"%", "%"+req.Keyword+"%")
 	}
+	if req.RoleType != "" {
+		query = query.Where("roles.type = ?", req.RoleType)
+	}
+
 	if req.SortBy != "" && req.Sort != "" {
 		if req.SortBy == "username" || req.SortBy == "display_name" {
 			query = query.Order(fmt.Sprintf("users.%s %s", req.SortBy, req.Sort))
