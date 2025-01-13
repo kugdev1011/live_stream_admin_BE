@@ -79,6 +79,10 @@ type CreateUserRequest struct {
 	CreatedByID    *uint          `json:"-" form:"-"`
 }
 
+type DeactiveUserRequest struct {
+	Reason string `json:"reason" validate:"required,min=3,max=255"`
+}
+
 type ChangePasswordRequest struct {
 	Password        string `json:"password" form:"password" validate:"required,min=8,max=255"`
 	ConfirmPassword string `json:"confirm_password" form:"confirm_password" validate:"required,min=8,max=255"`

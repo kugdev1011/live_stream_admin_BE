@@ -27,6 +27,15 @@ definitions:
     - confirm_password
     - password
     type: object
+  dto.DeactiveUserRequest:
+    properties:
+      reason:
+        maxLength: 255
+        minLength: 3
+        type: string
+    required:
+    - reason
+    type: object
   dto.ForgetPasswordDTO:
     properties:
       email:
@@ -766,6 +775,12 @@ paths:
         name: id
         required: true
         type: integer
+      - description: Deactive User
+        in: body
+        name: DeactiveUserRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DeactiveUserRequest'
       produces:
       - application/json
       responses:

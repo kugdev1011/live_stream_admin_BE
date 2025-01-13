@@ -221,8 +221,9 @@ func (s *UserService) FindByID(id uint) (*model.User, error) {
 	return s.repo.User.FindByID(int(id))
 }
 
-func (s *UserService) ChangeStatusUser(user *model.User, updatedByID uint, status model.UserStatusType, apiUrl string) (*dto.UpdateUserResponse, error) {
+func (s *UserService) ChangeStatusUser(user *model.User, updatedByID uint, status model.UserStatusType, reason, apiUrl string) (*dto.UpdateUserResponse, error) {
 	user.Status = status
+	user.BlockedReason = reason
 	user.UpdatedByID = &updatedByID
 	user.UpdatedAt = time.Now()
 	return s.toUpdatedUserDTO(user, user.Role.Type, apiUrl), s.repo.User.Update(user)

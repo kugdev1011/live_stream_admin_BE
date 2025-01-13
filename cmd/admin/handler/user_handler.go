@@ -179,6 +179,9 @@ func (h *userHandler) reactiveUser(c echo.Context) error {
 	currentUser := c.Get("user").(*utils.Claims)
 	updatedUser, err := h.srv.User.FindByID(uint(id))
 
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
 	if updatedUser == nil {
 		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
 	}
@@ -191,7 +194,7 @@ func (h *userHandler) reactiveUser(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request, admin can't reactive admin"), nil)
 	}
 
-	data, err := h.srv.User.ChangeStatusUser(updatedUser, currentUser.ID, model.OFFLINE, h.apiURL)
+	data, err := h.srv.User.ChangeStatusUser(updatedUser, currentUser.ID, model.OFFLINE, "", h.apiURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
@@ -211,6 +214,7 @@ func (h *userHandler) reactiveUser(c echo.Context) error {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "User ID"
+// @Param DeactiveUserRequest body dto.DeactiveUserRequest true "Deactive User"
 // @Success 200 {object} dto.UpdateUserResponse
 // @Failure 400 "Invalid ID parameter"
 // @Failure 404 "Not found"
@@ -223,8 +227,17 @@ func (h *userHandler) deactiveUser(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid id parameter"), nil)
 	}
 
+	var request dto.DeactiveUserRequest
+	if err := utils.BindAndValidate(c, &request); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
 	currentUser := c.Get("user").(*utils.Claims)
 	updatedUser, err := h.srv.User.FindByID(uint(id))
+
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
 
 	if updatedUser == nil {
 		return utils.BuildErrorResponse(c, http.StatusNotFound, errors.New("not found"), nil)
@@ -238,12 +251,12 @@ func (h *userHandler) deactiveUser(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("invalid request, admin can't deactive admin"), nil)
 	}
 
-	data, err := h.srv.User.ChangeStatusUser(updatedUser, currentUser.ID, model.BLOCKED, h.apiURL)
+	data, err := h.srv.User.ChangeStatusUser(updatedUser, currentUser.ID, model.BLOCKED, request.Reason, h.apiURL)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
-	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeactiveUserAction, fmt.Sprintf("%s de-active %s.", currentUser.Username, data.UserName))
+	adminLog := h.srv.Admin.MakeAdminLogModel(currentUser.ID, model.DeactiveUserAction, fmt.Sprintf("%s block %s. reason is %s", currentUser.Username, data.UserName, request.Reason))
 	err = h.srv.Admin.CreateLog(adminLog)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to created admin log"})
