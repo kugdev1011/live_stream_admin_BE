@@ -78,7 +78,7 @@ type User struct {
 	DeletedAt           gorm.DeletedAt `json:"deleted_at,omitempty"`
 	DeletedByID         *uint          `json:"deleted_by_id,omitempty"`
 	AvatarFileName      sql.NullString `gorm:"type:varchar(255)" json:"avatar_file_name,omitempty"`
-	Status              string         `gorm:"type:varchar(50);not null;default:'offline'" json:"status,omitempty"`
+	Status              UserStatusType `gorm:"type:varchar(50);not null;default:'offline'" json:"status,omitempty"`
 	AdminLogs           []AdminLog     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	CreatedByCategories []Category     `gorm:"foreignKey:CreatedByID"`
 	UpdatedByCategories []Category     `gorm:"foreignKey:UpdatedByID"`
