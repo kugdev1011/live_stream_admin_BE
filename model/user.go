@@ -42,6 +42,14 @@ const (
 	SUPER_ADMIN_USERNAME = "superAdmin"
 )
 
+type UserStatusType string
+
+const (
+	ONLINE  UserStatusType = "online"
+	OFFLINE UserStatusType = "offline"
+	BLOCKED UserStatusType = "blocked"
+)
+
 type Role struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id,omitempty"`
 	Type        RoleType  `gorm:"type:varchar(50);not null;unique" json:"type,omitempty"`
@@ -70,6 +78,7 @@ type User struct {
 	DeletedAt           gorm.DeletedAt `json:"deleted_at,omitempty"`
 	DeletedByID         *uint          `json:"deleted_by_id,omitempty"`
 	AvatarFileName      sql.NullString `gorm:"type:varchar(255)" json:"avatar_file_name,omitempty"`
+	Status              string         `gorm:"type:varchar(50);not null;default:'offline'" json:"status,omitempty"`
 	AdminLogs           []AdminLog     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	CreatedByCategories []Category     `gorm:"foreignKey:CreatedByID"`
 	UpdatedByCategories []Category     `gorm:"foreignKey:UpdatedByID"`
