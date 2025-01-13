@@ -16,6 +16,8 @@ const (
 	ChangeUserPasswordAction     AdminAction = "change_user_password"
 	ChangeAvatarByAdmin          AdminAction = "change_avatar_by_admin"
 	DeleteUserAction             AdminAction = "delete_user"
+	DeactiveUserAction           AdminAction = "admin_deactive_user"
+	ReactiveUserAction           AdminAction = "admin_reactive_user"
 	DeleteStreamByAdmin          AdminAction = "delete_stream_by_admin"
 	ScheduledLiveStreamByAdmin   AdminAction = "scheduled_stream_by_admin"
 	UpdateStreamByAdmin          AdminAction = "update_stream_by_admin"
@@ -79,6 +81,7 @@ type User struct {
 	DeletedByID         *uint          `json:"deleted_by_id,omitempty"`
 	AvatarFileName      sql.NullString `gorm:"type:varchar(255)" json:"avatar_file_name,omitempty"`
 	Status              UserStatusType `gorm:"type:varchar(50);not null;default:'offline'" json:"status,omitempty"`
+	BlockedReason       string         `gorm:"type:text" json:"blocked_reason,omitempty"`
 	AdminLogs           []AdminLog     `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	CreatedByCategories []Category     `gorm:"foreignKey:CreatedByID"`
 	UpdatedByCategories []Category     `gorm:"foreignKey:UpdatedByID"`
