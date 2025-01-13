@@ -6,34 +6,30 @@ import (
 )
 
 type UserQuery struct {
-	Role string `query:"role" validate:"omitempty,oneof=super_admin admin streamer user"`
-	// UserName    string `query:"username" validate:"omitempty,min=1,max=50"`
-	// DisplayName string `query:"display_name" validate:"omitempty,min=1,max=50"`
-	// Email       string `query:"email" validate:"omitempty,email,max=100"`
+	Role    string `json:"role" query:"role" validate:"omitempty,oneof=super_admin admin streamer user"`
 	Keyword string `query:"keyword" validate:"omitempty,max=255"`
-	SortBy  string `query:"sort_by" validate:"omitempty,oneof=created_at updated_at username email display_name"`
-	Sort    string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
-	// CreatedBy string `query:"created_by" validate:"omitempty,min=1,max=50"`
-	// UpdatedBy string `query:"updated_by" validate:"omitempty,min=1,max=50"`
-	Page  uint `query:"page" validate:"omitempty,min=1"`
-	Limit uint `query:"limit" validate:"omitempty,min=1,max=20"`
+	SortBy  string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=created_at updated_at username email display_name"`
+	Sort    string `json:"sort" query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	Page    uint   `query:"page" validate:"omitempty,min=1"`
+	Limit   uint   `query:"limit" validate:"omitempty,min=1,max=20"`
 }
 
 type UserResponseDTO struct {
-	ID             uint             `json:"id,omitempty"`
-	Username       string           `json:"username,omitempty"`
-	DisplayName    string           `json:"display_name"`
-	AvatarFileName string           `json:"avatar_file_name,omitempty"`
-	Email          string           `json:"email,omitempty"`
-	RoleID         uint             `json:"role_id,omitempty"`
-	Role           *RoleDTO         `json:"role,omitempty"`
-	CreatedAt      time.Time        `json:"created_at,omitempty"`
-	CreatedByID    *uint            `json:"created_by_id,omitempty"`
-	CreatedBy      *UserResponseDTO `json:"created_by,omitempty"`
-	UpdatedAt      time.Time        `json:"updated_at,omitempty"`
-	UpdatedByID    *uint            `json:"updated_by_id,omitempty"`
-	UpdatedBy      *UserResponseDTO `json:"updated_by,omitempty"`
-	DeletedByID    *uint            `json:"deleted_by_id,omitempty"`
+	ID             uint                 `json:"id,omitempty"`
+	Username       string               `json:"username,omitempty"`
+	DisplayName    string               `json:"display_name"`
+	AvatarFileName string               `json:"avatar_file_name,omitempty"`
+	Email          string               `json:"email,omitempty"`
+	RoleID         uint                 `json:"role_id,omitempty"`
+	Role           *RoleDTO             `json:"role,omitempty"`
+	Status         model.UserStatusType `json:"status,omitempty"`
+	CreatedAt      time.Time            `json:"created_at,omitempty"`
+	CreatedByID    *uint                `json:"created_by_id,omitempty"`
+	CreatedBy      *UserResponseDTO     `json:"created_by,omitempty"`
+	UpdatedAt      time.Time            `json:"updated_at,omitempty"`
+	UpdatedByID    *uint                `json:"updated_by_id,omitempty"`
+	UpdatedBy      *UserResponseDTO     `json:"updated_by,omitempty"`
+	DeletedByID    *uint                `json:"deleted_by_id,omitempty"`
 }
 
 type RoleDTO struct {
@@ -63,13 +59,14 @@ type UpdateUserRequest struct {
 }
 
 type UpdateUserResponse struct {
-	ID          uint           `json:"id"`
-	UserName    string         `json:"username,omitempty"`
-	Avatar      string         `json:"avatar"`
-	DisplayName string         `json:"display_name,omitempty"`
-	Email       string         `json:"email,omitempty"`
-	Role        model.RoleType `json:"role,omitempty"`
-	UpdatedAt   time.Time      `json:"created_at,omitempty"`
+	ID          uint                 `json:"id"`
+	UserName    string               `json:"username,omitempty"`
+	Avatar      string               `json:"avatar"`
+	DisplayName string               `json:"display_name,omitempty"`
+	Email       string               `json:"email,omitempty"`
+	Role        model.RoleType       `json:"role,omitempty"`
+	Status      model.UserStatusType `json:"status,omitempty"`
+	UpdatedAt   time.Time            `json:"created_at,omitempty"`
 }
 
 type CreateUserRequest struct {
@@ -95,10 +92,10 @@ type ChangeAvatarRequest struct {
 type UserStatisticsRequest struct {
 	Page     uint   `query:"page" validate:"min=1"`
 	Limit    uint   `query:"limit" validate:"min=1,max=20"`
-	SortBy   string `query:"sort_by" validate:"omitempty,oneof=user_id username display_name total_streams total_likes total_comments total_subscriptions total_views"`
-	Sort     string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
-	RoleType string `query:"role_type" validate:"omitempty,oneof=user streamer"`
-	Keyword  string `query:"keyword" validate:"omitempty,max=255"`
+	SortBy   string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=user_id username display_name total_streams total_likes total_comments total_subscriptions total_views"`
+	Sort     string `json:"sort" query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	RoleType string `json:"role_type" query:"role_type" validate:"omitempty,oneof=user streamer"`
+	Keyword  string `json:"keyword" query:"keyword" validate:"omitempty,max=255"`
 }
 
 type UserStatisticsResponse struct {

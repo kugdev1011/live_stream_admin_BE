@@ -16,6 +16,8 @@ const (
 	ChangeUserPasswordAction     AdminAction = "change_user_password"
 	ChangeAvatarByAdmin          AdminAction = "change_avatar_by_admin"
 	DeleteUserAction             AdminAction = "delete_user"
+	DeactiveUserAction           AdminAction = "admin_deactive_user"
+	ReactiveUserAction           AdminAction = "admin_reactive_user"
 	DeleteStreamByAdmin          AdminAction = "delete_stream_by_admin"
 	ScheduledLiveStreamByAdmin   AdminAction = "scheduled_stream_by_admin"
 	UpdateStreamByAdmin          AdminAction = "update_stream_by_admin"

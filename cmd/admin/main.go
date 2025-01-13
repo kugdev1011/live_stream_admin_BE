@@ -37,6 +37,14 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 	return nil
 }
 
+// @title          			   Admin API Live Stream
+// @version         		   1.0
+// @description     		   Swagger API Admin Live Stream.
+// @host            		   localhost:8686
+// @BasePath       			   /
+// @securityDefinitions.apikey Bearer
+// @in                         header
+// @name                       Authorization
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 

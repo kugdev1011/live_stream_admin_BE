@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admin/logs": {
+        "/api/admins/logs": {
             "get": {
                 "security": [
                     {
@@ -35,13 +35,57 @@ const docTemplate = `{
                 "summary": "Get Admin Logs",
                 "parameters": [
                     {
-                        "description": "Admin Log Query",
-                        "name": "adminLogQuery",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.AdminLogQuery"
-                        }
+                        "enum": [
+                            "action",
+                            "details",
+                            "id",
+                            "username",
+                            "email"
+                        ],
+                        "type": "string",
+                        "name": "filter_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "is_me",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 255,
+                        "type": "string",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 20,
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "DESC",
+                            "ASC"
+                        ],
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "performed_at"
+                        ],
+                        "type": "string",
+                        "name": "sort_by",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -60,7 +104,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/admin/{id}": {
+        "/api/admins/{id}": {
             "get": {
                 "security": [
                     {
@@ -226,53 +270,641 @@ const docTemplate = `{
                     }
                 }
             }
-        }
-    },
-    "definitions": {
-        "dto.AdminLogQuery": {
-            "type": "object",
-            "properties": {
-                "filterBy": {
-                    "type": "string",
-                    "enum": [
-                        "action",
-                        "details",
-                        "id",
-                        "username",
-                        "email"
-                    ]
-                },
-                "isMe": {
-                    "type": "boolean"
-                },
-                "keyword": {
-                    "type": "string",
-                    "maxLength": 255
-                },
-                "limit": {
-                    "type": "integer",
-                    "maximum": 20,
-                    "minimum": 1
-                },
-                "page": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "sort": {
-                    "type": "string",
-                    "enum": [
-                        "DESC",
-                        "ASC"
-                    ]
-                },
-                "sortBy": {
-                    "type": "string",
-                    "enum": [
-                        "performed_at"
-                    ]
+        },
+        "/api/users": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get a paginated list of users based on the provided query parameters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get paginated list of users",
+                "parameters": [
+                    {
+                        "maxLength": 255,
+                        "type": "string",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 20,
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "super_admin",
+                            "admin",
+                            "streamer",
+                            "user"
+                        ],
+                        "type": "string",
+                        "name": "role",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "DESC",
+                            "ASC"
+                        ],
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "created_at",
+                            "updated_at",
+                            "username",
+                            "email",
+                            "display_name"
+                        ],
+                        "type": "string",
+                        "name": "sort_by",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationModel-dto_UserResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a new user with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Create a new user",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "User Avatar",
+                        "name": "avatar",
+                        "in": "formData"
+                    },
+                    {
+                        "maxLength": 100,
+                        "minLength": 3,
+                        "type": "string",
+                        "name": "display_name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "maxLength": 100,
+                        "type": "string",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "maxLength": 255,
+                        "minLength": 8,
+                        "type": "string",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "super_admin",
+                            "admin",
+                            "streamer",
+                            "user"
+                        ],
+                        "type": "string",
+                        "x-enum-varnames": [
+                            "SUPPERADMINROLE",
+                            "ADMINROLE",
+                            "STREAMER",
+                            "USERROLE"
+                        ],
+                        "name": "role_type",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "maxLength": 50,
+                        "minLength": 3,
+                        "type": "string",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully"
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
                 }
             }
         },
+        "/api/users/statistics": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get statistics for users based on the provided criteria",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user statistics",
+                "parameters": [
+                    {
+                        "maxLength": 255,
+                        "type": "string",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 20,
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "user",
+                            "streamer"
+                        ],
+                        "type": "string",
+                        "name": "role_type",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "DESC",
+                            "ASC"
+                        ],
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "user_id",
+                            "username",
+                            "display_name",
+                            "total_streams",
+                            "total_likes",
+                            "total_comments",
+                            "total_subscriptions",
+                            "total_views"
+                        ],
+                        "type": "string",
+                        "name": "sort_by",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationModel-dto_UserStatisticsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/users/usernames": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get a list of all usernames",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get list of usernames",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get a user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get user by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID parameter"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Update the details of a user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update user details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update User Request",
+                        "name": "UpdateUserRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete a user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete user by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully"
+                    },
+                    "400": {
+                        "description": "Invalid ID parameter"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/users/{id}/change-avatar": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Change the avatar of a user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Change user avatar",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "User Avatar",
+                        "name": "avatar",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/users/{id}/change-password": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Change the password of a user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Change user password",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Change Password Request",
+                        "name": "ChangePasswordRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/users/{id}/deactive": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Deactive a user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Deactive user by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID parameter"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/users/{id}/reactive": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Reactive a user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Reactive user by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID parameter"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
         "dto.AdminLogRespDTO": {
             "type": "object",
             "properties": {
@@ -290,6 +922,25 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/dto.UserResponseDTO"
+                }
+            }
+        },
+        "dto.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirm_password",
+                "password"
+            ],
+            "properties": {
+                "confirm_password": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 8
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 8
                 }
             }
         },
@@ -399,6 +1050,69 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.UpdateUserRequest": {
+            "type": "object",
+            "properties": {
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "role_type": {
+                    "enum": [
+                        "admin",
+                        "streamer",
+                        "user"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.RoleType"
+                        }
+                    ]
+                },
+                "updated_by_id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3
+                }
+            }
+        },
+        "dto.UpdateUserResponse": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "$ref": "#/definitions/model.RoleType"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.UserStatusType"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.UserResponseDTO": {
             "type": "object",
             "properties": {
@@ -432,6 +1146,9 @@ const docTemplate = `{
                 "role_id": {
                     "type": "integer"
                 },
+                "status": {
+                    "$ref": "#/definitions/model.UserStatusType"
+                },
                 "updated_at": {
                     "type": "string"
                 },
@@ -439,6 +1156,35 @@ const docTemplate = `{
                     "$ref": "#/definitions/dto.UserResponseDTO"
                 },
                 "updated_by_id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserStatisticsResponse": {
+            "type": "object",
+            "properties": {
+                "display_name": {
+                    "type": "string"
+                },
+                "role_type": {
+                    "$ref": "#/definitions/model.RoleType"
+                },
+                "total_comments": {
+                    "type": "integer"
+                },
+                "total_likes": {
+                    "type": "integer"
+                },
+                "total_streams": {
+                    "type": "integer"
+                },
+                "total_views": {
+                    "type": "integer"
+                },
+                "user_id": {
                     "type": "integer"
                 },
                 "username": {
@@ -459,6 +1205,19 @@ const docTemplate = `{
                 "ADMINROLE",
                 "STREAMER",
                 "USERROLE"
+            ]
+        },
+        "model.UserStatusType": {
+            "type": "string",
+            "enum": [
+                "online",
+                "offline",
+                "blocked"
+            ],
+            "x-enum-varnames": [
+                "ONLINE",
+                "OFFLINE",
+                "BLOCKED"
             ]
         },
         "utils.PaginationModel-dto_AdminLogRespDTO": {
@@ -508,18 +1267,121 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "utils.PaginationModel-dto_UserResponseDTO": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "exec_time": {
+                    "type": "number"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "is_new_filter": {
+                    "type": "boolean"
+                },
+                "length": {
+                    "type": "integer"
+                },
+                "next": {
+                    "type": "integer"
+                },
+                "obj": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "page": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserResponseDTO"
+                    }
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "previous": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "route": {
+                    "type": "string"
+                },
+                "total_items": {
+                    "type": "integer"
+                }
+            }
+        },
+        "utils.PaginationModel-dto_UserStatisticsResponse": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "exec_time": {
+                    "type": "number"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "is_new_filter": {
+                    "type": "boolean"
+                },
+                "length": {
+                    "type": "integer"
+                },
+                "next": {
+                    "type": "integer"
+                },
+                "obj": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "page": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserStatisticsResponse"
+                    }
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "previous": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "route": {
+                    "type": "string"
+                },
+                "total_items": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:8686",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Admin API Live Stream",
+	Description:      "Swagger API Admin Live Stream.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

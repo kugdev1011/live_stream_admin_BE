@@ -16,13 +16,13 @@ type CreateAdminResp struct {
 }
 
 type AdminLogQuery struct {
-	SortBy   string `query:"sort_by" validate:"omitempty,oneof=performed_at"`
-	Sort     string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
-	FilterBy string `query:"filter_by" validate:"omitempty,oneof=action details id username email"`
-	Keyword  string `query:"keyword" validate:"omitempty,max=255"`
+	SortBy   string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=performed_at"`
+	Sort     string `json:"sort" query:"sort" validate:"omitempty,oneof=DESC ASC"`
+	FilterBy string `json:"filter_by" query:"filter_by" validate:"omitempty,oneof=action details id username email"`
+	Keyword  string `json:"keyword" query:"keyword" validate:"omitempty,max=255"`
 	UserID   uint   `json:"-"`
 	IsAdmin  bool   `json:"-"`
-	IsMe     bool   `query:"is_me" validate:"omitempty"`
+	IsMe     bool   `json:"is_me" query:"is_me" validate:"omitempty"`
 	Page     uint   `query:"page" validate:"omitempty,min=1"`
 	Limit    uint   `query:"limit" validate:"omitempty,min=1,max=20"`
 }
