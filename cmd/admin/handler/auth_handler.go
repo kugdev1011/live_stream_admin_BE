@@ -67,6 +67,10 @@ func (h *authHandler) login(c echo.Context) error {
 		return utils.BuildErrorResponse(c, http.StatusUnauthorized, errors.New("invalid username or password"), nil)
 	}
 
+	if user.Status == model.BLOCKED {
+		return utils.BuildErrorResponse(c, http.StatusForbidden, errors.New("user was blocked"), nil)
+	}
+
 	if !slices.Contains([]model.RoleType{model.ADMINROLE, model.SUPPERADMINROLE}, user.Role.Type) {
 		return utils.BuildErrorResponse(c, http.StatusUnauthorized, errors.New("you have no permission to login"), nil)
 	}
