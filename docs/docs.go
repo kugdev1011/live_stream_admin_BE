@@ -326,6 +326,12 @@ const docTemplate = `{
                 "summary": "Get paginated list of users",
                 "parameters": [
                     {
+                        "maxLength": 255,
+                        "type": "string",
+                        "name": "createdBy",
+                        "in": "query"
+                    },
+                    {
                         "enum": [
                             "status"
                         ],

@@ -54,6 +54,10 @@ func (s *UserRepository) Page(filter *dto.UserQuery, page, limit uint) (*utils.P
 		query = query.Or("ur.username ILIKE ?", "%"+filter.Keyword+"%")
 	}
 
+	if filter != nil && filter.CreatedBy != "" {
+		query = query.Where("cr.username = ?", filter.CreatedBy)
+	}
+
 	if filter.FilterBy != "" {
 		if filter.FilterBy == "status" {
 			query = query.Where("users.status = ?", model.UserStatusType(filter.Keyword))
