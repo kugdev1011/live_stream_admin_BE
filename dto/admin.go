@@ -18,7 +18,8 @@ type CreateAdminResp struct {
 type AdminLogQuery struct {
 	SortBy   string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=performed_at"`
 	Sort     string `json:"sort" query:"sort" validate:"omitempty,oneof=DESC ASC"`
-	FilterBy string `json:"filter_by" query:"filter_by" validate:"omitempty,oneof=action details id username email"`
+	FilterBy string `json:"filter_by" query:"filter_by" validate:"omitempty,oneof=details username email"`
+	Action   string `json:"action" query:"action" validate:"omitempty,max=255"`
 	Keyword  string `json:"keyword" query:"keyword" validate:"omitempty,max=255"`
 	UserID   uint   `json:"-"`
 	IsAdmin  bool   `json:"-"`
