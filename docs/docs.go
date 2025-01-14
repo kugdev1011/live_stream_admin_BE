@@ -66,10 +66,14 @@ const docTemplate = `{
                 "summary": "Get Admin Logs",
                 "parameters": [
                     {
+                        "maxLength": 255,
+                        "type": "string",
+                        "name": "action",
+                        "in": "query"
+                    },
+                    {
                         "enum": [
-                            "action",
                             "details",
-                            "id",
                             "username",
                             "email"
                         ],
@@ -541,13 +545,11 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "user_id",
                             "username",
                             "display_name",
                             "total_streams",
                             "total_likes",
                             "total_comments",
-                            "total_subscriptions",
                             "total_views"
                         ],
                         "type": "string",

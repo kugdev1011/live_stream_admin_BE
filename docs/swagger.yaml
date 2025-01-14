@@ -379,10 +379,12 @@ paths:
       - application/json
       description: Get logs for the current admin
       parameters:
+      - in: query
+        maxLength: 255
+        name: action
+        type: string
       - enum:
-        - action
         - details
-        - id
         - username
         - email
         in: query
@@ -884,13 +886,11 @@ paths:
         name: sort
         type: string
       - enum:
-        - user_id
         - username
         - display_name
         - total_streams
         - total_likes
         - total_comments
-        - total_subscriptions
         - total_views
         in: query
         name: sort_by

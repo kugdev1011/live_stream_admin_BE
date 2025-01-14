@@ -97,7 +97,7 @@ type ChangeAvatarRequest struct {
 type UserStatisticsRequest struct {
 	Page     uint   `query:"page" validate:"min=1"`
 	Limit    uint   `query:"limit" validate:"min=1,max=20"`
-	SortBy   string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=user_id username display_name total_streams total_likes total_comments total_subscriptions total_views"`
+	SortBy   string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=username display_name total_streams total_likes total_comments total_views"`
 	Sort     string `json:"sort" query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	RoleType string `json:"role_type" query:"role_type" validate:"omitempty,oneof=user streamer"`
 	Keyword  string `json:"keyword" query:"keyword" validate:"omitempty,max=255"`
