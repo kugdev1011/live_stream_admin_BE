@@ -332,14 +332,6 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "enum": [
-                            "status"
-                        ],
-                        "type": "string",
-                        "name": "filter_by",
-                        "in": "query"
-                    },
-                    {
                         "maxLength": 255,
                         "type": "string",
                         "name": "keyword",
@@ -388,6 +380,11 @@ const docTemplate = `{
                         ],
                         "type": "string",
                         "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "status",
                         "in": "query"
                     }
                 ],

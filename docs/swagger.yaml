@@ -521,11 +521,6 @@ paths:
         maxLength: 255
         name: created_by
         type: string
-      - enum:
-        - status
-        in: query
-        name: filter_by
-        type: string
       - in: query
         maxLength: 255
         name: keyword
@@ -561,6 +556,9 @@ paths:
         - display_name
         in: query
         name: sort_by
+        type: string
+      - in: query
+        name: status
         type: string
       produces:
       - application/json
