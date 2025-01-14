@@ -65,7 +65,7 @@ type Notification struct {
 	Type      string    `gorm:"type:varchar(50);not null"`
 	Content   string    `gorm:"type:text;not null"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
-	IsRead    bool      `gorm:"default:false;not null"`
+	ReadAt    time.Time `gorm:"column:read_at"`
 	Stream    Stream    `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
