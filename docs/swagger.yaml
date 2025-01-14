@@ -519,7 +519,7 @@ paths:
       parameters:
       - in: query
         maxLength: 255
-        name: createdBy
+        name: created_by
         type: string
       - enum:
         - status

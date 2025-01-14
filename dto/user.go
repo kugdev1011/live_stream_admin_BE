@@ -8,7 +8,7 @@ import (
 type UserQuery struct {
 	Role      string `json:"role" query:"role" validate:"omitempty,oneof=super_admin admin streamer user"`
 	Keyword   string `query:"keyword" validate:"omitempty,max=255"`
-	CreatedBy string `query:"created_by" validate:"omitempty,max=255"`
+	CreatedBy string `json:"created_by" query:"created_by" validate:"omitempty,max=255"`
 	FilterBy  string `json:"filter_by" query:"filter_by" validate:"omitempty,oneof=status"`
 	SortBy    string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=created_at updated_at username email display_name"`
 	Sort      string `json:"sort" query:"sort" validate:"omitempty,oneof=DESC ASC"`

@@ -328,7 +328,7 @@ const docTemplate = `{
                     {
                         "maxLength": 255,
                         "type": "string",
-                        "name": "createdBy",
+                        "name": "created_by",
                         "in": "query"
                     },
                     {
