@@ -30,6 +30,27 @@ const (
 	CreateAdmin                  AdminAction = "create_admin"
 )
 
+var Actions = map[AdminAction]string{
+	LoginAction:                  "login",
+	CreateUserAction:             "create_user",
+	UpdateUserAction:             "update_user",
+	ChangeUserPasswordAction:     "change_user_password",
+	ChangeAvatarByAdmin:          "change_avatar_by_admin",
+	DeleteUserAction:             "delete_user",
+	DeactiveUserAction:           "admin_deactive_user",
+	ReactiveUserAction:           "admin_reactive_user",
+	DeleteStreamByAdmin:          "delete_stream_by_admin",
+	ScheduledLiveStreamByAdmin:   "scheduled_stream_by_admin",
+	UpdateStreamByAdmin:          "update_stream_by_admin",
+	UpdateThumbnailByAdmin:       "update_thumbnail_by_admin",
+	UpdateScheduledStreamByAdmin: "update_scheduled_stream_by_admin",
+	EndLiveStreamByAdmin:         "end_live_stream_by_admin",
+	CreateCategory:               "create_category",
+	ForgetPassword:               "forget_password",
+	ResetPassword:                "reset_password",
+	CreateAdmin:                  "create_admin",
+}
+
 type RoleType string
 
 const (

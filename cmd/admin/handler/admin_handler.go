@@ -38,6 +38,7 @@ func (h *adminHandler) register() {
 	group.Use(h.JWTMiddleware())
 	group.GET("/logs", h.getAdminLogs)
 	group.GET("/:id", h.byId)
+	group.GET("/actions", h.getAdminActions)
 
 }
 
@@ -99,6 +100,23 @@ func (h *adminHandler) getAdminLogs(c echo.Context) error {
 
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
+}
+
+// @Summary      Get Admin Actions
+// @Description  Get actions for admin logs
+// @Tags         Admin
+// @Accept       json
+// @Produce      json
+// @Success      200 {array} string   "Admin actions"
+// @Security     Bearer
+// @Router       /api/admins/actions [get]
+func (h *adminHandler) getAdminActions(c echo.Context) error {
+	var data []string
+	for _, value := range model.Actions {
+		data = append(data, value)
 	}
 
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)

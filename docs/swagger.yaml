@@ -354,6 +354,25 @@ paths:
       summary: Get Admin by ID
       tags:
       - Admin
+  /api/admins/actions:
+    get:
+      consumes:
+      - application/json
+      description: Get actions for admin logs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Admin actions
+          schema:
+            items:
+              type: string
+            type: array
+      security:
+      - Bearer: []
+      summary: Get Admin Actions
+      tags:
+      - Admin
   /api/admins/logs:
     get:
       consumes:
@@ -496,6 +515,11 @@ paths:
       - application/json
       description: Get a paginated list of users based on the provided query parameters
       parameters:
+      - enum:
+        - status
+        in: query
+        name: filter_by
+        type: string
       - in: query
         maxLength: 255
         name: keyword

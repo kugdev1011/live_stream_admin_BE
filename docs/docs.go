@@ -15,6 +15,37 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/admins/actions": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get actions for admin logs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get Admin Actions",
+                "responses": {
+                    "200": {
+                        "description": "Admin actions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/admins/logs": {
             "get": {
                 "security": [
@@ -290,6 +321,14 @@ const docTemplate = `{
                 ],
                 "summary": "Get paginated list of users",
                 "parameters": [
+                    {
+                        "enum": [
+                            "status"
+                        ],
+                        "type": "string",
+                        "name": "filter_by",
+                        "in": "query"
+                    },
                     {
                         "maxLength": 255,
                         "type": "string",
