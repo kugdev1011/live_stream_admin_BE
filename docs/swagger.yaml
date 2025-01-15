@@ -636,6 +636,11 @@ paths:
         minimum: 1
         name: page
         type: integer
+      - in: query
+        maxLength: 255
+        minLength: 3
+        name: reason
+        type: string
       - enum:
         - admin
         - streamer

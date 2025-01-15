@@ -433,6 +433,13 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "maxLength": 255,
+                        "minLength": 3,
+                        "type": "string",
+                        "name": "reason",
+                        "in": "query"
+                    },
+                    {
                         "enum": [
                             "admin",
                             "streamer",
