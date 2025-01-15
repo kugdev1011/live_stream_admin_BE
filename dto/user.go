@@ -24,6 +24,7 @@ type UserResponseDTO struct {
 	AvatarFileName string               `json:"avatar_file_name,omitempty"`
 	Email          string               `json:"email,omitempty"`
 	RoleID         uint                 `json:"role_id,omitempty"`
+	BlockedReason  string               `json:"blocked_reason,omitempty"`
 	Role           *RoleDTO             `json:"role,omitempty"`
 	Status         model.UserStatusType `json:"status,omitempty"`
 	CreatedAt      time.Time            `json:"created_at,omitempty"`
