@@ -37,6 +37,7 @@ func (h *adminHandler) register() {
 
 	group.Use(h.JWTMiddleware())
 	group.GET("/logs", h.getAdminLogs)
+	group.GET("", h.getAdmins)
 	group.GET("/:id", h.byId)
 	group.GET("/actions", h.getAdminActions)
 
@@ -66,6 +67,27 @@ func (h *adminHandler) byId(c echo.Context) error {
 
 	if data == nil {
 		return utils.BuildErrorResponse(c, http.StatusBadRequest, errors.New("not found"), nil)
+	}
+
+	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)
+
+}
+
+// @Summary      Get Admins
+// @Description  Get admin list
+// @Tags         Admin
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}  dto.AdminResp  "Admins"
+// @Failure      400         "Invalid request"
+// @Failure      500         "Internal Server Error"
+// @Security     Bearer
+// @Router       /api/admins [get]
+func (h *adminHandler) getAdmins(c echo.Context) error {
+
+	data, err := h.srv.Admin.GetAdmins()
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 
 	return utils.BuildSuccessResponseWithData(c, http.StatusOK, data)

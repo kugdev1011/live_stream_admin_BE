@@ -15,6 +15,43 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/admins": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get admin list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get Admins",
+                "responses": {
+                    "200": {
+                        "description": "Admins",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.AdminResp"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/api/admins/actions": {
             "get": {
                 "security": [
@@ -326,11 +363,9 @@ const docTemplate = `{
                 "summary": "Get paginated list of users",
                 "parameters": [
                     {
-                        "enum": [
-                            "status"
-                        ],
+                        "maxLength": 255,
                         "type": "string",
-                        "name": "filter_by",
+                        "name": "created_by",
                         "in": "query"
                     },
                     {
@@ -354,7 +389,6 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "super_admin",
                             "admin",
                             "streamer",
                             "user"
@@ -382,6 +416,16 @@ const docTemplate = `{
                         ],
                         "type": "string",
                         "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "online",
+                            "offline",
+                            "blocked"
+                        ],
+                        "type": "string",
+                        "name": "status",
                         "in": "query"
                     }
                 ],
@@ -972,6 +1016,20 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/dto.UserResponseDTO"
+                }
+            }
+        },
+        "dto.AdminResp": {
+            "type": "object",
+            "properties": {
+                "display_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
