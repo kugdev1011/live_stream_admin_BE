@@ -6,10 +6,10 @@ import (
 )
 
 type UserQuery struct {
-	Role      string `json:"role" query:"role" validate:"omitempty,oneof=super_admin admin streamer user"`
+	Role      string `json:"role" query:"role" validate:"omitempty,oneof=admin streamer user"`
 	Keyword   string `query:"keyword" validate:"omitempty,max=255"`
 	CreatedBy string `json:"created_by" query:"created_by" validate:"omitempty,max=255"`
-	Status    string `json:"status" query:"status" validate:"omitempty"`
+	Status    string `json:"status" query:"status" validate:"omitempty,oneof=online offline blocked"`
 	SortBy    string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=created_at updated_at username email display_name"`
 	Sort      string `json:"sort" query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	Page      uint   `query:"page" validate:"omitempty,min=1"`

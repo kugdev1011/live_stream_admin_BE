@@ -13,6 +13,15 @@ definitions:
       user:
         $ref: '#/definitions/dto.UserResponseDTO'
     type: object
+  dto.AdminResp:
+    properties:
+      display_name:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
   dto.ChangePasswordRequest:
     properties:
       confirm_password:
@@ -327,6 +336,29 @@ info:
   title: Admin API Live Stream
   version: "1.0"
 paths:
+  /api/admins:
+    get:
+      consumes:
+      - application/json
+      description: Get admin list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Admins
+          schema:
+            items:
+              $ref: '#/definitions/dto.AdminResp'
+            type: array
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get Admins
+      tags:
+      - Admin
   /api/admins/{id}:
     get:
       consumes:
@@ -535,7 +567,6 @@ paths:
         name: page
         type: integer
       - enum:
-        - super_admin
         - admin
         - streamer
         - user
@@ -557,7 +588,11 @@ paths:
         in: query
         name: sort_by
         type: string
-      - in: query
+      - enum:
+        - online
+        - offline
+        - blocked
+        in: query
         name: status
         type: string
       produces:
