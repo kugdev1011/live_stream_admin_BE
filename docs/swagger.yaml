@@ -22,6 +22,13 @@ definitions:
       username:
         type: string
     type: object
+  dto.BaseDTO:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+    type: object
   dto.ChangePasswordRequest:
     properties:
       confirm_password:
@@ -52,6 +59,29 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  dto.LiveStatRespInDayDTO:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/dto.BaseDTO'
+        type: array
+      description:
+        type: string
+      likes:
+        items:
+          $ref: '#/definitions/dto.BaseDTO'
+        type: array
+      status:
+        $ref: '#/definitions/model.StreamStatus'
+      stream_id:
+        type: integer
+      title:
+        type: string
+      viewers:
+        items:
+          $ref: '#/definitions/dto.BaseDTO'
+        type: array
     type: object
   dto.LoginDTO:
     properties:
@@ -223,6 +253,18 @@ definitions:
     - ADMINROLE
     - STREAMER
     - USERROLE
+  model.StreamStatus:
+    enum:
+    - pending
+    - started
+    - ended
+    - upcoming
+    type: string
+    x-enum-varnames:
+    - PENDING
+    - STARTED
+    - ENDED
+    - UPCOMING
   model.UserStatusType:
     enum:
     - online
@@ -543,6 +585,34 @@ paths:
       summary: Reset Password
       tags:
       - Auth
+  /api/streams/statistics/day:
+    get:
+      consumes:
+      - application/json
+      description: Get statistics data for live streams in a specific day
+      parameters:
+      - in: query
+        name: targeted_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.LiveStatRespInDayDTO'
+            type: array
+        "400":
+          description: Invalid Request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get live stream statistics data in a day
+      tags:
+      - streams
   /api/users:
     get:
       consumes:

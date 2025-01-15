@@ -58,6 +58,7 @@ func (h *streamHandler) register() {
 
 	group.Use(h.JWTMiddleware())
 	group.GET("/statistics", h.getLiveStreamStatisticsData)
+	group.GET("/statistics/day", h.getLiveStreamStatisticsDataInDay)
 	group.GET("/live-statistics", h.getLiveStatData)
 	group.GET("/statistics/total", h.getTotalLiveStream)
 	group.GET("", h.getLiveStreamWithPagination)
@@ -512,6 +513,33 @@ func (h *streamHandler) getLiveStreamStatisticsData(c echo.Context) error {
 	}
 
 	data, err := h.srv.Stream.GetStreamAnalyticsData(&req)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", data)
+
+}
+
+// @Summary Get live stream statistics data in a day
+// @Description Get statistics data for live streams in a specific day
+// @Tags streams
+// @Accept  json
+// @Produce  json
+// @Param request query dto.StatisticsStreamInDayQuery true "Statistics Stream In Day Query"
+// @Success 200 {array} dto.LiveStatRespInDayDTO
+// @Failure 400 "Invalid Request"
+// @Failure 500 "Internal Server Error"
+// @Security Bearer
+// @Router /api/streams/statistics/day [get]
+func (h *streamHandler) getLiveStreamStatisticsDataInDay(c echo.Context) error {
+
+	var req dto.StatisticsStreamInDayQuery
+	if err := utils.BindAndValidate(c, &req); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusBadRequest, err, nil)
+	}
+
+	data, err := h.srv.Stream.GetLiveStatDataInDay(&req)
 	if err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
