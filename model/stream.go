@@ -74,6 +74,7 @@ type Notification struct {
 	Content   string           `gorm:"type:text;not null"`
 	CreatedAt time.Time        `gorm:"default:CURRENT_TIMESTAMP;not null"`
 	ReadAt    sql.NullTime     `gorm:"column:read_at"`
+	HiddenAt  sql.NullTime     `gorm:"column:hidden_at"`
 	Stream    Stream           `gorm:"foreignKey:StreamID;constraint:OnDelete:CASCADE"`
 	User      User             `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
@@ -93,6 +94,7 @@ type Subscription struct {
 	SubscriberID uint      `gorm:"not null;uniqueIndex:idx_streamer_subscriber"`
 	StreamerID   uint      `gorm:"not null;uniqueIndex:idx_streamer_subscriber"`
 	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP;not null"`
+	IsMute       bool      `gorm:"not null;default:false"`
 	// StartDate      time.Time `gorm:"default:CURRENT_TIMESTAMP"`
 	// EndDate        time.Time `gorm:"not null"`
 	// AutoRenew      bool      `gorm:"not null"`
