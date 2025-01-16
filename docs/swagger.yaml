@@ -29,6 +29,43 @@ definitions:
       id:
         type: integer
     type: object
+  dto.CategoryRequestDTO:
+    properties:
+      name:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  dto.CategoryRespDto:
+    properties:
+      created_at:
+        type: string
+      created_by_id:
+        type: integer
+      created_by_user:
+        $ref: '#/definitions/dto.UserResponseDTO'
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+      updated_by_id:
+        type: integer
+      updated_by_user:
+        $ref: '#/definitions/dto.UserResponseDTO'
+    type: object
+  dto.CategoryUpdateRequestDTO:
+    properties:
+      name:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
   dto.ChangePasswordRequest:
     properties:
       confirm_password:
@@ -193,6 +230,8 @@ definitions:
     properties:
       avatar_file_name:
         type: string
+      blocked_reason:
+        type: string
       created_at:
         type: string
       created_by:
@@ -295,6 +334,38 @@ definitions:
       page:
         items:
           $ref: '#/definitions/dto.AdminLogRespDTO'
+        type: array
+      page_size:
+        type: integer
+      previous:
+        type: integer
+      query:
+        type: string
+      route:
+        type: string
+      total_items:
+        type: integer
+    type: object
+  utils.PaginationModel-dto_CategoryRespDto:
+    properties:
+      current_page:
+        type: integer
+      exec_time:
+        type: number
+      index:
+        type: integer
+      is_new_filter:
+        type: boolean
+      length:
+        type: integer
+      next:
+        type: integer
+      obj:
+        additionalProperties: true
+        type: object
+      page:
+        items:
+          $ref: '#/definitions/dto.CategoryRespDto'
         type: array
       page_size:
         type: integer
@@ -585,6 +656,142 @@ paths:
       summary: Reset Password
       tags:
       - Auth
+  /api/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all categories
+      parameters:
+      - in: query
+        maxLength: 255
+        name: created_by
+        type: string
+      - in: query
+        maximum: 20
+        minimum: 1
+        name: limit
+        type: integer
+      - in: query
+        maxLength: 255
+        name: name
+        type: string
+      - in: query
+        minimum: 1
+        name: page
+        type: integer
+      - enum:
+        - DESC
+        - ASC
+        in: query
+        name: sort
+        type: string
+      - enum:
+        - created_at
+        - updated_at
+        - name
+        - created_by
+        - updated_by
+        in: query
+        name: sort_by
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.PaginationModel-dto_CategoryRespDto'
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get all categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new category
+      parameters:
+      - description: Category Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CategoryRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Create a new category
+      tags:
+      - Categories
+  /api/categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a category by ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully
+        "400":
+          description: Invalid ID parameter
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Delete a category
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      description: Update a category by ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Category Update Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CategoryUpdateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CategoryRespDto'
+        "400":
+          description: Invalid ID parameter
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Update a category
+      tags:
+      - Categories
   /api/streams/statistics/day:
     get:
       consumes:
