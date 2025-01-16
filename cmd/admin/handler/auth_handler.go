@@ -93,6 +93,7 @@ func (h *authHandler) login(c echo.Context) error {
 	response := dto.LoginResponse{
 		ID:          user.ID,
 		Avatar:      avatarFileName,
+		Status:      string(user.Status),
 		Username:    user.Username,
 		DisplayName: user.DisplayName,
 		Email:       user.Email,
