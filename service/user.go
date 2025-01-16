@@ -33,6 +33,7 @@ func (s *UserService) toUserResponseDTO(user *model.User, apiURL string) dto.Use
 	userResp.DisplayName = user.DisplayName
 	userResp.Email = user.Email
 	userResp.Status = user.Status
+	userResp.BlockedReason = user.BlockedReason
 	if user.AvatarFileName.Valid {
 		userResp.AvatarFileName = utils.MakeAvatarURL(apiURL, user.AvatarFileName.String)
 	}

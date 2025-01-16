@@ -343,6 +343,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/streams/statistics/day": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get statistics data for live streams in a specific day",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "streams"
+                ],
+                "summary": "Get live stream statistics data in a day",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "targeted_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.LiveStatRespInDayDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/api/users": {
             "get": {
                 "security": [
@@ -385,6 +430,13 @@ const docTemplate = `{
                         "minimum": 1,
                         "type": "integer",
                         "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maxLength": 255,
+                        "minLength": 3,
+                        "type": "string",
+                        "name": "reason",
                         "in": "query"
                     },
                     {
@@ -1033,6 +1085,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.BaseDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.ChangePasswordRequest": {
             "type": "object",
             "required": [
@@ -1074,6 +1137,41 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "maxLength": 100
+                }
+            }
+        },
+        "dto.LiveStatRespInDayDTO": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BaseDTO"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "likes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BaseDTO"
+                    }
+                },
+                "status": {
+                    "$ref": "#/definitions/model.StreamStatus"
+                },
+                "stream_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "viewers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BaseDTO"
+                    }
                 }
             }
         },
@@ -1326,6 +1424,21 @@ const docTemplate = `{
                 "ADMINROLE",
                 "STREAMER",
                 "USERROLE"
+            ]
+        },
+        "model.StreamStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "started",
+                "ended",
+                "upcoming"
+            ],
+            "x-enum-varnames": [
+                "PENDING",
+                "STARTED",
+                "ENDED",
+                "UPCOMING"
             ]
         },
         "model.UserStatusType": {

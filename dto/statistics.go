@@ -34,6 +34,22 @@ type LiveStatRespDTO struct {
 	CurrentViewers uint               `json:"current_viewers"`
 	TotalViewers   uint               `json:"total_viewers"`
 	Comments       uint               `json:"comments"`
+	CreatedAt      *time.Time         `json:"created_at,omitempty"`
+}
+
+type BaseDTO struct {
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type LiveStatRespInDayDTO struct {
+	Title       string             `json:"title"`
+	Description string             `json:"description"`
+	StreamID    uint               `json:"stream_id"`
+	Status      model.StreamStatus `json:"status"`
+	Likes       []BaseDTO          `json:"likes"`
+	Viewers     []BaseDTO          `json:"viewers"`
+	Comments    []BaseDTO          `json:"comments"`
 }
 
 type StatisticsTotalLiveStreamDTO struct {
@@ -54,6 +70,10 @@ type StatisticsQuery struct {
 	Keyword string `query:"keyword" validate:"omitempty"`
 	Page    uint   `query:"page" validate:"required,min=1"`
 	Limit   uint   `query:"limit" validate:"required,min=1,max=20"`
+}
+
+type StatisticsStreamInDayQuery struct {
+	TargetedDate string `json:"targeted_date" query:"targeted_date" validate:"required,datetime=2006-01-02 15:04:05.999 -0700"`
 }
 
 type LiveStreamBroadCastQueryDTO struct {
