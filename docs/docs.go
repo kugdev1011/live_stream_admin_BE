@@ -369,7 +369,7 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "maximum": 20,
+                        "maximum": 99999,
                         "minimum": 1,
                         "type": "integer",
                         "name": "limit",
@@ -1480,6 +1480,9 @@ const docTemplate = `{
                 },
                 "role": {
                     "$ref": "#/definitions/model.RoleType"
+                },
+                "status": {
+                    "type": "string"
                 },
                 "token": {
                     "type": "string"
