@@ -30,5 +30,5 @@ type CategoryQueryDTO struct {
 	SortBy    string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=created_at updated_at name created_by updated_by"`
 	Sort      string `json:"sort" query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	Page      uint   `query:"page" validate:"omitempty,min=1"`
-	Limit     uint   `query:"limit" validate:"omitempty,min=1,max=20"`
+	Limit     uint   `query:"limit" validate:"omitempty,min=1,max=99999"`
 }
