@@ -21,6 +21,10 @@ type categoryHandler struct {
 
 func newCategoryHandler(r *echo.Group, srv *service.Service) *categoryHandler {
 	category := &categoryHandler{
+		Handler: Handler{
+			r:   r,
+			srv: srv,
+		},
 		r:   r,
 		srv: srv,
 	}

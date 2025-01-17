@@ -25,6 +25,10 @@ type authHandler struct {
 func newAuthHandler(r *echo.Group, srv *service.Service) *authHandler {
 	apiURL := conf.GetApiFileConfig().Url
 	auth := &authHandler{
+		Handler: Handler{
+			r:   r,
+			srv: srv,
+		},
 		r:      r,
 		srv:    srv,
 		apiURL: apiURL,

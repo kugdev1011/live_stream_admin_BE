@@ -33,6 +33,10 @@ func newUserHandler(r *echo.Group, srv *service.Service) *userHandler {
 	apiURL := conf.GetApiFileConfig().Url
 	clientHost := conf.GetClientConfig().Host
 	user := &userHandler{
+		Handler: Handler{
+			r:   r,
+			srv: srv,
+		},
 		r:            r,
 		srv:          srv,
 		avatarFolder: fileStorageConfig.AvatarFolder,

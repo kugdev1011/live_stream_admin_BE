@@ -22,6 +22,10 @@ type adminHandler struct {
 
 func newAdminHandler(r *echo.Group, srv *service.Service) *adminHandler {
 	admin := &adminHandler{
+		Handler: Handler{
+			r:   r,
+			srv: srv,
+		},
 		r:      r,
 		srv:    srv,
 		apiURL: conf.GetApiFileConfig().Url,

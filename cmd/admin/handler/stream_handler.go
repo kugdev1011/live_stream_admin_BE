@@ -37,6 +37,10 @@ func newStreamHandler(r *echo.Group, srv *service.Service) *streamHandler {
 	streamConfig := conf.GetStreamServerConfig()
 
 	stream := &streamHandler{
+		Handler: Handler{
+			r:   r,
+			srv: srv,
+		},
 		r:                     r,
 		srv:                   srv,
 		thumbnailFolder:       fileStorageConfig.ThumbnailFolder,
