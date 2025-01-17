@@ -66,9 +66,9 @@ func (h *Handler) JWTMiddleware() echo.MiddlewareFunc {
 			}
 
 			// check blacklist
-			inBlacklist, err := h.srv.GetBoolleanCache(c.Request().Context(), tokenString)
+			inBlacklist, err := h.srv.GetCache(c.Request().Context(), tokenString)
 
-			if inBlacklist || err != nil {
+			if inBlacklist != "" || err != nil {
 				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
 			}
 

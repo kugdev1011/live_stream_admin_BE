@@ -35,10 +35,10 @@ func (s *Service) SetCache(ctx context.Context, key string, value any, expiratio
 	return s.redisStore.Set(ctx, key, value, expiration)
 }
 
-func (s *Service) GetBoolleanCache(ctx context.Context, key string) (bool, error) {
-	data, err := s.redisStore.GetBoolean(ctx, key)
+func (s *Service) GetCache(ctx context.Context, key string) (string, error) {
+	data, err := s.redisStore.Get(ctx, key)
 	if err != nil && err != redis.Nil {
-		return false, err
+		return "", err
 	}
 	return data, nil
 }
