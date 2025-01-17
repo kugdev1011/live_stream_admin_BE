@@ -47,7 +47,6 @@ func GenerateAccessToken(id uint, username string, email string, roleType model.
 		log.Printf("Failed to sign the token: %v\n", err)
 		return "", time.Now(), err
 	}
-
 	return ss, expirationTime, nil
 }
 

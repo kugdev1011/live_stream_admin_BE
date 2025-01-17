@@ -45,6 +45,8 @@ func (h *authHandler) register() {
 	group.POST("/login", h.login)
 
 	group.Use(h.JWTMiddleware())
+
+	group.POST("/logout", h.logout)
 	group.POST("/resetPassword", h.resetPassword)
 	group.POST("/forgetPassword", h.forgetPassword)
 
@@ -113,6 +115,33 @@ func (h *authHandler) login(c echo.Context) error {
 	}
 
 	return utils.BuildSuccessResponse(c, http.StatusOK, "Login successful", response)
+}
+
+// @Summary Logout user
+// @Description Logout the current user and invalidate the token
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Success 200 "Logout successful"
+// @Failure 500 "Internal Server Error"
+// @Security Bearer
+// @Router /api/auth/logout [post]
+func (h *authHandler) logout(c echo.Context) error {
+
+	token, err := utils.GetTokenFromHeader(c)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	currentUser := c.Get("user").(*utils.Claims)
+	// add token.jti to cache
+	if err := h.srv.SetCache(c.Request().Context(), token, true, 24*time.Hour); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+	if err := h.srv.User.ChangeStatusUserByID(currentUser.ID, currentUser.ID, model.OFFLINE); err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
+
+	return utils.BuildSuccessResponse(c, http.StatusOK, "Logout successful", nil)
 }
 
 // forgetPassword godoc

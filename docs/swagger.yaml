@@ -630,6 +630,23 @@ paths:
       summary: Login a user
       tags:
       - Auth
+  /api/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout the current user and invalidate the token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Logout user
+      tags:
+      - Auth
   /api/auth/resetPassword:
     post:
       consumes:
