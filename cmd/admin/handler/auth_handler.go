@@ -74,6 +74,11 @@ func (h *authHandler) login(c echo.Context) error {
 	if !slices.Contains([]model.RoleType{model.ADMINROLE, model.SUPPERADMINROLE}, user.Role.Type) {
 		return utils.BuildErrorResponse(c, http.StatusUnauthorized, errors.New("you have no permission to login"), nil)
 	}
+	// update to online
+	_, err = h.srv.User.ChangeStatusUser(user, user.ID, model.ONLINE, "", h.apiURL)
+	if err != nil {
+		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
+	}
 
 	token, expiredTime, err := utils.GenerateAccessToken(user.ID, user.Username, user.Email, user.Role.Type) // createdByID is current user id login
 	if err != nil {
@@ -93,7 +98,7 @@ func (h *authHandler) login(c echo.Context) error {
 	response := dto.LoginResponse{
 		ID:          user.ID,
 		Avatar:      avatarFileName,
-		Status:      string(user.Status),
+		Status:      string(model.ONLINE),
 		Username:    user.Username,
 		DisplayName: user.DisplayName,
 		Email:       user.Email,

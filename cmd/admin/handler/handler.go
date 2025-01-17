@@ -4,6 +4,7 @@ import (
 	"gitlab/live/be-live-admin/model"
 	"gitlab/live/be-live-admin/service"
 	"gitlab/live/be-live-admin/utils"
+	"log"
 	"net/http"
 	"slices"
 	"strings"
@@ -51,6 +52,13 @@ func (h *Handler) JWTMiddleware() echo.MiddlewareFunc {
 			tokenString := tokenParts[1]
 			claims, err := utils.ValidateAccessToken(tokenString)
 			if err != nil {
+				if err.Error() == "invalid token" {
+					// update status to offline at here
+					if err := h.srv.User.ChangeStatusUserByID(claims.ID, claims.ID, model.OFFLINE); err != nil {
+						log.Println(err)
+						return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+					}
+				}
 				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
 			}
 
