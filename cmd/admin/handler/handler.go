@@ -65,6 +65,13 @@ func (h *Handler) JWTMiddleware() echo.MiddlewareFunc {
 				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Permission denied"})
 			}
 
+			// check blacklist
+			inBlacklist, err := h.srv.GetCache(c.Request().Context(), tokenString)
+
+			if inBlacklist != "" || err != nil {
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+			}
+
 			// Attach claims to the context
 			c.Set("user", claims)
 
