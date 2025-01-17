@@ -120,3 +120,5 @@ type UserStatisticsResponse struct {
 func (r *UserStatisticsResponse) TableName() string {
 	return "users"
 }
+
+type CommonResponseDTO interface{}
