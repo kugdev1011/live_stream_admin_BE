@@ -95,6 +95,7 @@ func (h *authHandler) login(c echo.Context) error {
 	if user.AvatarFileName.Valid {
 		avatarFileName = utils.MakeAvatarURL(h.apiURL, user.AvatarFileName.String)
 	}
+
 	response := dto.LoginResponse{
 		ID:          user.ID,
 		Avatar:      avatarFileName,

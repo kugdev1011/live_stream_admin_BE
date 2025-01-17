@@ -53,7 +53,6 @@ func (h *Handler) JWTMiddleware() echo.MiddlewareFunc {
 			claims, err := utils.ValidateAccessToken(tokenString)
 			if err != nil {
 				if err.Error() == "token is expired" {
-					// update status to offline at here
 					if err := h.srv.User.ChangeStatusUserByID(claims.ID, claims.ID, model.OFFLINE); err != nil {
 						log.Println(err)
 						return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})

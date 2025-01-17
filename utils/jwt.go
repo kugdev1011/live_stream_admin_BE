@@ -66,7 +66,7 @@ func ValidateAccessToken(tokenString string) (*Claims, error) {
 	if err != nil {
 		// Check if the token is expired
 		if ve, ok := err.(*jwt.ValidationError); ok && ve.Errors == jwt.ValidationErrorExpired {
-			return nil, fmt.Errorf("token is expired")
+			return claims, fmt.Errorf("token is expired")
 		}
 		return nil, err
 	}
