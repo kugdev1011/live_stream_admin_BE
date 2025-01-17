@@ -134,7 +134,7 @@ func (h *authHandler) logout(c echo.Context) error {
 	}
 	currentUser := c.Get("user").(*utils.Claims)
 	// add token.jti to cache
-	if err := h.srv.SetCache(c.Request().Context(), token, fmt.Sprintf("%s_%s", currentUser.ID, currentUser.Username), 24*time.Hour); err != nil {
+	if err := h.srv.SetCache(c.Request().Context(), token, fmt.Sprintf("%d_%s", currentUser.ID, currentUser.Username), 24*time.Hour); err != nil {
 		return utils.BuildErrorResponse(c, http.StatusInternalServerError, err, nil)
 	}
 	if err := h.srv.User.ChangeStatusUserByID(currentUser.ID, currentUser.ID, model.OFFLINE); err != nil {
