@@ -64,7 +64,7 @@ type LiveCurrentViewers struct {
 }
 
 type StatisticsQuery struct {
-	SortBy  string ` json:"sort_by" query:"sort_by" validate:"omitempty,oneof=title created_at views likes comments video_size duration stream_id id"`
+	SortBy  string ` json:"sort_by" query:"sort_by" validate:"omitempty,oneof=title created_at views likes comments video_size duration shares stream_id id"`
 	Sort    string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	From    int64  `query:"from" validate:"omitempty"`
 	To      int64  `query:"to" validate:"omitempty"`
