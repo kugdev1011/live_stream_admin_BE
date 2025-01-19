@@ -723,6 +723,7 @@ const docTemplate = `{
                             "comments",
                             "video_size",
                             "duration",
+                            "shares",
                             "stream_id",
                             "id"
                         ],
