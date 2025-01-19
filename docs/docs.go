@@ -583,6 +583,175 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/streams/live-statistics": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get live stream statistics data with pagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Streams"
+                ],
+                "summary": "Get live stream statistics with pagination",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 20,
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "DESC",
+                            "ASC"
+                        ],
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "total_viewers",
+                            "likes",
+                            "comments",
+                            "current_viewers",
+                            "title",
+                            "description"
+                        ],
+                        "type": "string",
+                        "name": "sortBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationModel-dto_LiveStatRespDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/streams/statistics": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get statistics data for live streams",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Streams"
+                ],
+                "summary": "Get live stream statistics data",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 20,
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "DESC",
+                            "ASC"
+                        ],
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "title",
+                            "created_at",
+                            "views",
+                            "likes",
+                            "comments",
+                            "video_size",
+                            "duration",
+                            "stream_id",
+                            "id"
+                        ],
+                        "type": "string",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationModel-dto_LiveStreamRespDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/api/streams/statistics/day": {
             "get": {
                 "security": [
@@ -621,6 +790,37 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/streams/statistics/total": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get total statistics data for live streams",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Streams"
+                ],
+                "summary": "Get total live stream statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.StatisticsTotalLiveStreamDTO"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error"
@@ -1435,6 +1635,38 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.LiveStatRespDTO": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "current_viewers": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "likes": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.StreamStatus"
+                },
+                "stream_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "total_viewers": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.LiveStatRespInDayDTO": {
             "type": "object",
             "properties": {
@@ -1467,6 +1699,38 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.BaseDTO"
                     }
+                }
+            }
+        },
+        "dto.LiveStreamRespDTO": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "likes": {
+                    "type": "integer"
+                },
+                "stream_id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "video_size": {
+                    "type": "integer"
+                },
+                "viewers": {
+                    "type": "integer"
                 }
             }
         },
@@ -1564,6 +1828,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.UserResponseDTO"
                     }
+                }
+            }
+        },
+        "dto.StatisticsTotalLiveStreamDTO": {
+            "type": "object",
+            "properties": {
+                "active_live_streams": {
+                    "type": "integer"
+                },
+                "total_live_streams": {
+                    "type": "integer"
                 }
             }
         },
@@ -1832,6 +2107,102 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.CategoryRespDto"
+                    }
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "previous": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "route": {
+                    "type": "string"
+                },
+                "total_items": {
+                    "type": "integer"
+                }
+            }
+        },
+        "utils.PaginationModel-dto_LiveStatRespDTO": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "exec_time": {
+                    "type": "number"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "is_new_filter": {
+                    "type": "boolean"
+                },
+                "length": {
+                    "type": "integer"
+                },
+                "next": {
+                    "type": "integer"
+                },
+                "obj": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "page": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.LiveStatRespDTO"
+                    }
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "previous": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "route": {
+                    "type": "string"
+                },
+                "total_items": {
+                    "type": "integer"
+                }
+            }
+        },
+        "utils.PaginationModel-dto_LiveStreamRespDTO": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "exec_time": {
+                    "type": "number"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "is_new_filter": {
+                    "type": "boolean"
+                },
+                "length": {
+                    "type": "integer"
+                },
+                "next": {
+                    "type": "integer"
+                },
+                "obj": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "page": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.LiveStreamRespDTO"
                     }
                 },
                 "page_size": {

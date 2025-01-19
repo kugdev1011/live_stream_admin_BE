@@ -499,6 +499,15 @@ func (h *streamHandler) createLiveStreamByAdmin(c echo.Context) error {
 	})
 }
 
+// @Summary Get total live stream statistics
+// @Description Get total statistics data for live streams
+// @Tags Streams
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} dto.StatisticsTotalLiveStreamDTO
+// @Failure 500 "Internal Server Error"
+// @Security Bearer
+// @Router /api/streams/statistics/total [get]
 func (h *streamHandler) getTotalLiveStream(c echo.Context) error {
 
 	data, err := h.srv.Stream.GetStatisticsTotalLiveStreamData()
@@ -509,6 +518,17 @@ func (h *streamHandler) getTotalLiveStream(c echo.Context) error {
 	return utils.BuildSuccessResponse(c, http.StatusOK, "Successfully", data)
 }
 
+// @Summary Get live stream statistics data
+// @Description Get statistics data for live streams
+// @Tags Streams
+// @Accept  json
+// @Produce  json
+// @Param request query dto.StatisticsQuery true "Statistics Query"
+// @Success 200 {object} utils.PaginationModel[dto.LiveStreamRespDTO]
+// @Failure 400 "Invalid request"
+// @Failure 500 "Internal Server Error"
+// @Security Bearer
+// @Router /api/streams/statistics [get]
 func (h *streamHandler) getLiveStreamStatisticsData(c echo.Context) error {
 
 	var req dto.StatisticsQuery
@@ -552,6 +572,17 @@ func (h *streamHandler) getLiveStreamStatisticsDataInDay(c echo.Context) error {
 
 }
 
+// @Summary Get live stream statistics with pagination
+// @Description Get live stream statistics data with pagination
+// @Tags Streams
+// @Accept  json
+// @Produce  json
+// @Param request query dto.LiveStatQuery true "Live Stat Query"
+// @Success 200 {object} utils.PaginationModel[dto.LiveStatRespDTO]
+// @Failure 400 "Invalid request"
+// @Failure 500 "Internal Server Error"
+// @Security Bearer
+// @Router /api/streams/live-statistics [get]
 func (h *streamHandler) getLiveStatData(c echo.Context) error {
 
 	var req dto.LiveStatQuery

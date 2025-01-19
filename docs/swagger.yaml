@@ -97,6 +97,27 @@ definitions:
     required:
     - email
     type: object
+  dto.LiveStatRespDTO:
+    properties:
+      comments:
+        type: integer
+      created_at:
+        type: string
+      current_viewers:
+        type: integer
+      description:
+        type: string
+      likes:
+        type: integer
+      status:
+        $ref: '#/definitions/model.StreamStatus'
+      stream_id:
+        type: integer
+      title:
+        type: string
+      total_viewers:
+        type: integer
+    type: object
   dto.LiveStatRespInDayDTO:
     properties:
       comments:
@@ -119,6 +140,27 @@ definitions:
         items:
           $ref: '#/definitions/dto.BaseDTO'
         type: array
+    type: object
+  dto.LiveStreamRespDTO:
+    properties:
+      comments:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      duration:
+        type: integer
+      likes:
+        type: integer
+      stream_id:
+        type: integer
+      title:
+        type: string
+      video_size:
+        type: integer
+      viewers:
+        type: integer
     type: object
   dto.LoginDTO:
     properties:
@@ -185,6 +227,13 @@ definitions:
         items:
           $ref: '#/definitions/dto.UserResponseDTO'
         type: array
+    type: object
+  dto.StatisticsTotalLiveStreamDTO:
+    properties:
+      active_live_streams:
+        type: integer
+      total_live_streams:
+        type: integer
     type: object
   dto.UpdateUserRequest:
     properties:
@@ -368,6 +417,70 @@ definitions:
       page:
         items:
           $ref: '#/definitions/dto.CategoryRespDto'
+        type: array
+      page_size:
+        type: integer
+      previous:
+        type: integer
+      query:
+        type: string
+      route:
+        type: string
+      total_items:
+        type: integer
+    type: object
+  utils.PaginationModel-dto_LiveStatRespDTO:
+    properties:
+      current_page:
+        type: integer
+      exec_time:
+        type: number
+      index:
+        type: integer
+      is_new_filter:
+        type: boolean
+      length:
+        type: integer
+      next:
+        type: integer
+      obj:
+        additionalProperties: true
+        type: object
+      page:
+        items:
+          $ref: '#/definitions/dto.LiveStatRespDTO'
+        type: array
+      page_size:
+        type: integer
+      previous:
+        type: integer
+      query:
+        type: string
+      route:
+        type: string
+      total_items:
+        type: integer
+    type: object
+  utils.PaginationModel-dto_LiveStreamRespDTO:
+    properties:
+      current_page:
+        type: integer
+      exec_time:
+        type: number
+      index:
+        type: integer
+      is_new_filter:
+        type: boolean
+      length:
+        type: integer
+      next:
+        type: integer
+      obj:
+        additionalProperties: true
+        type: object
+      page:
+        items:
+          $ref: '#/definitions/dto.LiveStreamRespDTO'
         type: array
       page_size:
         type: integer
@@ -811,6 +924,119 @@ paths:
       summary: Update a category
       tags:
       - Categories
+  /api/streams/live-statistics:
+    get:
+      consumes:
+      - application/json
+      description: Get live stream statistics data with pagination
+      parameters:
+      - in: query
+        name: keyword
+        type: string
+      - in: query
+        maximum: 20
+        minimum: 1
+        name: limit
+        required: true
+        type: integer
+      - in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - enum:
+        - DESC
+        - ASC
+        in: query
+        name: sort
+        type: string
+      - enum:
+        - total_viewers
+        - likes
+        - comments
+        - current_viewers
+        - title
+        - description
+        in: query
+        name: sortBy
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.PaginationModel-dto_LiveStatRespDTO'
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get live stream statistics with pagination
+      tags:
+      - Streams
+  /api/streams/statistics:
+    get:
+      consumes:
+      - application/json
+      description: Get statistics data for live streams
+      parameters:
+      - in: query
+        name: from
+        type: integer
+      - in: query
+        name: keyword
+        type: string
+      - in: query
+        maximum: 20
+        minimum: 1
+        name: limit
+        required: true
+        type: integer
+      - in: query
+        minimum: 1
+        name: page
+        required: true
+        type: integer
+      - enum:
+        - DESC
+        - ASC
+        in: query
+        name: sort
+        type: string
+      - enum:
+        - title
+        - created_at
+        - views
+        - likes
+        - comments
+        - video_size
+        - duration
+        - stream_id
+        - id
+        in: query
+        name: sort_by
+        type: string
+      - in: query
+        name: to
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.PaginationModel-dto_LiveStreamRespDTO'
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get live stream statistics data
+      tags:
+      - Streams
   /api/streams/statistics/day:
     get:
       consumes:
@@ -839,6 +1065,25 @@ paths:
       summary: Get live stream statistics data in a day
       tags:
       - streams
+  /api/streams/statistics/total:
+    get:
+      consumes:
+      - application/json
+      description: Get total statistics data for live streams
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.StatisticsTotalLiveStreamDTO'
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get total live stream statistics
+      tags:
+      - Streams
   /api/users:
     get:
       consumes:
