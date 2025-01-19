@@ -1720,6 +1720,9 @@ const docTemplate = `{
                 "likes": {
                     "type": "integer"
                 },
+                "shares": {
+                    "type": "integer"
+                },
                 "stream_id": {
                     "type": "integer"
                 },

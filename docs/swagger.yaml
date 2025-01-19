@@ -153,6 +153,8 @@ definitions:
         type: integer
       likes:
         type: integer
+      shares:
+        type: integer
       stream_id:
         type: integer
       title:

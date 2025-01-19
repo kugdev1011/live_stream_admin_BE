@@ -132,6 +132,7 @@ func (s *StreamService) GetStreamAnalyticsData(req *dto.StatisticsQuery) (*utils
 		live_stream_dto.Viewers = v.Views
 		live_stream_dto.CreatedAt = &v.UpdatedAt
 		live_stream_dto.StreamID = v.StreamID
+		live_stream_dto.Shares = v.Shares
 		live_stream_dto.Duration = int64(v.Duration)
 		result.Page = append(result.Page, *live_stream_dto)
 	}
