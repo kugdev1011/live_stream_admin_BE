@@ -135,9 +135,7 @@ func (s *StreamService) GetStreamAnalyticsData(req *dto.StatisticsQuery) (*utils
 		live_stream_dto.Duration = int64(v.Duration)
 		result.Page = append(result.Page, *live_stream_dto)
 	}
-	if req != nil && req.SortBy == dto.SORT_BY_DURATION && req.Sort != "" {
-		result.Page = s.sortByDuration(result.Page, req.Sort)
-	}
+
 	return result, nil
 }
 
