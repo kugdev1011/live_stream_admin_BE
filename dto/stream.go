@@ -35,6 +35,13 @@ type UpdateStreamThumbnailRequest struct {
 	UpdatedByID       uint   `json:"-" form:"-"`
 }
 
+type CreateStreamResponseDTO struct {
+	ID           uint   `json:"id"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	ThumbnailURL string `json:"thumbnail_url"`
+}
+
 const (
 	SORT_BY_DURATION        = "duration"
 	SORT_BY_CURRENT_VIEWERS = "currents_viewers"

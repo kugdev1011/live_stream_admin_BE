@@ -586,6 +586,222 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/streams": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get live stream broadcast data with pagination",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Streams"
+                ],
+                "summary": "Get live streams with pagination",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "end_ended_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "end_started_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "from_ended_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "from_started_time",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 20,
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "DESC",
+                            "ASC"
+                        ],
+                        "type": "string",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "title",
+                            "started_at",
+                            "ended_at",
+                            "views",
+                            "likes",
+                            "comments",
+                            "video_size",
+                            "duration",
+                            "shares",
+                            "created_at"
+                        ],
+                        "type": "string",
+                        "name": "sort_by",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "enum": [
+                                "pending",
+                                "started",
+                                "ended",
+                                "upcoming"
+                            ],
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "camera",
+                            "software",
+                            "pre_record"
+                        ],
+                        "type": "string",
+                        "x-enum-comments": {
+                            "SOFTWARESTREAM": "like obs"
+                        },
+                        "x-enum-varnames": [
+                            "CAMERASTREAM",
+                            "SOFTWARESTREAM",
+                            "PRERECORDSTREAM"
+                        ],
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationModel-dto_LiveStreamBroadCastDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create a live stream by admin with thumbnail and video upload",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Streams"
+                ],
+                "summary": "Create a live stream by admin",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Stream Title",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Stream Description",
+                        "name": "description",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Scheduled At",
+                        "name": "scheduledAt",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Thumbnail image file",
+                        "name": "thumbnail",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Video file",
+                        "name": "video",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateStreamResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/api/streams/live-statistics": {
             "get": {
                 "security": [
@@ -772,7 +988,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "streams"
+                    "Streams"
                 ],
                 "summary": "Get live stream statistics data in a day",
                 "parameters": [
@@ -1541,6 +1757,20 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CategoryDTO": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CategoryRequestDTO": {
             "type": "object",
             "required": [
@@ -1612,6 +1842,23 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 255,
                     "minLength": 8
+                }
+            }
+        },
+        "dto.CreateStreamResponseDTO": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "thumbnail_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -1707,6 +1954,58 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.BaseDTO"
                     }
+                }
+            }
+        },
+        "dto.LiveStreamBroadCastDTO": {
+            "type": "object",
+            "properties": {
+                "broadcast_url": {
+                    "description": "generated from web",
+                    "type": "string"
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CategoryDTO"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "ended_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "live_stream_analytic": {
+                    "$ref": "#/definitions/dto.LiveStreamRespDTO"
+                },
+                "push_url": {
+                    "description": "generated from streaming server",
+                    "type": "string"
+                },
+                "schedule_stream": {
+                    "$ref": "#/definitions/dto.ScheduleStreamDTO"
+                },
+                "started_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.StreamStatus"
+                },
+                "stream_type": {
+                    "$ref": "#/definitions/model.StreamType"
+                },
+                "thumbnail_file_name": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/dto.UserResponseDTO"
                 }
             }
         },
@@ -1839,6 +2138,20 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.UserResponseDTO"
                     }
+                }
+            }
+        },
+        "dto.ScheduleStreamDTO": {
+            "type": "object",
+            "properties": {
+                "scheduled_at": {
+                    "type": "string"
+                },
+                "video_name": {
+                    "type": "string"
+                },
+                "video_url": {
+                    "type": "string"
                 }
             }
         },
@@ -2028,6 +2341,22 @@ const docTemplate = `{
                 "UPCOMING"
             ]
         },
+        "model.StreamType": {
+            "type": "string",
+            "enum": [
+                "camera",
+                "software",
+                "pre_record"
+            ],
+            "x-enum-comments": {
+                "SOFTWARESTREAM": "like obs"
+            },
+            "x-enum-varnames": [
+                "CAMERASTREAM",
+                "SOFTWARESTREAM",
+                "PRERECORDSTREAM"
+            ]
+        },
         "model.UserStatusType": {
             "type": "string",
             "enum": [
@@ -2166,6 +2495,54 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.LiveStatRespDTO"
+                    }
+                },
+                "page_size": {
+                    "type": "integer"
+                },
+                "previous": {
+                    "type": "integer"
+                },
+                "query": {
+                    "type": "string"
+                },
+                "route": {
+                    "type": "string"
+                },
+                "total_items": {
+                    "type": "integer"
+                }
+            }
+        },
+        "utils.PaginationModel-dto_LiveStreamBroadCastDTO": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "exec_time": {
+                    "type": "number"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "is_new_filter": {
+                    "type": "boolean"
+                },
+                "length": {
+                    "type": "integer"
+                },
+                "next": {
+                    "type": "integer"
+                },
+                "obj": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "page": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.LiveStreamBroadCastDTO"
                     }
                 },
                 "page_size": {
