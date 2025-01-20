@@ -637,11 +637,12 @@ const docTemplate = `{
                             "likes",
                             "comments",
                             "current_viewers",
+                            "shares",
                             "title",
                             "description"
                         ],
                         "type": "string",
-                        "name": "sortBy",
+                        "name": "sort_by",
                         "in": "query"
                     }
                 ],
@@ -1652,6 +1653,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "likes": {
+                    "type": "integer"
+                },
+                "shares": {
                     "type": "integer"
                 },
                 "status": {

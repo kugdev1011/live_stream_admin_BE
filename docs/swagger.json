@@ -631,11 +631,12 @@
                             "likes",
                             "comments",
                             "current_viewers",
+                            "shares",
                             "title",
                             "description"
                         ],
                         "type": "string",
-                        "name": "sortBy",
+                        "name": "sort_by",
                         "in": "query"
                     }
                 ],
@@ -1646,6 +1647,9 @@
                     "type": "string"
                 },
                 "likes": {
+                    "type": "integer"
+                },
+                "shares": {
                     "type": "integer"
                 },
                 "status": {

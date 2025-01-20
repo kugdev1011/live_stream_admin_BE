@@ -19,7 +19,7 @@ type LiveStreamRespDTO struct {
 }
 
 type LiveStatQuery struct {
-	SortBy  string `query:"sort_by" validate:"omitempty,oneof=total_viewers likes comments current_viewers title description"`
+	SortBy  string `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=total_viewers likes comments current_viewers shares title description"`
 	Sort    string `query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	Keyword string `query:"keyword" validate:"omitempty"`
 	Page    uint   `query:"page" validate:"required,min=1"`
@@ -32,6 +32,7 @@ type LiveStatRespDTO struct {
 	StreamID       uint               `json:"stream_id"`
 	Status         model.StreamStatus `json:"status"`
 	Likes          uint               `json:"likes"`
+	Shares         uint               `json:"shares"`
 	CurrentViewers uint               `json:"current_viewers"`
 	TotalViewers   uint               `json:"total_viewers"`
 	Comments       uint               `json:"comments"`

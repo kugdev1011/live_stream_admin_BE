@@ -109,6 +109,8 @@ definitions:
         type: string
       likes:
         type: integer
+      shares:
+        type: integer
       status:
         $ref: '#/definitions/model.StreamStatus'
       stream_id:
@@ -957,10 +959,11 @@ paths:
         - likes
         - comments
         - current_viewers
+        - shares
         - title
         - description
         in: query
-        name: sortBy
+        name: sort_by
         type: string
       produces:
       - application/json
