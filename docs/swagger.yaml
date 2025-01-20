@@ -678,6 +678,9 @@ paths:
         type: string
       - enum:
         - performed_at
+        - action
+        - details
+        - username
         in: query
         name: sort_by
         type: string

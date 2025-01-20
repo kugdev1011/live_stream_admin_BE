@@ -153,7 +153,10 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "performed_at"
+                            "performed_at",
+                            "action",
+                            "details",
+                            "username"
                         ],
                         "type": "string",
                         "name": "sort_by",
