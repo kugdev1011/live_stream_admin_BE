@@ -82,7 +82,7 @@ type LiveStreamBroadCastQueryDTO struct {
 	SortBy          string               `json:"sort_by" query:"sort_by" validate:"omitempty,oneof=title started_at ended_at views shares likes comments video_size duration shares created_at"`
 	Sort            string               `query:"sort" validate:"omitempty,oneof=DESC ASC"`
 	Status          []model.StreamStatus `query:"status" validate:"omitempty"`
-	Type            model.StreamType     `query:"type" validate:"omitempty,oneof=camera software"`
+	Type            model.StreamType     `query:"type" validate:"omitempty,oneof=camera software pre_record"`
 	Category        string               `query:"category" validate:"omitempty"`
 	FromStartedTime int64                `json:"from_started_time" query:"from_started_time" validate:"omitempty"`
 	EndStartedTime  int64                `json:"end_started_time" query:"end_started_time" validate:"omitempty"`

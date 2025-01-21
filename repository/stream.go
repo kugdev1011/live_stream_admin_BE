@@ -165,7 +165,7 @@ func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit uint, con
 			query = query.Where("streams.status IN ?", cond.Status)
 		}
 		if cond.Type != "" {
-			query = query.Where("streams.type = ?", cond.Type)
+			query = query.Where("streams.stream_type = ?", cond.Type)
 		}
 		if cond.FromStartedTime != 0 && cond.EndStartedTime != 0 {
 			from := time.Unix(cond.FromStartedTime, 0).Format(utils.DATETIME_LAYOUT)
