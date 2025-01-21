@@ -179,7 +179,7 @@ func (s *StreamRepository) PaginateLiveStreamBroadCastData(page, limit uint, con
 		}
 
 		if cond.Sort != "" && cond.SortBy != "" && cond.SortBy != dto.SORT_BY_DURATION {
-			if slices.Contains([]string{dto.SORT_BY_VIEWERS, dto.SORT_BY_LIKES, dto.SORT_BY_COMMENTS, dto.SORT_BY_VIDEO_SIZE}, cond.SortBy) {
+			if slices.Contains([]string{dto.SORT_BY_VIEWERS, dto.SORT_BY_LIKES, dto.SORT_BY_COMMENTS, dto.SORT_BY_VIDEO_SIZE, dto.SORT_BY_SHARES}, cond.SortBy) {
 				query = query.Joins("LEFT JOIN stream_analytics ON streams.id = stream_analytics.stream_id")
 				query = query.Order(fmt.Sprintf("stream_analytics.%s %s", cond.SortBy, cond.Sort))
 			} else {

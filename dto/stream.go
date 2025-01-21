@@ -52,6 +52,7 @@ const (
 	SORT_BY_LIKES           = "likes"
 	SORT_BY_COMMENTS        = "comments"
 	SORT_BY_VIDEO_SIZE      = "video_size"
+	SORT_BY_SHARES          = "shares"
 )
 
 const (

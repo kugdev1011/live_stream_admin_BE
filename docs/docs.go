@@ -665,6 +665,7 @@ const docTemplate = `{
                             "started_at",
                             "ended_at",
                             "views",
+                            "shares",
                             "likes",
                             "comments",
                             "video_size",
